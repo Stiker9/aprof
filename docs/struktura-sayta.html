@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AUTOPROFI — структура сайта</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0b0c0e; --panel:#141618; --line:#26292e; --ink:#f2f3f5; --dim:#8b9199;
+    --accent:#ED4B18; --green:#2f9e6b; --blue:#4b8fd4; --amber:#c98a2b; --purple:#8b6fd4;
+  }
+  body{background:var(--bg);color:var(--ink);font-family:'Segoe UI',Inter,system-ui,sans-serif;
+       padding:44px 30px 70px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  header{border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:34px}
+  .brand{font-size:13px;letter-spacing:.34em;color:var(--accent);font-weight:700;margin-bottom:12px}
+  h1{font-size:40px;font-weight:300;letter-spacing:-.02em;margin-bottom:10px}
+  .sub{color:var(--dim);font-size:15px;max-width:640px}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:12px;margin:30px 0 40px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .stat b{display:block;font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+  .stat span{font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-top:5px;display:block}
+  .stat.hl b{color:var(--accent)}
+
+  .legend{display:flex;gap:22px;flex-wrap:wrap;font-size:12.5px;color:var(--dim);margin-bottom:34px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:middle;font-style:normal}
+
+  .sec{margin-bottom:34px}
+  .sec-h{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .sec-h h2{font-size:13px;text-transform:uppercase;letter-spacing:.15em;font-weight:700}
+  .sec-h .bar{width:3px;height:19px;border-radius:2px}
+  .sec-h .tot{margin-left:auto;font-size:12px;color:var(--dim)}
+
+  .tree{padding-left:4px}
+  .node{position:relative;padding-left:26px;margin-bottom:5px}
+  .node::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--line)}
+  .node:last-child::before{height:19px}
+  .node::after{content:'';position:absolute;left:6px;top:19px;width:14px;height:1px;background:var(--line)}
+  .node.root{padding-left:0}
+  .node.root::before,.node.root::after{display:none}
+
+  .box{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
+       border-radius:9px;padding:10px 14px;transition:.15s}
+  .box:hover{border-color:#3a3f46}
+  .box .u{font-family:ui-monospace,'Cascadia Code',Consolas,monospace;font-size:12.5px;color:var(--ink);white-space:nowrap}
+  .box .d{font-size:12.5px;color:var(--dim);flex:1;min-width:0}
+  .box .n{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;
+          background:rgba(255,255,255,.06);color:var(--dim)}
+  .box.key{border-color:rgba(237,75,24,.5);background:linear-gradient(90deg,rgba(237,75,24,.09),var(--panel) 60%)}
+  .box.key .n{background:var(--accent);color:#fff}
+  .box.key .u{color:#fff;font-weight:600}
+  .box.big .n{background:rgba(237,75,24,.18);color:var(--accent)}
+
+  .star{color:var(--accent);font-size:14px}
+  .kids{margin-top:5px}
+
+  .note{margin:8px 0 4px 26px;padding:9px 13px;border-left:2px solid var(--accent);
+        background:rgba(237,75,24,.05);font-size:12.5px;color:#c9ced4;border-radius:0 7px 7px 0}
+  .note b{color:var(--accent);font-weight:600}
+
+  footer{margin-top:50px;padding-top:24px;border-top:1px solid var(--line);color:var(--dim);font-size:12.5px}
+  @media(max-width:640px){
+    body{padding:26px 15px 50px} h1{font-size:27px}
+    .box{flex-wrap:wrap;gap:6px} .box .d{flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">A U T O P R O F I</div>
+    <h1>Структура сайта</h1>
+    <p class="sub">Фаркопы с установкой в Санкт-Петербурге и доставкой по России.
+       Около 8 300 страниц, собираемых из 13 шаблонов.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat hl"><b>8 269</b><span>страниц каталога</span></div>
+    <div class="stat"><b>13</b><span>шаблонов</span></div>
+    <div class="stat"><b>106</b><span>марок авто</span></div>
+    <div class="stat"><b>956</b><span>моделей</span></div>
+    <div class="stat"><b>1 369</b><span>поколений</span></div>
+    <div class="stat"><b>5 808</b><span>товаров</span></div>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--accent)"></i>Каталог — основной трафик</span>
+    <span><i style="background:var(--green)"></i>Услуги — маржа</span>
+    <span><i style="background:var(--blue)"></i>Контент и доверие</span>
+    <span><i style="background:var(--amber)"></i>Информация и право</span>
+    <span><i style="background:var(--purple)"></i>Заглушки и служебные</span>
+  </div>
+
+  <!-- КАТАЛОГ -->
+  <div class="sec">
+    <div class="sec-h"><span class="bar" style="background:var(--accent)"></span>
+      <h2>Каталог</h2><span class="tot">8 269 страниц</span></div>
+    <div class="tree">
+
+      <div class="node root">
+        <div class="box key"><span class="u">/</span><span class="d">Главная — подбор в первом экране, услуги, марки, акции</span><span class="n">1</span></div>
+      </div>
+
+      <div class="node">
+        <div class="box key"><span class="u">/podbor/</span><span class="d">Мастер: марка → модель → поколение</span><span class="n">1</span></div>
+      </div>
+
+      <div class="node">
+        <div class="box"><span class="u">/farkopy/</span><span class="d">Указатель всех марок</span><span class="n">1</span></div>
+        <div class="kids">
+
+          <div class="node">
+            <div class="box big"><span class="u">/farkopy/{марка}/</span><span class="d">Модели марки — например, Toyota</span><span class="n">106</span></div>
+            <div class="kids">
+
+              <div class="node">
+                <div class="box big"><span class="u">/{модель}/</span><span class="d">Поколения модели — например, RAV4</span><span class="n">956</span></div>
+                <div class="kids">
+
+                  <div class="node">
+                    <div class="box key"><span class="u">/{поколение}/</span>
+                      <span class="d"><span class="star">★</span> Основная посадочная — «RAV4 XA40 2013–2019»</span>
+                      <span class="n">1 369</span></div>
+                  </div>
+
+                  <div class="note">
+                    У <b>581 модели</b> поколение только одно — для них отдельный адрес не создаётся,
+                    страница модели показывает товары сама. Так исключаются дубли.
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="node">
+            <div class="box key"><span class="u">/tovar/{артикул}/</span><span class="d">Карточка: фото, схема, характеристики, PDF-документы</span><span class="n">5 808</span></div>
+          </div>
+
+          <div class="node">
+            <div class="box"><span class="u">/proizvoditeli/{бренд}/</span><span class="d">Steinhof, GALIA, Oris, Лидер-плюс…</span><span class="n">27</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="note">
+        Пустые марки, модели и поколения <b>не публикуются</b> — отсекается 945 страниц без товаров.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- УСЛУГИ -->
+  <div class="sec">
+    <div class="sec-h"><span class="bar" style="background:var(--green)"></span>
+      <h2>Услуги</h2><span class="tot">5 страниц</span></div>
+    <div class="tree">
+      <div class="node root">
+        <div class="box"><span class="u">/uslugi/</span><span class="d">Хаб услуг с ценами на работы</span><span class="n">1</span></div>
+        <div class="kids">
+          <div class="node"><div class="box key"><span class="u">/ustanovka-farkopa/</span><span class="d"><span class="star">★</span> Главный коммерческий запрос по городу</span><span class="n">1</span></div></div>
+          <div class="node"><div class="box"><span class="u">/elektrika/</span><span class="d">Подключение розетки, блок согласования</span><span class="n">1</span></div></div>
+          <div class="node"><div class="box"><span class="u">/podbor/</span><span class="d">Подбор и консультация</span><span class="n">1</span></div></div>
+          <div class="node"><div class="box"><span class="u">/remont-tsu/</span><span class="d">Сварка, доработка, ремонт</span><span class="n">1</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- КОНТЕНТ -->
+  <div class="sec">
+    <div class="sec-h"><span class="bar" style="background:var(--blue)"></span>
+      <h2>Контент и доверие</h2><span class="tot">растёт со временем</span></div>
+    <div class="tree">
+      <div class="node root"><div class="box"><span class="u">/akcii/</span><span class="d">Список акций + страница акции, сроки действия</span><span class="n">∞</span></div></div>
+      <div class="node"><div class="box"><span class="u">/blog/</span><span class="d">Статьи под информационные запросы</span><span class="n">∞</span></div></div>
+      <div class="node"><div class="box"><span class="u">/otzyvy/</span><span class="d">Отзывы, рейтинг звёздами в поисковой выдаче</span><span class="n">1</span></div></div>
+      <div class="node"><div class="box key"><span class="u">/nashi-raboty/</span><span class="d"><span class="star">★</span> Фото своих установок — источник картинок без чужих водяных знаков</span><span class="n">∞</span></div></div>
+    </div>
+  </div>
+
+  <!-- ИНФО -->
+  <div class="sec">
+    <div class="sec-h"><span class="bar" style="background:var(--amber)"></span>
+      <h2>Информация и право</h2><span class="tot">8 страниц</span></div>
+    <div class="tree">
+      <div class="node root"><div class="box"><span class="u">/o-nas/</span><span class="d">О компании, сертификаты, фото сервиса</span><span class="n">1</span></div></div>
+      <div class="node"><div class="box"><span class="u">/kontakty/</span><span class="d">Адрес, карта, часы, реквизиты</span><span class="n">1</span></div></div>
+      <div class="node"><div class="box key"><span class="u">/dostavka/</span><span class="d">СДЭК по России, сроки по регионам, калькулятор</span><span class="n">1</span></div></div>
+      <div class="node"><div class="box"><span class="u">/garantiya/ · /oplata/</span><span class="d">Гарантия на работы, способы оплаты</span><span class="n">2</span></div></div>
+      <div class="node"><div class="box"><span class="u">/politika-konfidencialnosti/</span><span class="d">Обязательна по 152-ФЗ при любой форме</span><span class="n">1</span></div></div>
+      <div class="node"><div class="box"><span class="u">/soglasie-na-obrabotku/</span><span class="d">Согласие на обработку персональных данных</span><span class="n">1</span></div></div>
+      <div class="node"><div class="box"><span class="u">/polzovatelskoe-soglashenie/</span><span class="d">Пользовательское соглашение</span><span class="n">1</span></div></div>
+    </div>
+  </div>
+
+  <!-- СЛУЖЕБНЫЕ -->
+  <div class="sec">
+    <div class="sec-h"><span class="bar" style="background:var(--purple)"></span>
+      <h2>Заглушки и служебные</h2><span class="tot">6 страниц</span></div>
+    <div class="tree">
+      <div class="node root"><div class="box"><span class="u">/elektrika/</span><span class="d">Раздел без товаров — описание и форма «уточнить наличие»</span><span class="n">1</span></div></div>
+      <div class="node"><div class="box"><span class="u">/aksessuary/</span><span class="d">То же: шары, переходники, розетки</span><span class="n">1</span></div></div>
+      <div class="node"><div class="box"><span class="u">/sitemap.xml</span><span class="d">Разбита на части — 8 000 адресов в один файл не помещаются</span><span class="n">—</span></div></div>
+      <div class="node"><div class="box"><span class="u">/robots.txt</span><span class="d">С директивой Clean-param для Яндекса</span><span class="n">—</span></div></div>
+      <div class="node"><div class="box"><span class="u">/404 · /500</span><span class="d">С поиском и ссылками на популярные марки</span><span class="n">2</span></div></div>
+    </div>
+  </div>
+
+  <footer>
+    Спецификация: <code>docs/superpowers/specs/2026-08-06-autoprofi-struktura-design.md</code><br>
+    Данные каталога — срез от 27 июня 2026 · Документ от 6 августа 2026
+  </footer>
+
+</div>
+</body>
+</html>
