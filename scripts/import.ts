@@ -4,7 +4,9 @@ import { readFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { applyMigrations } from '../src/db/migrate'
 import * as schema from '../src/db/schema'
+import { recalculateCounters } from '../src/import/counters'
 import { importCatalog } from '../src/import/run'
+import { verifyIntegrity } from '../src/import/verify'
 
 const SOURCE = 'E:/всякое/WEB/Подбор_фаркопов_все_марки_инструкции_сертификаты.html'
 const DB_PATH = process.env.PGLITE_PATH ?? './.pgdata'
@@ -34,7 +36,38 @@ async function main() {
   console.log('Товары:       ', stats.products)
   console.log('Связки:       ', stats.fitments)
   console.log('')
+  console.log('Пересчитываю счётчики…')
+  const counters = await recalculateCounters(db)
+
+  console.log('')
+  console.log('Публикуется марок:          ', counters.publishedBrands)
+  console.log('Публикуется моделей:        ', counters.publishedModels)
+  console.log('Публикуется кузовов:        ', counters.publishedVariants)
+  console.log('Кузовов со своей страницей: ', counters.variantsWithOwnPage)
+  console.log('')
+  console.log(
+    'Итого страниц каталога:',
+    counters.publishedBrands +
+      counters.publishedModels +
+      counters.variantsWithOwnPage +
+      stats.products,
+  )
+  console.log('')
+  console.log('Проверяю целостность…')
+  const problems = await verifyIntegrity(db)
+
+  if (problems.length === 0) {
+    console.log('Нарушений не найдено')
+  } else {
+    console.log('')
+    console.log('НАЙДЕНЫ НАРУШЕНИЯ:')
+    problems.forEach((p) => console.log(`  ${p.check}: ${p.count}`))
+  }
+
+  console.log('')
   console.log(`Импорт занял ${seconds} с`)
+
+  if (problems.length > 0) process.exit(1)
 }
 
 main().catch((error) => {
