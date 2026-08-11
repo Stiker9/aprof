@@ -35,3 +35,10 @@ test('slugify переводит кириллицу в латиницу', () => 
 test('slugify не оставляет пустых строк и двойных дефисов', () => {
   expect(slugify('  A --- B  ')).toBe('a-b')
 })
+
+test('slugify бросает ошибку, если после очистки не осталось символов', () => {
+  expect(() => slugify('')).toThrow()
+  expect(() => slugify('«»')).toThrow()
+  expect(() => slugify('---')).toThrow()
+  expect(() => slugify('!!!')).toThrow()
+})
