@@ -11,18 +11,26 @@ test('извлекает rows из объекта в формате PGlite', () 
   expect(rowsOf(input)).toEqual([{ id: 1 }])
 })
 
-test('возвращает пустой массив для объекта без поля rows', () => {
-  expect(rowsOf({ affectedRows: 1 })).toEqual([])
-})
-
-test('возвращает пустой массив для null', () => {
-  expect(rowsOf(null)).toEqual([])
-})
-
-test('возвращает пустой массив для undefined', () => {
-  expect(rowsOf(undefined)).toEqual([])
-})
-
-test('возвращает пустой массив на входе как пустой массив', () => {
+test('пустой массив на входе остаётся пустым', () => {
   expect(rowsOf([])).toEqual([])
+})
+
+test('пустой rows остаётся пустым', () => {
+  expect(rowsOf({ rows: [], fields: [], affectedRows: 0 })).toEqual([])
+})
+
+test('бросает ошибку на объекте без поля rows', () => {
+  expect(() => rowsOf({ affectedRows: 1 })).toThrow(/неизвестной формы/)
+})
+
+test('бросает ошибку, если rows не массив', () => {
+  expect(() => rowsOf({ rows: 'нет' })).toThrow(/неизвестной формы/)
+})
+
+test('бросает ошибку на null', () => {
+  expect(() => rowsOf(null)).toThrow(/неизвестной формы/)
+})
+
+test('бросает ошибку на undefined', () => {
+  expect(() => rowsOf(undefined)).toThrow(/неизвестной формы/)
 })

@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AUTOPROFI
 
-## Getting Started
+Сайт по продаже и установке фаркопов в Санкт-Петербурге с доставкой по России.
 
-First, run the development server:
+## Что здесь сейчас
+
+Первый подпроект — данные. Спарсенный каталог фаркопов разворачивается
+в схему PostgreSQL, чистится и нормализуется. На этих данных дальше
+будут сгенерированы страницы каталога.
+
+## Команды
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev       # локальный сервер разработки
+npm run build     # сборка
+npm test          # тесты
+npm run import    # импорт каталога в базу
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## База данных
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Разработка идёт на **PGlite** — это PostgreSQL, скомпилированный в WebAssembly.
+Он ставится обычным npm-пакетом, поэтому ни Docker, ни установленный
+PostgreSQL не нужны. База лежит в `.pgdata/` и пересоздаётся при каждом
+запуске импорта.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Продакшен — управляемый PostgreSQL на российской площадке. Это требование
+закона: по части 5 статьи 18 152-ФЗ персональные данные граждан РФ должны
+храниться на серверах в России. Заявки с сайта содержат имя и телефон,
+поэтому зарубежные базы данных для этого проекта не подходят.
 
-## Learn More
+## Импорт каталога
 
-To learn more about Next.js, take a look at the following resources:
+Исходные данные — HTML-файл со встроенным JSON, срез каталога от 27.06.2026.
+Путь к нему задан в `scripts/import.ts`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Импорт проверяет сам себя: после загрузки пересчитываются счётчики товаров
+и флаги публикации, затем прогоняется проверка целостности. При любом
+нарушении скрипт завершается с ненулевым кодом.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Контрольные числа последнего успешного прогона:
 
-## Deploy on Vercel
+| | |
+|---|---:|
+| Производители | 27 |
+| Марки | 129 |
+| Модели | 1 278 |
+| Кузова | 2 549 |
+| Товары | 5 808 |
+| Связки товар↔кузов | 10 138 |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Публикуется 106 марок, 956 моделей, 1 949 кузовов, из них 1 368 со своей
+страницей. Итого 8 238 страниц каталога.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Документы
+
+- `docs/superpowers/specs/` — спецификация структуры сайта
+- `docs/superpowers/plans/` — план подпроекта данных
+- `docs/design-tokens.md` — цвета, шрифты и размеры из макета
+- `docs/claude-design-prompts.md` — промты для отрисовки макетов

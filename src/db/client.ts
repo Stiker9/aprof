@@ -44,6 +44,11 @@ export async function getDb(): Promise<DrizzleDb> {
  * { rows, fields, affectedRows }, postgres.js — массивоподобным значением.
  * Тип PgDatabase описывает результат как unknown, поэтому компилятор
  * эту разницу не поймает: код под один драйвер молча сломается на другом.
+ *
+ * На нераспознанной форме бросает ошибку, а не возвращает пустой массив.
+ * Пустой массив здесь опаснее падения: запрос, вернувший список страниц,
+ * молча дал бы ноль страниц, и сборка выпустила бы пустой сайт вместо
+ * того, чтобы остановиться.
  */
 export function rowsOf<T>(result: unknown): T[] {
   if (Array.isArray(result)) return result as T[]
@@ -51,5 +56,7 @@ export function rowsOf<T>(result: unknown): T[] {
     const rows = (result as { rows: unknown }).rows
     if (Array.isArray(rows)) return rows as T[]
   }
-  return []
+  throw new Error(
+    `Драйвер вернул результат неизвестной формы: ожидался массив строк или объект с полем rows, получено ${typeof result}`,
+  )
 }

@@ -20,8 +20,26 @@ export interface CounterStats {
  * Порядок запросов важен: счётчики моделей опираются на уже проставленный
  * флаг публикации кузовов, а решение о собственной странице кузова — на то,
  * сколько у его модели публикуемых кузовов.
+ *
+ * Функция пригодна для повторного вызова на уже заполненной базе, а не только
+ * сразу после импорта. Поэтому она сначала сбрасывает счётчики и флаги в ноль:
+ * запросы вида UPDATE ... FROM (SELECT ... GROUP BY ...) трогают лишь строки,
+ * попавшие в подзапрос, а кузов, потерявший последнюю связку, туда не попадёт
+ * и остался бы опубликованным со старым счётчиком. Проверка целостности этого
+ * не поймает — счётчик и флаг протухнут согласованно.
  */
 export async function recalculateCounters(db: DrizzleDb): Promise<CounterStats> {
+  // Сброс перед пересчётом: см. пояснение выше
+  await db.execute(sql`
+    UPDATE variants SET product_count = 0, is_published = FALSE, has_own_page = FALSE
+  `)
+  await db.execute(sql`
+    UPDATE models SET product_count = 0, variant_count = 0, is_published = FALSE
+  `)
+  await db.execute(sql`
+    UPDATE brands SET product_count = 0, model_count = 0, is_published = FALSE
+  `)
+
   // Товары на кузов
   await db.execute(sql`
     UPDATE variants v
