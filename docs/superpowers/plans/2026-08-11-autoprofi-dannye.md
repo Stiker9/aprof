@@ -1522,7 +1522,7 @@ npx vitest run src/import/counters.test.ts
 
 ```typescript
 import { sql } from 'drizzle-orm'
-import type { DrizzleDb } from '../db/client'
+import { rowsOf, type DrizzleDb } from '../db/client'
 
 export interface CounterStats {
   publishedBrands: number
@@ -1599,18 +1599,22 @@ export async function recalculateCounters(db: DrizzleDb): Promise<CounterStats> 
       ) > 1
   `)
 
-  const [row] = await db.execute<{
-    brands: number
-    models: number
-    variants: number
-    own_pages: number
-  }>(sql`
+  const result = await db.execute(sql`
     SELECT
       (SELECT COUNT(*) FROM brands   WHERE is_published)   AS brands,
       (SELECT COUNT(*) FROM models   WHERE is_published)   AS models,
       (SELECT COUNT(*) FROM variants WHERE is_published)   AS variants,
       (SELECT COUNT(*) FROM variants WHERE has_own_page)   AS own_pages
   `)
+
+  const [row] = rowsOf<{
+    brands: number | string
+    models: number | string
+    variants: number | string
+    own_pages: number | string
+  }>(result)
+
+  if (!row) throw new Error('Запрос счётчиков не вернул ни одной строки')
 
   return {
     publishedBrands: Number(row.brands),
@@ -1620,6 +1624,10 @@ export async function recalculateCounters(db: DrizzleDb): Promise<CounterStats> 
   }
 }
 ```
+
+**Почему `rowsOf`, а не деструктуризация результата напрямую.** Драйверы возвращают результат `execute()` в разной форме: PGlite отдаёт объект `{ rows, fields, affectedRows }`, postgres.js — массивоподобное значение. Тип `PgDatabase<PgQueryResultHKT, …>` описывает результат как `unknown`, поэтому компилятор эту разницу не ловит. Код, написанный под одну форму, молча сломается на другой — на разработке или в продакшене. `rowsOf` приводит оба случая к массиву строк.
+
+`COUNT(*)` в PostgreSQL возвращает `bigint`, который драйверы отдают строкой, — поэтому в типе `number | string`, а наружу значения идут через `Number()`.
 
 - [ ] **Step 4: Запустить тесты, убедиться что проходят**
 
