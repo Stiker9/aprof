@@ -1116,30 +1116,18 @@ git commit -m "feat: дедупликация связок товар-кузов
 Создать `src/import/run.test.ts`:
 
 ```typescript
-import { PGlite } from '@electric-sql/pglite'
-import { drizzle } from 'drizzle-orm/pglite'
-import { readFileSync } from 'node:fs'
 import { beforeAll, expect, test } from 'vitest'
 import * as schema from '../db/schema'
+import { createTestDb } from '../db/test-helpers'
 import { importCatalog } from './run'
-
-const MIGRATION = readFileSync('drizzle/0000_init.sql', 'utf8')
 
 const FIXTURE = `<script id="catalog-data" type="application/json">{"brands":[["b:a","Acura","u"],["b:t","Toyota","u"]],"models":[["m:1",0,"MDX","u"],["m:2",1,"RAV4","u"]],"variants":[["v:1",0,"фаркопы для Акура МДХ 2006-2014","u",0],["v:2",1,"фаркопы для Тойота РАВ4 XA10 1995-2000","u",0]],"products":[["oris::x1","X1","ORIS","Словакия","Описание",1000,"сегодня","1 шт","u","A",1000,50,10,"not_required",false,[],[]],["oris::x2","X2","Oris","Польша","Описание",2000,"сегодня","2 шт","u","C",1500,75,12,"required",true,[],[]]],"fitments":[[0,0,0,0,1000,"сегодня","u","u",1],[0,0,0,0,1000,"сегодня","u","u",1],[1,1,1,1,2000,"сегодня","u","u",1]]}</script>`
 
-async function makeDb() {
-  const client = new PGlite()
-  for (const stmt of MIGRATION.split('--> statement-breakpoint')) {
-    if (stmt.trim()) await client.exec(stmt)
-  }
-  return drizzle(client, { schema })
-}
-
 let stats: Awaited<ReturnType<typeof importCatalog>>
-let db: Awaited<ReturnType<typeof makeDb>>
+let db: Awaited<ReturnType<typeof createTestDb>>
 
 beforeAll(async () => {
-  db = await makeDb()
+  db = await createTestDb()
   stats = await importCatalog(FIXTURE, db)
 })
 
@@ -1450,16 +1438,12 @@ git commit -m "feat: импорт каталога в базу"
 Создать `src/import/counters.test.ts`:
 
 ```typescript
-import { PGlite } from '@electric-sql/pglite'
 import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/pglite'
-import { readFileSync } from 'node:fs'
 import { beforeAll, expect, test } from 'vitest'
 import * as schema from '../db/schema'
+import { createTestDb } from '../db/test-helpers'
 import { recalculateCounters } from './counters'
 import { importCatalog } from './run'
-
-const MIGRATION = readFileSync('drizzle/0000_init.sql', 'utf8')
 
 /**
  * Марка A: модель с одним кузовом и товаром → кузов без своей страницы
@@ -1468,14 +1452,10 @@ const MIGRATION = readFileSync('drizzle/0000_init.sql', 'utf8')
  */
 const FIXTURE = `<script id="catalog-data" type="application/json">{"brands":[["b:a","Alfa","u"],["b:b","Bmw","u"],["b:c","Chery","u"]],"models":[["m:a",0,"Giulia","u"],["m:b",1,"X5","u"],["m:c",2,"Tiggo","u"]],"variants":[["v:1",0,"Giulia 2016-2020","u",0],["v:2",1,"X5 E70 2007-2013","u",0],["v:3",1,"X5 F15 2013-2018","u",0],["v:4",2,"Tiggo 2020-","u",0]],"products":[["a::p1","P1","GALIA","Словакия","Опис",1000,"сегодня","1 шт","u","A",1000,50,10,"not_required",false,[],[]],["a::p2","P2","GALIA","Словакия","Опис",2000,"сегодня","1 шт","u","A",1000,50,10,"not_required",false,[],[]],["a::p3","P3","GALIA","Словакия","Опис",3000,"сегодня","1 шт","u","A",1000,50,10,"not_required",false,[],[]]],"fitments":[[0,0,0,0,1000,"сегодня","u","u",1],[1,1,1,1,2000,"сегодня","u","u",1],[1,1,2,2,3000,"сегодня","u","u",1]]}</script>`
 
-let db: ReturnType<typeof drizzle<typeof schema>>
+let db: Awaited<ReturnType<typeof createTestDb>>
 
 beforeAll(async () => {
-  const client = new PGlite()
-  for (const stmt of MIGRATION.split('--> statement-breakpoint')) {
-    if (stmt.trim()) await client.exec(stmt)
-  }
-  db = drizzle(client, { schema })
+  db = await createTestDb()
   await importCatalog(FIXTURE, db)
   await recalculateCounters(db)
 })
