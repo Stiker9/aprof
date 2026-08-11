@@ -1020,12 +1020,20 @@ export function parseYears(name: string): { from: number | null; to: number | nu
  * Чистые числа (147, 156) отбрасываются — это названия моделей Alfa Romeo,
  * а не коды поколений.
  */
-export function parseGeneration(name: string): string | null {
+export function parseGeneration(name: string, modelName: string): string | null {
   const withoutYears = name.replace(/(19|20)\d{2}\s*-\s*((19|20)\d{2})?/g, ' ')
   const tokens = withoutYears.match(/\b[A-Za-z]+[0-9]+[A-Za-z0-9]*\b/g)
-  return tokens && tokens.length > 0 ? tokens[tokens.length - 1].toUpperCase() : null
+  if (!tokens || tokens.length === 0) return null
+
+  const model = modelName.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+  const candidate = tokens[tokens.length - 1].toUpperCase()
+
+  // Токен, совпадающий с именем модели, — это и есть модель, а не поколение
+  return candidate.replace(/[^A-Z0-9]/g, '') === model ? null : candidate
 }
 ```
+
+**Почему функции нужно имя модели.** Без него она берёт первый подходящий латинский токен — и для «Volvo S60 2000-2009» возвращает `S60`, то есть само название модели. На странице это даёт «Volvo S60 **S60** 2000–2009». В каталоге таких случаев 216 из 459: Infiniti QX50, BMW i3, Audi Q3, Great Wall BJ40 и другие модели, чьё имя само состоит из букв и цифр.
 
 - [ ] **Step 4: Запустить тесты, убедиться что проходят**
 
@@ -1331,11 +1339,12 @@ export async function importCatalog(html: string, db: DrizzleDb): Promise<Import
       raw.variants.map((v) => {
         const name = cleanVariantName(v.name)
         const years = parseYears(name)
+        const modelName = raw.models[v.modelIndex].name
         return {
           modelId: modelIdByIndex.get(v.modelIndex)!,
           slug: slugify(name),
           name,
-          generation: parseGeneration(name),
+          generation: parseGeneration(name, modelName),
           yearFrom: years.from,
           yearTo: years.to,
           sourceUrl: v.sourceUrl,

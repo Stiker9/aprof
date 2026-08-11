@@ -107,9 +107,23 @@ export function parseYears(name: string): { from: number | null; to: number | nu
  * хотя бы одну букву и одну цифру: XA10, E120, F15, W203.
  * Чистые числа (147, 156) отбрасываются — это названия моделей Alfa Romeo,
  * а не коды поколений.
+ *
+ * Второй аргумент — имя модели — обязателен, потому что латинский токен
+ * в названии кузова не всегда код поколения: иногда это сама модель,
+ * записанная латиницей, если у поколения отдельного кода нет. Например,
+ * «Volvo S60 2000-2009» и «Volvo S60 2010-2019» — оба содержат только
+ * токен «S60», это название модели, а не два разных поколения. Без
+ * сравнения с именем модели функция вернула бы «S60» как код поколения,
+ * и подпись на сайте задвоилась бы: «Volvo S60 S60 2000–2009».
  */
-export function parseGeneration(name: string): string | null {
+export function parseGeneration(name: string, modelName: string): string | null {
   const withoutYears = name.replace(/(19|20)\d{2}\s*-\s*((19|20)\d{2})?/g, ' ')
   const tokens = withoutYears.match(/\b[A-Za-z]+[0-9]+[A-Za-z0-9]*\b/g)
-  return tokens && tokens.length > 0 ? tokens[tokens.length - 1].toUpperCase() : null
+  if (!tokens || tokens.length === 0) return null
+
+  const model = modelName.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+  const candidate = tokens[tokens.length - 1].toUpperCase()
+
+  // Токен, совпадающий с именем модели, — это и есть модель, а не поколение
+  return candidate.replace(/[^A-Z0-9]/g, '') === model ? null : candidate
 }

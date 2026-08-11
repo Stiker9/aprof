@@ -87,13 +87,27 @@ test('возвращает пустые годы, когда их нет в на
 })
 
 test('вытаскивает код поколения латиницей', () => {
-  expect(parseGeneration('Тойота РАВ4 XA10 1995-2000')).toBe('XA10')
-  expect(parseGeneration('БМВ Х5 F15 2013-2018')).toBe('F15')
-  expect(parseGeneration('Тойота Королла E120 2000-2007')).toBe('E120')
+  expect(parseGeneration('Тойота РАВ4 XA10 1995-2000', 'RAV4')).toBe('XA10')
+  expect(parseGeneration('БМВ Х5 F15 2013-2018', 'X5')).toBe('F15')
+  expect(parseGeneration('Тойота Королла E120 2000-2007', 'Corolla')).toBe('E120')
 })
 
 test('возвращает null, когда кода поколения нет', () => {
-  expect(parseGeneration('Ауди А6 1997-2004')).toBeNull()
-  expect(parseGeneration('Giulia')).toBeNull()
-  expect(parseGeneration('147')).toBeNull()
+  expect(parseGeneration('Ауди А6 1997-2004', 'A6')).toBeNull()
+  expect(parseGeneration('Giulia', 'Giulia')).toBeNull()
+  expect(parseGeneration('147', '147')).toBeNull()
+})
+
+test('возвращает null, когда единственный латинский токен совпадает с именем модели', () => {
+  expect(parseGeneration('Volvo S60 2000-2009', 'S60')).toBeNull()
+  expect(parseGeneration('Infiniti QX50 2013-2017', 'QX50')).toBeNull()
+})
+
+test('вытаскивает код поколения, когда он отличается от модели', () => {
+  expect(parseGeneration('Тойота РАВ4 XA10 1995-2000', 'RAV4')).toBe('XA10')
+  expect(parseGeneration('БМВ Х5 F15 2013-2018', 'X5')).toBe('F15')
+})
+
+test('возвращает null для названия без годов, совпадающего с моделью', () => {
+  expect(parseGeneration('Giulia', 'Giulia')).toBeNull()
 })
