@@ -10,3 +10,4 @@ CLAUDE.md
 design/
 
 .pgdata/
+tsconfig.tsbuildinfo

@@ -36,3 +36,20 @@ export async function getDb(): Promise<DrizzleDb> {
   cached = drizzlePglite(client, { schema })
   return cached
 }
+
+/**
+ * Приводит результат db.execute() к массиву строк.
+ *
+ * Драйверы возвращают его по-разному: PGlite — объектом
+ * { rows, fields, affectedRows }, postgres.js — массивоподобным значением.
+ * Тип PgDatabase описывает результат как unknown, поэтому компилятор
+ * эту разницу не поймает: код под один драйвер молча сломается на другом.
+ */
+export function rowsOf<T>(result: unknown): T[] {
+  if (Array.isArray(result)) return result as T[]
+  if (result !== null && typeof result === 'object' && 'rows' in result) {
+    const rows = (result as { rows: unknown }).rows
+    if (Array.isArray(rows)) return rows as T[]
+  }
+  return []
+}
