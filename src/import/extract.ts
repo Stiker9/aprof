@@ -123,32 +123,32 @@ export function extractCatalog(html: string): RawCatalog {
 
   return {
     brands: data.brands.map((b, i) => ({
-      key: requireString(b[0], 'key', i),
+      key: requireString(b[0], 'brands.key', i),
       name: String(b[1]),
       sourceUrl: String(b[2] ?? ''),
     })),
 
     models: data.models.map((m, i) => ({
-      key: requireString(m[0], 'key', i),
-      brandIndex: requireNumber(m[1], 'brandIndex', i),
+      key: requireString(m[0], 'models.key', i),
+      brandIndex: requireNumber(m[1], 'models.brandIndex', i),
       name: String(m[2]),
       sourceUrl: String(m[3] ?? ''),
     })),
 
     variants: data.variants.map((v, i) => ({
-      key: requireString(v[0], 'key', i),
-      modelIndex: requireNumber(v[1], 'modelIndex', i),
+      key: requireString(v[0], 'variants.key', i),
+      modelIndex: requireNumber(v[1], 'variants.modelIndex', i),
       name: String(v[2]),
       sourceUrl: String(v[3] ?? ''),
     })),
 
     products: data.products.map((p, i) => ({
-      key: requireString(p[0], 'key', i),
-      article: requireString(p[1], 'article', i),
+      key: requireString(p[0], 'products.key', i),
+      article: requireString(p[1], 'products.article', i),
       manufacturerRaw: String(p[2] ?? ''),
       country: str(p[3]),
       description: String(p[4] ?? ''),
-      price: requireNumber(p[5], 'price', i),
+      price: requireNumber(p[5], 'products.price', i),
       deliveryShort: str(p[6]),
       deliveryText: str(p[7]),
       sourceUrl: str(p[8]),
@@ -168,10 +168,10 @@ export function extractCatalog(html: string): RawCatalog {
     })),
 
     fitments: data.fitments.map((f, i) => ({
-      brandIndex: requireNumber(f[0], 'brandIndex', i),
-      modelIndex: requireNumber(f[1], 'modelIndex', i),
-      variantIndex: requireNumber(f[2], 'variantIndex', i),
-      productIndex: requireNumber(f[3], 'productIndex', i),
+      brandIndex: requireNumber(f[0], 'fitments.brandIndex', i),
+      modelIndex: requireNumber(f[1], 'fitments.modelIndex', i),
+      variantIndex: requireNumber(f[2], 'fitments.variantIndex', i),
+      productIndex: requireNumber(f[3], 'fitments.productIndex', i),
       price: num(f[4]),
       deliveryShort: str(f[5]),
     })),

@@ -118,6 +118,20 @@ test('towLoadKg, verticalLoadKg, weightKg равные null остаются nul
   expect(p.weightKg).toBeNull()
 })
 
+test('настоящий ноль в данных остаётся нулём, а не превращается в null', () => {
+  let product = withProduct(10, 0)
+  product[11] = 0
+  product[12] = 0
+  const html = catalogHtml({ product, fitment: withFitment(4, 0) })
+  const c = extractCatalog(html)
+  const p = c.products[0]
+  const f = c.fitments[0]
+  expect(p.towLoadKg).toBe(0)
+  expect(p.verticalLoadKg).toBe(0)
+  expect(p.weightKg).toBe(0)
+  expect(f.price).toBe(0)
+})
+
 test('price связки равный null остаётся null', () => {
   const f = extractCatalog(catalogHtml({ fitment: withFitment(4, null) })).fitments[0]
   expect(f.price).toBeNull()
