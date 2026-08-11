@@ -1,5 +1,12 @@
 import { expect, test } from 'vitest'
-import { normalizeManufacturer, slugify, slugifyArticle } from './normalize'
+import {
+  cleanVariantName,
+  normalizeManufacturer,
+  parseGeneration,
+  parseYears,
+  slugify,
+  slugifyArticle,
+} from './normalize'
 
 test('схлопывает разный регистр в одно имя', () => {
   expect(normalizeManufacturer('Oris')).toBe(normalizeManufacturer('ORIS'))
@@ -55,4 +62,38 @@ test('slugifyArticle работает как обычно для артикул�
 
 test('slugifyArticle наследует поведение slugify на строке без букв и цифр', () => {
   expect(() => slugifyArticle('...')).toThrow()
+})
+
+test('срезает приставку «фаркопы для»', () => {
+  expect(cleanVariantName('фаркопы для Тойота РАВ4 XA10 1995-2000')).toBe(
+    'Тойота РАВ4 XA10 1995-2000',
+  )
+  expect(cleanVariantName('Фаркопы для Ауди А6 1997-2004')).toBe('Ауди А6 1997-2004')
+})
+
+test('не трогает названия без приставки', () => {
+  expect(cleanVariantName('Giulia')).toBe('Giulia')
+  expect(cleanVariantName('ZDX')).toBe('ZDX')
+})
+
+test('вытаскивает диапазон годов', () => {
+  expect(parseYears('Тойота РАВ4 XA10 1995-2000')).toEqual({ from: 1995, to: 2000 })
+  expect(parseYears('Тойота РАВ4 2025-')).toEqual({ from: 2025, to: null })
+})
+
+test('возвращает пустые годы, когда их нет в названии', () => {
+  expect(parseYears('Giulia')).toEqual({ from: null, to: null })
+  expect(parseYears('147')).toEqual({ from: null, to: null })
+})
+
+test('вытаскивает код поколения латиницей', () => {
+  expect(parseGeneration('Тойота РАВ4 XA10 1995-2000')).toBe('XA10')
+  expect(parseGeneration('БМВ Х5 F15 2013-2018')).toBe('F15')
+  expect(parseGeneration('Тойота Королла E120 2000-2007')).toBe('E120')
+})
+
+test('возвращает null, когда кода поколения нет', () => {
+  expect(parseGeneration('Ауди А6 1997-2004')).toBeNull()
+  expect(parseGeneration('Giulia')).toBeNull()
+  expect(parseGeneration('147')).toBeNull()
 })

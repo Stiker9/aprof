@@ -71,3 +71,45 @@ export function slugify(input: string): string {
 export function slugifyArticle(article: string): string {
   return slugify(article.replace(/\./g, ''))
 }
+
+/**
+ * Убирает служебную приставку из названия кузова.
+ * В источнике все варианты записаны как «фаркопы для Ауди А6 1997-2004»,
+ * на сайте приставка избыточна — мы и так в каталоге фаркопов.
+ */
+export function cleanVariantName(raw: string): string {
+  return raw.replace(/^\s*фаркопы\s+для\s+/i, '').trim()
+}
+
+/**
+ * Вытаскивает годы из названия кузова.
+ * У 818 вариантов из 2550 годов в названии нет — для них
+ * возвращается пара null, и это штатная ситуация.
+ */
+export function parseYears(name: string): { from: number | null; to: number | null } {
+  const m = name.match(/(19|20)(\d{2})\s*-\s*((19|20)\d{2})?/)
+  if (!m) return { from: null, to: null }
+
+  const from = Number(m[1] + m[2])
+  const to = m[3] ? Number(m[3]) : null
+  return { from, to }
+}
+
+/**
+ * Вытаскивает код поколения из названия кузова.
+ *
+ * В источнике марка и модель записаны кириллицей («Тойота РАВ4»),
+ * а на сайте они берутся из своих таблиц латиницей («Toyota RAV4»).
+ * Смешивать их в одной строке нельзя, поэтому из названия кузова
+ * нужен только код поколения — латинский токен перед годами.
+ *
+ * Ищется последовательность из латинских букв и цифр, содержащая
+ * хотя бы одну букву и одну цифру: XA10, E120, F15, W203.
+ * Чистые числа (147, 156) отбрасываются — это названия моделей Alfa Romeo,
+ * а не коды поколений.
+ */
+export function parseGeneration(name: string): string | null {
+  const withoutYears = name.replace(/(19|20)\d{2}\s*-\s*((19|20)\d{2})?/g, ' ')
+  const tokens = withoutYears.match(/\b[A-Za-z]+[0-9]+[A-Za-z0-9]*\b/g)
+  return tokens && tokens.length > 0 ? tokens[tokens.length - 1].toUpperCase() : null
+}
