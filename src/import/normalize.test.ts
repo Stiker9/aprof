@@ -111,3 +111,13 @@ test('вытаскивает код поколения, когда он отли
 test('возвращает null для названия без годов, совпадающего с моделью', () => {
   expect(parseGeneration('Giulia', 'Giulia')).toBeNull()
 })
+
+test('сравнивает со всеми словами составного имени модели, а не с именем целиком', () => {
+  expect(parseGeneration('Ауди Q3 Sportback 2019-', 'Q3 Sportback')).toBeNull()
+  expect(parseGeneration('Ауди A6 e-tron 2024-', 'A6 e-tron')).toBeNull()
+  expect(parseGeneration('Вольво S60 Cross Country 2015-2018', 'S60 Cross Country')).toBeNull()
+})
+
+test('доводка сравнения по словам не ломает рабочий случай с настоящим кодом поколения', () => {
+  expect(parseGeneration('Тойота РАВ4 XA10 1995-2000', 'RAV4')).toBe('XA10')
+})

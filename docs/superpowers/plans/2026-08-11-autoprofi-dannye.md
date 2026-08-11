@@ -1025,11 +1025,19 @@ export function parseGeneration(name: string, modelName: string): string | null 
   const tokens = withoutYears.match(/\b[A-Za-z]+[0-9]+[A-Za-z0-9]*\b/g)
   if (!tokens || tokens.length === 0) return null
 
-  const model = modelName.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+  // Сравниваем со ВСЕМИ словами имени модели, а не с именем целиком:
+  // у модели «Q3 Sportback» кандидат «Q3» — это её первое слово,
+  // и при сравнении с полным именем он бы не отсеялся
+  const modelWords = new Set(
+    modelName
+      .split(/[^A-Za-z0-9]+/)
+      .filter((w) => w.length > 0)
+      .map((w) => w.toUpperCase()),
+  )
   const candidate = tokens[tokens.length - 1].toUpperCase()
 
-  // Токен, совпадающий с именем модели, — это и есть модель, а не поколение
-  return candidate.replace(/[^A-Z0-9]/g, '') === model ? null : candidate
+  // Токен, совпадающий со словом имени модели, — это модель, а не поколение
+  return modelWords.has(candidate) ? null : candidate
 }
 ```
 
