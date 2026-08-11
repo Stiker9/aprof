@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { normalizeManufacturer, slugify } from './normalize'
+import { normalizeManufacturer, slugify, slugifyArticle } from './normalize'
 
 test('схлопывает разный регистр в одно имя', () => {
   expect(normalizeManufacturer('Oris')).toBe(normalizeManufacturer('ORIS'))
@@ -41,4 +41,18 @@ test('slugify бросает ошибку, если после очистки н
   expect(() => slugify('«»')).toThrow()
   expect(() => slugify('---')).toThrow()
   expect(() => slugify('!!!')).toThrow()
+})
+
+test('slugifyArticle различает точку и дефис как разделитель артикула', () => {
+  expect(slugifyArticle('J.069')).not.toBe(slugifyArticle('J-069'))
+  expect(slugifyArticle('K.023')).not.toBe(slugifyArticle('K-023'))
+  expect(slugifyArticle('K.069')).not.toBe(slugifyArticle('K-069'))
+})
+
+test('slugifyArticle работает как обычно для артикулов без точки', () => {
+  expect(slugifyArticle('T030A')).toBe('t030a')
+})
+
+test('slugifyArticle наследует поведение slugify на строке без букв и цифр', () => {
+  expect(() => slugifyArticle('...')).toThrow()
 })

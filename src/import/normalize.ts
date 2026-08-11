@@ -59,3 +59,15 @@ export function slugify(input: string): string {
 
   return slug
 }
+
+/**
+ * Слаг для артикула товара.
+ *
+ * Отличается от обычного тем, что точка удаляется, а не превращается
+ * в разделитель. Иначе артикулы «J.069» и «J-069» дают один и тот же
+ * слаг и один из двух товаров теряет свою страницу.
+ * В каталоге такие пары есть: J.069/J-069, K.023/K-023, K.069/K-069.
+ */
+export function slugifyArticle(article: string): string {
+  return slugify(article.replace(/\./g, ''))
+}
