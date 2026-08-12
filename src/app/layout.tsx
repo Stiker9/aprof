@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
+import { SiteFooter } from '@/components/site-footer'
+import { SiteHeader } from '@/components/site-header'
 import './globals.css'
 
 /**
@@ -34,7 +36,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="ru" className={`${display.variable} ${body.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-bg text-ink font-[family-name:var(--font-body)]">
+        <SiteHeader />
         {children}
+        <SiteFooter />
       </body>
     </html>
   )
