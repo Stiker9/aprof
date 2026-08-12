@@ -96,6 +96,64 @@ export function parseYears(name: string): { from: number | null; to: number | nu
 }
 
 /**
+ * Общее начало у группы названий, по словам.
+ * У кузовов одной модели это марка и модель.
+ */
+function commonWordPrefix(names: string[]): number {
+  if (names.length === 0) return 0
+  const split = names.map((n) => n.split(/\s+/))
+  const first = split[0]
+  let length = 0
+  for (let i = 0; i < first.length; i++) {
+    if (split.every((words) => words[i] === first[i])) length++
+    else break
+  }
+  return length
+}
+
+/**
+ * Слаги кузовов для адресов страниц.
+ *
+ * Считаются сразу для всего списка, а не по одному: слаг зависит от других
+ * кузовов той же модели. Из названия срезается общее начало — марка и модель,
+ * которые уже есть в пути. «Шевроле Лачетти седан 2004-2012» превращается
+ * в «sedan-2004-2012», а адрес выходит /farkopy/chevrolet/lacetti/sedan-2004-2012
+ * вместо /farkopy/chevrolet/lacetti/shevrole-lachetti-sedan-2004-2012.
+ *
+ * Срезать только марку и модель, оставляя тип кузова, обязательно: у 193 кузовов
+ * различие именно в нём. «Лачетти седан» и «Лачетти универсал» идут в одни годы
+ * и без кода поколения — по годам они бы схлопнулись в одну страницу.
+ *
+ * Единственная функция, где рождается слаг кузова. Дедупликация и вставка
+ * в базу обязаны пользоваться её результатом, иначе разойдутся между собой
+ * и упрутся в уникальный индекс на пару (модель, слаг).
+ */
+export function buildVariantSlugs(items: { modelIndex: number; name: string }[]): string[] {
+  const byModel = new Map<number, number[]>()
+  items.forEach((item, index) => {
+    if (!byModel.has(item.modelIndex)) byModel.set(item.modelIndex, [])
+    byModel.get(item.modelIndex)!.push(index)
+  })
+
+  const slugs = new Array<string>(items.length)
+
+  for (const indices of byModel.values()) {
+    const names = indices.map((i) => cleanVariantName(items[i].name))
+    const prefixLength = commonWordPrefix(names)
+
+    indices.forEach((itemIndex, position) => {
+      const words = names[position].split(/\s+/)
+      // У модели с единственным кузовом общее начало равно всему названию —
+      // срезать нечего, иначе не осталось бы ни одного символа
+      const rest = prefixLength < words.length ? words.slice(prefixLength) : words
+      slugs[itemIndex] = slugify(rest.join(' '))
+    })
+  }
+
+  return slugs
+}
+
+/**
  * Вытаскивает код поколения из названия кузова.
  *
  * В источнике марка и модель записаны кириллицей («Тойота РАВ4»),
