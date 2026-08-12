@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { formatCount } from '@/catalog/format'
-import { listBrands } from '@/catalog/queries'
+import { countProducts, listBrands } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { getDb } from '@/db/client'
@@ -15,8 +15,7 @@ export const metadata: Metadata = {
 
 export default async function CatalogPage() {
   const db = await getDb()
-  const brands = await listBrands(db)
-  const totalProducts = brands.reduce((sum, b) => sum + b.productCount, 0)
+  const [brands, totalProducts] = await Promise.all([listBrands(db), countProducts(db)])
 
   return (
     <main className="mx-auto w-full max-w-[1400px] px-6 py-8">

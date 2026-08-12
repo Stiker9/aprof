@@ -1,5 +1,13 @@
 import { expect, test } from 'vitest'
-import { formatCount, formatPrice, formatVariantLabel, formatYears, plural } from './format'
+import {
+  formatCount,
+  formatNumber,
+  formatPrice,
+  formatVariantLabel,
+  formatVariantShort,
+  formatYears,
+  plural,
+} from './format'
 
 test('склонение по русским правилам', () => {
   expect(plural(1, 'фаркоп', 'фаркопа', 'фаркопов')).toBe('фаркоп')
@@ -48,4 +56,20 @@ test('подпись без кода поколения не оставляет 
 
 test('подпись без годов обходится названием', () => {
   expect(formatVariantLabel('Alfa Romeo', 'Giulia', null, null, null)).toBe('Alfa Romeo Giulia')
+})
+
+test('дробное число пишется через запятую', () => {
+  expect(formatNumber(11.1)).toBe('11,1')
+  expect(formatNumber(13.25)).toBe('13,25')
+  expect(formatNumber(18)).toBe('18')
+})
+
+test('короткая подпись кузова без марки и модели', () => {
+  expect(formatVariantShort('XA10', 1995, 2000)).toBe('XA10 1995–2000')
+  expect(formatVariantShort(null, 1997, 2004)).toBe('1997–2004')
+  expect(formatVariantShort('F30', null, null)).toBe('F30')
+})
+
+test('короткая подпись пуста, когда описывать нечем', () => {
+  expect(formatVariantShort(null, null, null)).toBe('')
 })

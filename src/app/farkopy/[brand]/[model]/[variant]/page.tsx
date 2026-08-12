@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { formatCount, formatPrice, formatVariantLabel } from '@/catalog/format'
+import { formatCount, formatPrice, formatVariantLabel, formatVariantShort } from '@/catalog/format'
 import {
   getBrand,
   getModel,
@@ -86,7 +86,14 @@ export default async function VariantPage({ params }: Params) {
           { label: 'Фаркопы', href: urls.catalog() },
           { label: data.brand.name, href: urls.brand(brand) },
           { label: data.model.name, href: urls.model(brand, model) },
-          { label: data.variant.name },
+          {
+            label:
+              formatVariantShort(
+                data.variant.generation,
+                data.variant.yearFrom,
+                data.variant.yearTo,
+              ) || data.model.name,
+          },
         ]}
       />
 
@@ -141,7 +148,10 @@ export default async function VariantPage({ params }: Params) {
                 href={urls.variant(brand, model, sibling.slug)}
                 className="rounded-lg border border-line px-4 py-3 text-sm text-ink-muted hover:text-ink"
               >
-                <span className="block text-ink">{sibling.generation ?? data.model.name}</span>
+                <span className="block text-ink">
+                  {formatVariantShort(sibling.generation, sibling.yearFrom, sibling.yearTo) ||
+                    data.model.name}
+                </span>
                 <span className="text-xs">
                   {formatCount(sibling.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
                 </span>

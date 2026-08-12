@@ -67,6 +67,16 @@ async function main() {
   console.log('')
   console.log(`Импорт занял ${seconds} с`)
 
+  /**
+   * Базу обязательно закрыть.
+   *
+   * PostgreSQL держит в каталоге файл postmaster.pid, и если процесс
+   * уйдёт, не закрывшись, замок останется. Следующая попытка открыть
+   * базу — например, сервером разработки — упадёт с «RuntimeError: Aborted()»,
+   * причём без единого намёка на причину.
+   */
+  await client.close()
+
   if (problems.length > 0) process.exit(1)
 }
 

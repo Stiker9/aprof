@@ -12,29 +12,49 @@ import * as schema from './schema'
  */
 export type DrizzleDb = PgDatabase<PgQueryResultHKT, typeof schema>
 
-let cached: DrizzleDb | null = null
+/**
+ * Подключение кешируется на globalThis, а не в переменной модуля.
+ *
+ * В режиме разработки Next.js перезагружает модули на лету, и обычная
+ * переменная обнулялась бы при каждой перезагрузке. Каждый раз создавался
+ * бы новый экземпляр PGlite на той же папке, а файловую базу может держать
+ * только один — второй падает с «RuntimeError: Aborted()».
+ *
+ * Кешируется обещание, а не готовое подключение: два одновременных вызова
+ * до того, как первое успело открыться, иначе создали бы два экземпляра.
+ */
+const globalForDb = globalThis as typeof globalThis & {
+  __autoprofiDb?: Promise<DrizzleDb>
+}
 
 /**
  * Подключение к БД. В режиме local поднимает PGlite в файле —
  * настоящий PostgreSQL в WASM, без установки сервера.
  * В режиме remote подключается к управляемому PostgreSQL.
  */
-export async function getDb(): Promise<DrizzleDb> {
-  if (cached) return cached
+export function getDb(): Promise<DrizzleDb> {
+  if (!globalForDb.__autoprofiDb) {
+    globalForDb.__autoprofiDb = connect().catch((error: unknown) => {
+      // Неудачу не кешируем: иначе одна ошибка при старте отравит
+      // все последующие запросы до перезапуска процесса
+      globalForDb.__autoprofiDb = undefined
+      throw error
+    })
+  }
+  return globalForDb.__autoprofiDb
+}
 
+async function connect(): Promise<DrizzleDb> {
   const mode = process.env.DATABASE_MODE ?? 'local'
 
   if (mode === 'remote') {
     const url = process.env.DATABASE_URL
     if (!url) throw new Error('DATABASE_MODE=remote, но DATABASE_URL не задан')
-    cached = drizzlePostgres(postgres(url), { schema })
-    return cached
+    return drizzlePostgres(postgres(url), { schema })
   }
 
-  const path = process.env.PGLITE_PATH ?? './.pgdata'
-  const client = new PGlite(path)
-  cached = drizzlePglite(client, { schema })
-  return cached
+  const dataDir = process.env.PGLITE_PATH ?? './.pgdata'
+  return drizzlePglite(new PGlite(dataDir), { schema })
 }
 
 /**

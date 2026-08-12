@@ -1,7 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { formatPrice, formatVariantLabel } from '@/catalog/format'
+import {
+  formatNumber,
+  formatPrice,
+  formatVariantLabel,
+  formatVariantShort,
+} from '@/catalog/format'
 import { getProduct, listAllProductSlugs, listVariantsForProduct } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
 import { Breadcrumbs } from '@/components/breadcrumbs'
@@ -85,7 +90,7 @@ export default async function ProductPage({ params }: Params) {
       'Вертикальная нагрузка',
       product.verticalLoadKg ? `${product.verticalLoadKg} кг` : 'нет данных',
     ],
-    ['Масса фаркопа', product.weightKg ? `${product.weightKg} кг` : 'нет данных'],
+    ['Масса фаркопа', product.weightKg ? `${formatNumber(product.weightKg)} кг` : 'нет данных'],
     ['Вырез бампера', BUMPER_TEXT[product.bumperCut]],
     [
       'Электрика в комплекте',
@@ -188,9 +193,7 @@ export default async function ProductPage({ params }: Params) {
                       {fit.brand} {fit.model}
                     </span>
                     <span className="text-xs text-ink-muted">
-                      {formatVariantLabel(
-                        '',
-                        '',
+                      {formatVariantShort(
                         fit.variant.generation,
                         fit.variant.yearFrom,
                         fit.variant.yearTo,

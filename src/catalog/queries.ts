@@ -277,3 +277,15 @@ export async function listAllProductSlugs(db: DrizzleDb): Promise<string[]> {
   const rows = await db.select({ slug: products.slug }).from(products)
   return rows.map((r) => r.slug)
 }
+
+/**
+ * Сколько всего товаров в каталоге.
+ *
+ * Считать сложением счётчиков по маркам нельзя: один фаркоп подходит
+ * к машинам разных марок и попал бы в сумму несколько раз. На главной
+ * это давало 7 339 вместо 5 808.
+ */
+export async function countProducts(db: DrizzleDb): Promise<number> {
+  const rows = await db.select({ id: products.id }).from(products)
+  return rows.length
+}

@@ -3,6 +3,7 @@ import { createTestDb } from '../db/test-helpers'
 import { recalculateCounters } from '../import/counters'
 import { importCatalog } from '../import/run'
 import {
+  countProducts,
   getBrand,
   getProduct,
   getVariant,
@@ -118,4 +119,13 @@ test('пути всех кузовов со своими страницами', 
 test('слаги всех товаров', async () => {
   const slugs = await listAllProductSlugs(db)
   expect(slugs.sort()).toEqual(['t-185', 't030a'])
+})
+
+test('общее число товаров не складывается из счётчиков по маркам', async () => {
+  // T030A подходит к двум кузовам, поэтому сумма по маркам его задвоит.
+  // Товаров ровно два, а не три.
+  const brands = await listBrands(db)
+  const sumByBrand = brands.reduce((sum, b) => sum + b.productCount, 0)
+  expect(await countProducts(db)).toBe(2)
+  expect(sumByBrand).toBe(2)
 })

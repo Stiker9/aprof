@@ -31,6 +31,28 @@ export function formatYears(from: number | null, to: number | null): string {
   return to === null ? `${from} и новее` : `${from}–${to}`
 }
 
+/** Число с запятой вместо точки — по-русски дробную часть отделяют запятой. */
+export function formatNumber(value: number): string {
+  return value.toLocaleString('ru-RU')
+}
+
+/**
+ * Короткая подпись кузова — без марки и модели.
+ *
+ * Нужна там, где марка и модель уже названы рядом: в хлебных крошках
+ * и в списке соседних поколений. Если ни кода поколения, ни годов нет,
+ * возвращает пустую строку — тогда вызывающий сам решит, что показать.
+ */
+export function formatVariantShort(
+  generation: string | null,
+  from: number | null,
+  to: number | null,
+): string {
+  return [generation, formatYears(from, to)]
+    .filter((part): part is string => part !== null && part !== '')
+    .join(' ')
+}
+
 /**
  * Подпись кузова для заголовков и хлебных крошек.
  *

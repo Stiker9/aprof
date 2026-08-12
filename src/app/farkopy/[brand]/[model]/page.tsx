@@ -101,10 +101,10 @@ export default async function ModelPage({ params }: Params) {
               className="rounded-[var(--radius-card)] border border-line bg-surface p-5 hover:border-accent"
             >
               <span className="block text-lg text-ink">
-                {variant.generation ?? foundModel.name}
+                {variant.generation ?? formatYears(variant.yearFrom, variant.yearTo) ?? foundModel.name}
               </span>
               <span className="block text-sm text-ink-muted">
-                {formatYears(variant.yearFrom, variant.yearTo)}
+                {variant.generation ? formatYears(variant.yearFrom, variant.yearTo) : ''}
               </span>
               <span className="mt-2 block text-xs text-ink-dim">
                 {formatCount(variant.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}

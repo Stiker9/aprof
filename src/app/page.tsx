@@ -1,13 +1,12 @@
 import Link from 'next/link'
 import { formatCount } from '@/catalog/format'
-import { listBrands } from '@/catalog/queries'
+import { countProducts, listBrands } from '@/catalog/queries'
 import { urls } from '@/catalog/urls'
 import { getDb } from '@/db/client'
 
 export default async function HomePage() {
   const db = await getDb()
-  const brands = await listBrands(db)
-  const totalProducts = brands.reduce((sum, b) => sum + b.productCount, 0)
+  const [brands, totalProducts] = await Promise.all([listBrands(db), countProducts(db)])
   const popular = [...brands].sort((a, b) => b.productCount - a.productCount).slice(0, 24)
 
   return (

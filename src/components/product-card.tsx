@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { formatPrice } from '@/catalog/format'
+import { formatNumber, formatPrice } from '@/catalog/format'
 import type { ProductRow } from '@/catalog/queries'
 import { urls } from '@/catalog/urls'
 
@@ -22,7 +22,7 @@ export function ProductCard({ product }: { product: ProductRow }) {
     product.towLoadKg && product.verticalLoadKg
       ? `${product.towLoadKg}/${product.verticalLoadKg} кг`
       : null,
-    product.weightKg ? `${product.weightKg} кг` : null,
+    product.weightKg ? `${formatNumber(product.weightKg)} кг` : null,
     BUMPER_LABEL[product.bumperCut],
   ].filter((chip): chip is string => chip !== null)
 
