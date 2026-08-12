@@ -27,10 +27,14 @@
 | Производители | 33 написания | **27** | 27 |
 | Марки авто | 129 | 129 | **106** |
 | Модели | 1 278 | 1 278 | **956** |
-| Кузова | 2 550 | 2 550 | **1 950** |
-| Кузова со своей страницей | — | — | **1 369** |
+| Кузова | 2 550 | **2 549** | **1 949** |
+| Кузова со своей страницей | — | — | **1 368** |
 | Товары | 5 808 | 5 808 | 5 808 |
-| Связки товар↔кузов | 16 995 | **10 140** | 10 140 |
+| Связки товар↔кузов | 16 995 | **10 138** | 10 138 |
+
+Про кузова: у Kia Sorento запись «фаркопы для Киа Соренто 1 BL 2006-2009» лежит в источнике дважды — остаётся 2 549.
+
+Про связки: уникальных пар «товар↔кузов» в сыром виде 10 140, но после схлопывания дубля кузова две связки, указывавшие на разные копии одной записи, тоже становятся одинаковыми. Итог — 10 138.
 
 Дополнительно: 3 562 товара подходят ровно к одному кузову, 2 246 — к двум и более. 581 модель имеет единственный кузов.
 
@@ -581,12 +585,42 @@ export interface RawCatalog {
   fitments: RawFitment[]
 }
 
+/**
+ * Необязательное число. Возвращает null, когда данных нет.
+ *
+ * Проверка на null и undefined ОБЯЗАТЕЛЬНА и идёт первой:
+ * Number(null) === 0, а ноль — конечное число, поэтому без этой
+ * проверки отсутствующая нагрузка или цена превратились бы в 0
+ * и ушли бы в базу как достоверное значение.
+ */
 const num = (v: unknown): number | null => {
+  if (v === null || v === undefined || v === '') return null
   const n = Number(v)
   return Number.isFinite(n) ? n : null
 }
 
 const str = (v: unknown): string | null => (typeof v === 'string' && v.length > 0 ? v : null)
+
+/**
+ * Обязательное число: индекс связи или цена товара.
+ * Битое значение здесь рвёт целостность каталога, поэтому падаем сразу
+ * и с указанием места, а не пропускаем NaN дальше.
+ */
+function requireNumber(v: unknown, field: string, index: number): number {
+  const n = num(v)
+  if (n === null) {
+    throw new Error(`Поле «${field}» в записи №${index} пустое или не число: ${JSON.stringify(v)}`)
+  }
+  return n
+}
+
+/** Обязательная строка: ключ записи. Пустой ключ ломает связи. */
+function requireString(v: unknown, field: string, index: number): string {
+  if (typeof v !== 'string' || v.length === 0) {
+    throw new Error(`Поле «${field}» в записи №${index} пустое или не строка: ${JSON.stringify(v)}`)
+  }
+  return v
+}
 
 function toBumperCut(v: unknown): 'not_required' | 'required' | 'unknown' {
   return v === 'not_required' || v === 'required' ? v : 'unknown'
@@ -832,15 +866,41 @@ const TRANSLIT: Record<string, string> = {
   ю: 'yu', я: 'ya',
 }
 
-/** Слаг для URL: кириллица транслитерируется, разделители схлопываются. */
+/**
+ * Слаг для URL: кириллица транслитерируется, разделители схлопываются.
+ *
+ * Бросает ошибку, если после очистки не осталось ни одного символа.
+ * Пустой слаг — это сломанный адрес страницы, и молча отдавать его
+ * нельзя: из слагов собираются пути 8 269 страниц каталога.
+ * Пустой результат означает проблему в исходных данных, и о ней
+ * надо узнать при импорте, а не при обходе сайта роботом.
+ */
 export function slugify(input: string): string {
-  return input
+  const slug = input
     .toLowerCase()
     .split('')
     .map((ch) => TRANSLIT[ch] ?? ch)
     .join('')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+
+  if (slug.length === 0) {
+    throw new Error(`Из строки «${input}» не получается слаг: не осталось ни одного символа`)
+  }
+
+  return slug
+}
+
+/**
+ * Слаг для артикула товара.
+ *
+ * Отличается от обычного тем, что точка удаляется, а не превращается
+ * в разделитель. Иначе артикулы «J.069» и «J-069» дают один и тот же
+ * слаг и один из двух товаров теряет свою страницу.
+ * В каталоге такие пары есть: J.069/J-069, K.023/K-023, K.069/K-069.
+ */
+export function slugifyArticle(article: string): string {
+  return slugify(article.replace(/\./g, ''))
 }
 ```
 
@@ -964,12 +1024,28 @@ export function parseYears(name: string): { from: number | null; to: number | nu
  * Чистые числа (147, 156) отбрасываются — это названия моделей Alfa Romeo,
  * а не коды поколений.
  */
-export function parseGeneration(name: string): string | null {
+export function parseGeneration(name: string, modelName: string): string | null {
   const withoutYears = name.replace(/(19|20)\d{2}\s*-\s*((19|20)\d{2})?/g, ' ')
   const tokens = withoutYears.match(/\b[A-Za-z]+[0-9]+[A-Za-z0-9]*\b/g)
-  return tokens && tokens.length > 0 ? tokens[tokens.length - 1].toUpperCase() : null
+  if (!tokens || tokens.length === 0) return null
+
+  // Сравниваем со ВСЕМИ словами имени модели, а не с именем целиком:
+  // у модели «Q3 Sportback» кандидат «Q3» — это её первое слово,
+  // и при сравнении с полным именем он бы не отсеялся
+  const modelWords = new Set(
+    modelName
+      .split(/[^A-Za-z0-9]+/)
+      .filter((w) => w.length > 0)
+      .map((w) => w.toUpperCase()),
+  )
+  const candidate = tokens[tokens.length - 1].toUpperCase()
+
+  // Токен, совпадающий со словом имени модели, — это модель, а не поколение
+  return modelWords.has(candidate) ? null : candidate
 }
 ```
+
+**Почему функции нужно имя модели.** Без него она берёт первый подходящий латинский токен — и для «Volvo S60 2000-2009» возвращает `S60`, то есть само название модели. На странице это даёт «Volvo S60 **S60** 2000–2009». В каталоге таких случаев 216 из 459: Infiniti QX50, BMW i3, Audi Q3, Great Wall BJ40 и другие модели, чьё имя само состоит из букв и цифр.
 
 - [ ] **Step 4: Запустить тесты, убедиться что проходят**
 
@@ -994,8 +1070,12 @@ git commit -m "feat: очистка названий кузовов, разбо�
 - Create: `src/import/dedupe.ts`, `src/import/dedupe.test.ts`
 
 **Interfaces:**
-- Consumes: тип `RawFitment` из `src/import/extract.ts`
-- Produces: `dedupeFitments(list: RawFitment[]): RawFitment[]`
+- Consumes: типы `RawFitment` и `RawVariant` из `src/import/extract.ts`
+- Produces:
+  - `dedupeFitments(list: RawFitment[]): RawFitment[]`
+  - `dedupeVariants(list: RawVariant[]): { kept: RawVariant[]; indexMap: Map<number, number> }` — схлопывает одинаковые кузова одной модели и отдаёт карту «старый индекс → новый», по которой связки перенаправляются на оставшийся кузов
+
+**Зачем нужен `dedupeVariants`.** В источнике встречаются полностью одинаковые записи кузовов: у Kia Sorento строка «фаркопы для Киа Соренто 1 BL 2006-2009» лежит дважды. В схеме на пару (модель, слаг) стоит уникальный индекс, поэтому без схлопывания импорт упадёт. Связки, указывающие на удалённый дубль, надо перевести на оставшуюся запись — для этого и возвращается карта соответствия индексов.
 
 - [ ] **Step 1: Написать падающий тест**
 
@@ -1116,30 +1196,18 @@ git commit -m "feat: дедупликация связок товар-кузов
 Создать `src/import/run.test.ts`:
 
 ```typescript
-import { PGlite } from '@electric-sql/pglite'
-import { drizzle } from 'drizzle-orm/pglite'
-import { readFileSync } from 'node:fs'
 import { beforeAll, expect, test } from 'vitest'
 import * as schema from '../db/schema'
+import { createTestDb } from '../db/test-helpers'
 import { importCatalog } from './run'
-
-const MIGRATION = readFileSync('drizzle/0000_init.sql', 'utf8')
 
 const FIXTURE = `<script id="catalog-data" type="application/json">{"brands":[["b:a","Acura","u"],["b:t","Toyota","u"]],"models":[["m:1",0,"MDX","u"],["m:2",1,"RAV4","u"]],"variants":[["v:1",0,"фаркопы для Акура МДХ 2006-2014","u",0],["v:2",1,"фаркопы для Тойота РАВ4 XA10 1995-2000","u",0]],"products":[["oris::x1","X1","ORIS","Словакия","Описание",1000,"сегодня","1 шт","u","A",1000,50,10,"not_required",false,[],[]],["oris::x2","X2","Oris","Польша","Описание",2000,"сегодня","2 шт","u","C",1500,75,12,"required",true,[],[]]],"fitments":[[0,0,0,0,1000,"сегодня","u","u",1],[0,0,0,0,1000,"сегодня","u","u",1],[1,1,1,1,2000,"сегодня","u","u",1]]}</script>`
 
-async function makeDb() {
-  const client = new PGlite()
-  for (const stmt of MIGRATION.split('--> statement-breakpoint')) {
-    if (stmt.trim()) await client.exec(stmt)
-  }
-  return drizzle(client, { schema })
-}
-
 let stats: Awaited<ReturnType<typeof importCatalog>>
-let db: Awaited<ReturnType<typeof makeDb>>
+let db: Awaited<ReturnType<typeof createTestDb>>
 
 beforeAll(async () => {
-  db = await makeDb()
+  db = await createTestDb()
   stats = await importCatalog(FIXTURE, db)
 })
 
@@ -1283,11 +1351,12 @@ export async function importCatalog(html: string, db: DrizzleDb): Promise<Import
       raw.variants.map((v) => {
         const name = cleanVariantName(v.name)
         const years = parseYears(name)
+        const modelName = raw.models[v.modelIndex].name
         return {
           modelId: modelIdByIndex.get(v.modelIndex)!,
           slug: slugify(name),
           name,
-          generation: parseGeneration(name),
+          generation: parseGeneration(name, modelName),
           yearFrom: years.from,
           yearTo: years.to,
           sourceUrl: v.sourceUrl,
@@ -1450,16 +1519,12 @@ git commit -m "feat: импорт каталога в базу"
 Создать `src/import/counters.test.ts`:
 
 ```typescript
-import { PGlite } from '@electric-sql/pglite'
 import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/pglite'
-import { readFileSync } from 'node:fs'
 import { beforeAll, expect, test } from 'vitest'
 import * as schema from '../db/schema'
+import { createTestDb } from '../db/test-helpers'
 import { recalculateCounters } from './counters'
 import { importCatalog } from './run'
-
-const MIGRATION = readFileSync('drizzle/0000_init.sql', 'utf8')
 
 /**
  * Марка A: модель с одним кузовом и товаром → кузов без своей страницы
@@ -1468,14 +1533,10 @@ const MIGRATION = readFileSync('drizzle/0000_init.sql', 'utf8')
  */
 const FIXTURE = `<script id="catalog-data" type="application/json">{"brands":[["b:a","Alfa","u"],["b:b","Bmw","u"],["b:c","Chery","u"]],"models":[["m:a",0,"Giulia","u"],["m:b",1,"X5","u"],["m:c",2,"Tiggo","u"]],"variants":[["v:1",0,"Giulia 2016-2020","u",0],["v:2",1,"X5 E70 2007-2013","u",0],["v:3",1,"X5 F15 2013-2018","u",0],["v:4",2,"Tiggo 2020-","u",0]],"products":[["a::p1","P1","GALIA","Словакия","Опис",1000,"сегодня","1 шт","u","A",1000,50,10,"not_required",false,[],[]],["a::p2","P2","GALIA","Словакия","Опис",2000,"сегодня","1 шт","u","A",1000,50,10,"not_required",false,[],[]],["a::p3","P3","GALIA","Словакия","Опис",3000,"сегодня","1 шт","u","A",1000,50,10,"not_required",false,[],[]]],"fitments":[[0,0,0,0,1000,"сегодня","u","u",1],[1,1,1,1,2000,"сегодня","u","u",1],[1,1,2,2,3000,"сегодня","u","u",1]]}</script>`
 
-let db: ReturnType<typeof drizzle<typeof schema>>
+let db: Awaited<ReturnType<typeof createTestDb>>
 
 beforeAll(async () => {
-  const client = new PGlite()
-  for (const stmt of MIGRATION.split('--> statement-breakpoint')) {
-    if (stmt.trim()) await client.exec(stmt)
-  }
-  db = drizzle(client, { schema })
+  db = await createTestDb()
   await importCatalog(FIXTURE, db)
   await recalculateCounters(db)
 })
@@ -1522,7 +1583,7 @@ npx vitest run src/import/counters.test.ts
 
 ```typescript
 import { sql } from 'drizzle-orm'
-import type { DrizzleDb } from '../db/client'
+import { rowsOf, type DrizzleDb } from '../db/client'
 
 export interface CounterStats {
   publishedBrands: number
@@ -1599,18 +1660,22 @@ export async function recalculateCounters(db: DrizzleDb): Promise<CounterStats> 
       ) > 1
   `)
 
-  const [row] = await db.execute<{
-    brands: number
-    models: number
-    variants: number
-    own_pages: number
-  }>(sql`
+  const result = await db.execute(sql`
     SELECT
       (SELECT COUNT(*) FROM brands   WHERE is_published)   AS brands,
       (SELECT COUNT(*) FROM models   WHERE is_published)   AS models,
       (SELECT COUNT(*) FROM variants WHERE is_published)   AS variants,
       (SELECT COUNT(*) FROM variants WHERE has_own_page)   AS own_pages
   `)
+
+  const [row] = rowsOf<{
+    brands: number | string
+    models: number | string
+    variants: number | string
+    own_pages: number | string
+  }>(result)
+
+  if (!row) throw new Error('Запрос счётчиков не вернул ни одной строки')
 
   return {
     publishedBrands: Number(row.brands),
@@ -1620,6 +1685,10 @@ export async function recalculateCounters(db: DrizzleDb): Promise<CounterStats> 
   }
 }
 ```
+
+**Почему `rowsOf`, а не деструктуризация результата напрямую.** Драйверы возвращают результат `execute()` в разной форме: PGlite отдаёт объект `{ rows, fields, affectedRows }`, postgres.js — массивоподобное значение. Тип `PgDatabase<PgQueryResultHKT, …>` описывает результат как `unknown`, поэтому компилятор эту разницу не ловит. Код, написанный под одну форму, молча сломается на другой — на разработке или в продакшене. `rowsOf` приводит оба случая к массиву строк.
+
+`COUNT(*)` в PostgreSQL возвращает `bigint`, который драйверы отдают строкой, — поэтому в типе `number | string`, а наружу значения идут через `Number()`.
 
 - [ ] **Step 4: Запустить тесты, убедиться что проходят**
 
@@ -1677,13 +1746,15 @@ npm run import
 
 Публикуется марок:           106
 Публикуется моделей:         956
-Публикуется кузовов:         1950
-Кузовов со своей страницей:  1369
+Публикуется кузовов:         1949
+Кузовов со своей страницей:  1368
 
-Итого страниц каталога: 8239
+Итого страниц каталога: 8238
 ```
 
-Число 8 239 — это марки, модели, кузова со своими страницами и товары. Вместе с главной, каталогом, страницей указателя и 27 страницами производителей получается 8 269 из спецификации.
+Число 8 238 — это марки, модели, кузова со своими страницами и товары. Вместе с главной, каталогом, страницей указателя и 27 страницами производителей получается 8 268.
+
+Оно на единицу меньше расчётного 8 239 из спецификации, и причина известна: дубль кузова «Киа Соренто 1 BL 2006-2009» в источнике. Обе копии были опубликованы и получали свою страницу, поэтому после схлопывания счётчики уменьшились ровно на одну. Спецификация исправлена.
 
 - [ ] **Step 7: Прогнать весь набор тестов**
 
@@ -1708,6 +1779,10 @@ git commit -m "feat: счётчики товаров и флаги публик�
 
 - **Розничные цены и наценка.** В БД лежит только `sourcePrice` — цена из источника. Ценовая политика заказчика не определена (открытый вопрос №5), поэтому поле для розничной цены появится тогда, когда будут правила
 - **Изображения.** В `products.images` лежат ссылки на сторонний сайт с чужим водяным знаком. Скачивание и обработка — отдельный подпроект №3
+
+## Обнаружено при реализации
+
+**Лимит подстановок в запросе.** PostgreSQL допускает не более 65 535 подстановок на один запрос. Вставка 5 808 товаров одной командой даёт 92 928 подстановок и падает. Все вставки идут порциями по 500 строк через помощник `insertAll` в `src/import/run.ts`. Порядок при этом сохраняется — по нему строятся карты соответствия индексов.
 - **Тексты страниц кузовов.** Генерация уникальных описаний для 1 369 страниц — задача SEO-подпроекта
 - **Подключение к Timeweb Cloud.** Клиент готов к переключению через `DATABASE_MODE=remote`, но сам перенос делается при деплое
 - **Вёрстка.** Ни одной страницы сайта этот план не создаёт, только данные под них

@@ -2,7 +2,12 @@ node_modules/
 .next/
 .env*
 !.env.example
+AGENTS.md
+CLAUDE.md
 .superpowers/
 *.log
 .DS_Store
 design/
+
+.pgdata/
+tsconfig.tsbuildinfo
