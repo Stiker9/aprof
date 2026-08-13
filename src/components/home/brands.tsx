@@ -29,7 +29,12 @@ export function Brands({
       <SectionTitle>{formatCount(totalBrands, 'марка', 'марки', 'марок')}</SectionTitle>
       <SectionLead>Найдём под любую</SectionLead>
 
-      <div className="mt-12 grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line-light bg-line-light sm:grid-cols-3 lg:grid-cols-6">
+      {/*
+        На узком экране сетка в две колонки, а не в одну: 24 марки
+        столбиком растягивают секцию на два с половиной экрана, и до
+        акций уже никто не долистывает.
+      */}
+      <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] border border-line-light bg-line-light sm:grid-cols-3 lg:grid-cols-6">
         {brands.map((brand) => (
           <Link
             key={brand.slug}
