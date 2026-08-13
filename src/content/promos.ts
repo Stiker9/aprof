@@ -24,39 +24,45 @@ interface PromoBase {
   title: string
   lead: string
   period: PromoPeriod
+  action: { label: string; href: string }
 }
 
 export type Promo =
-  | (PromoBase & { kind: 'text' })
+  | (PromoBase & { kind: 'text'; discount: string; discountNote: string })
   | (PromoBase & { kind: 'list'; items: PromoItem[] })
 
 export const PROMOS: Promo[] = [
   {
     kind: 'text',
     slug: 'akciya-avgusta',
-    title: 'Установка со скидкой 20%',
-    lead: 'На автомобили не старше трёх лет — со штатными точками крепления работа идёт быстрее.',
+    title: 'Акция августа',
+    lead: 'Установка на автомобили моложе 3 лет',
     period: { kind: 'until', label: 'До 31 августа' },
+    discount: '−20%',
+    discountNote: 'на установку',
+    action: { label: 'Записаться', href: '/zapis' },
   },
   {
     kind: 'text',
     slug: 'privedi-druga',
     title: 'Приведи друга',
-    lead: 'Скидка 10% вам и столько же тому, кого вы привели. Считается при записи.',
+    lead: 'Скидка вам и другу',
     period: { kind: 'permanent' },
+    discount: '−10%',
+    discountNote: 'обоим',
+    action: { label: 'Как это работает', href: '/akcii/privedi-druga' },
   },
   {
     kind: 'list',
     slug: 'akcionnye-pozicii',
-    title: 'Акционные позиции',
-    lead: 'Модели, на которые сейчас действует скидка на установку.',
+    title: 'Акционные модели',
+    lead: 'Установка со скидкой в августе',
     period: { kind: 'permanent' },
     items: [
-      { model: 'Lada Vesta', discount: '−15%' },
-      { model: 'Hyundai Creta', discount: '−15%' },
-      { model: 'Kia Rio', discount: '−12%' },
-      { model: 'Renault Duster', discount: '−12%' },
-      { model: 'Volkswagen Polo', discount: '−10%' },
+      { model: 'Toyota RAV4', discount: 'скидка 15%' },
+      { model: 'Kia Sportage', discount: 'скидка 15%' },
+      { model: 'Hyundai Tucson', discount: 'скидка 15%' },
     ],
+    action: { label: 'Проверить свою модель', href: '/akcii/akcionnye-pozicii' },
   },
 ]

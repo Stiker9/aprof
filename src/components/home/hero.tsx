@@ -85,7 +85,7 @@ export function Hero({ productCount }: { productCount: number }) {
               className="mt-8 inline-flex items-center gap-4 text-ink transition-colors hover:text-accent"
             >
               <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line">
-                <span aria-hidden>↓</span>
+                <span aria-hidden>↘</span>
               </span>
               Подобрать фаркоп
             </Link>

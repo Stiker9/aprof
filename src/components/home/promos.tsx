@@ -20,7 +20,7 @@ function Period({ period }: { period: PromoPeriod }) {
   return (
     <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
       <span aria-hidden className="block h-1.5 w-1.5 rounded-full bg-in-stock" />
-      Действует постоянно
+      Постоянно
     </span>
   )
 }
@@ -37,7 +37,7 @@ function PromoCard({ promo }: { promo: Promo }) {
       <p className="mt-3 text-[15px] text-ink-muted">{promo.lead}</p>
 
       {promo.kind === 'list' ? (
-        <ul className="mt-6 border-t border-line">
+        <ul className="mt-7 border-t border-line">
           {promo.items.map((item) => (
             <li
               key={item.model}
@@ -48,7 +48,19 @@ function PromoCard({ promo }: { promo: Promo }) {
             </li>
           ))}
         </ul>
-      ) : null}
+      ) : (
+        <div className="mt-7">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,44px)] leading-none tracking-[-0.02em] text-accent-bright">
+            {promo.discount}
+          </div>
+          <div className="mt-2 text-sm text-ink-muted">{promo.discountNote}</div>
+        </div>
+      )}
+
+      {/* Ссылка прижата к низу, чтобы у карточек разной высоты она шла по одной линии */}
+      <div className="mt-auto pt-8">
+        <ArrowLink href={promo.action.href}>{promo.action.label}</ArrowLink>
+      </div>
     </article>
   )
 }
@@ -60,17 +72,18 @@ export function Promos() {
 
   return (
     <Section tone="dark">
-      <Eyebrow>Акции</Eyebrow>
-      <SectionTitle>Выгоднее сейчас</SectionTitle>
+      <div className="flex flex-wrap items-baseline justify-between gap-6">
+        <div>
+          <Eyebrow>Акции</Eyebrow>
+          <SectionTitle>Выгоднее сейчас</SectionTitle>
+        </div>
+        <ArrowLink href="/akcii">Все акции</ArrowLink>
+      </div>
 
-      <div className="mt-12 grid items-start gap-5 md:grid-cols-3">
+      <div className="mt-12 grid gap-5 md:grid-cols-3">
         {PROMOS.map((promo) => (
           <PromoCard key={promo.slug} promo={promo} />
         ))}
-      </div>
-
-      <div className="mt-10">
-        <ArrowLink href="/akcii">Все акции</ArrowLink>
       </div>
     </Section>
   )

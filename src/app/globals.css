@@ -36,3 +36,46 @@ html {
   background: var(--color-bg);
   color: var(--color-ink);
 }
+
+/*
+ * Вкладки «Как вы получите фаркоп» на главной.
+ *
+ * Написано обычным CSS, а не классами Tailwind: связка именованного
+ * `peer` с подсветкой активной вкладки в сборку не попадает — панели
+ * переключаются, а вкладки остаются одинаковыми, и человек не видит,
+ * где находится. Здесь селектор виден целиком и делает ровно то, что
+ * написано, не завися ни от порядка соседей, ни от генерации вариантов.
+ *
+ * Работает без JavaScript: состояние хранят сами радиокнопки.
+ * Разметка — src/components/home/install-delivery.tsx
+ */
+.tabs > .tab-panel {
+  display: none;
+}
+
+.tabs:has(#poluchenie-spb:checked) > [data-tab='spb'],
+.tabs:has(#poluchenie-dostavka:checked) > [data-tab='dostavka'] {
+  display: block;
+}
+
+/*
+ * Метки адресуются через `>`, а не вложенным поиском. Браузер
+ * пересчитывает `:has()` для прямых детей надёжно, а для потомков вглубь
+ * подсветку иногда не обновляет: панели переключались, вкладки — нет.
+ */
+.tabs:has(#poluchenie-spb:checked) > label[for='poluchenie-spb'],
+.tabs:has(#poluchenie-dostavka:checked) > label[for='poluchenie-dostavka'] {
+  border-color: transparent;
+  background: var(--color-ink);
+  color: var(--color-bg);
+}
+
+/*
+ * Радиокнопки убраны с экрана, поэтому обводку фокуса надо вернуть на
+ * метку — иначе человек с клавиатуры переключает вкладки вслепую.
+ */
+.tabs:has(#poluchenie-spb:focus-visible) > label[for='poluchenie-spb'],
+.tabs:has(#poluchenie-dostavka:focus-visible) > label[for='poluchenie-dostavka'] {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

@@ -38,8 +38,8 @@ export function Works() {
         <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(26px,4vw,34px)] leading-tight tracking-[-0.03em]">
           Три машины в день
         </h2>
-        <p className="mt-4 max-w-[54ch] text-[17px] text-ink-muted">
-          Снимаем то, что уезжает из сервиса.
+        <p className="mt-4 max-w-[60ch] text-[17px] text-ink-muted">
+          Снимаем каждую установку — посмотрите, как фаркоп выглядит именно на вашей модели.
         </p>
       </div>
 

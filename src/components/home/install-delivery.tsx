@@ -1,80 +1,123 @@
 import Image from 'next/image'
 import { ArrowLink } from '@/components/ui/arrow-link'
+import { Eyebrow, Section, SectionTitle } from '@/components/ui/section'
 
 /**
- * Установка и доставка.
+ * Как вы получите фаркоп.
  *
- * Экран разделён вертикально пополам с резкой границей: слева город,
- * справа вся остальная страна. Половины равны по площади намеренно —
- * доставка для заказчика такой же канал, как сервис, и уменьшенная
- * колонка читалась бы как приписка.
+ * В макете это переключатель на два состояния, а не две колонки рядом:
+ * человек либо приезжает в сервис, либо заказывает доставку — сразу оба
+ * сценария ему не нужны, и показывать их одновременно значит заставить
+ * читать половину лишнего.
  *
- * Секция не использует общую обёртку Section: у неё два фона вместо
- * одного, и внутренние отступы задаются каждой половине отдельно.
+ * Переключение сделано на радиокнопках, без JavaScript: страница остаётся
+ * полностью статической, а состояние живёт в самой разметке. Сами
+ * радиокнопки лежат вне потока и в раскладку не вмешиваются.
+ *
+ * Показ панелей и подсветка активной вкладки описаны обычным CSS в
+ * globals.css по классу `tabs` — почему не классами Tailwind, написано
+ * там же.
  */
+const TAB =
+  'cursor-pointer rounded-full border border-line px-5 py-2.5 text-sm text-ink-muted transition-colors hover:text-ink'
+const PANEL = 'tab-panel mt-4 w-full'
+
 export function InstallDelivery() {
   return (
-    <section className="grid lg:grid-cols-2">
-      {/* Петербург — тёмная половина с фотографией под текстом */}
-      <div className="relative overflow-hidden bg-bg px-6 py-20 md:py-28 lg:px-14">
-        <Image
-          src="/images/install-hero.webp"
-          alt=""
-          fill
-          sizes="(max-width: 1024px) 100vw, 50vw"
-          className="object-cover opacity-25"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/70 to-bg/30" />
+    <Section tone="dark" className="relative overflow-hidden">
+      <Image
+        src="/images/install-hero.webp"
+        alt=""
+        fill
+        sizes="100vw"
+        className="object-cover opacity-15"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-bg via-bg/85 to-bg" />
 
-        <div className="relative mx-auto flex h-full max-w-[620px] flex-col lg:mx-0 lg:ml-auto lg:pr-8">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-ink-dim">Вы в Петербурге</p>
+      <div className="relative">
+        <Eyebrow>Как вы получите фаркоп</Eyebrow>
 
-          <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(26px,3vw,34px)] leading-tight tracking-[-0.03em] text-ink">
-            Один визит
-          </h2>
+        <div className="tabs mt-8 flex flex-wrap items-start gap-3">
+          <input
+            type="radio"
+            name="poluchenie"
+            id="poluchenie-spb"
+            defaultChecked
+            className="sr-only"
+          />
+          <input type="radio" name="poluchenie" id="poluchenie-dostavka" className="sr-only" />
 
-          <p className="mt-4 max-w-[42ch] text-[17px] text-ink-muted">
-            Привозите машину утром — забираете с фаркопом и документами в тот же день.
-          </p>
+          <label htmlFor="poluchenie-spb" className={TAB}>
+            Я в Петербурге
+          </label>
+          <label htmlFor="poluchenie-dostavka" className={TAB}>
+            Другой город
+          </label>
 
-          <div className="mt-12">
-            <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,48px)] leading-none tracking-[-0.02em] text-ink">
-              3 часа
+          {/* Петербург */}
+          <div data-tab="spb" className={PANEL}>
+            <SectionTitle>
+              Один визит
+              <span className="block opacity-45">— и вы за рулём</span>
+            </SectionTitle>
+
+            <p className="mt-5 max-w-[52ch] text-[17px] text-ink-muted">
+              Приезжайте утром на Софийскую — уедете с фаркопом, электрикой и документами для ТО.
+            </p>
+
+            <div className="mt-12 flex flex-wrap gap-x-16 gap-y-8">
+              <div>
+                <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,48px)] leading-none tracking-[-0.02em]">
+                  3 часа
+                </div>
+                <div className="mt-2 text-sm text-ink-muted">средняя установка</div>
+              </div>
+              <div>
+                <div className="text-[19px]">Софийская, 72</div>
+                <div className="mt-2 text-sm text-ink-muted">Пн–Сб 9:00–19:00</div>
+              </div>
             </div>
-            <div className="mt-2 text-sm text-ink-muted">средняя установка</div>
+
+            <div className="mt-12 flex flex-wrap items-baseline gap-x-10 gap-y-4">
+              <ArrowLink href="/zapis">Записаться на установку</ArrowLink>
+              <ArrowLink href="/ustanovka-farkopa">Цены на установку</ArrowLink>
+            </div>
           </div>
 
-          <div className="mt-10">
-            <ArrowLink href="/ustanovka-farkopa">Цены на установку</ArrowLink>
+          {/* Доставка */}
+          <div data-tab="dostavka" className={PANEL}>
+            <SectionTitle>
+              Отправим
+              <span className="block opacity-45">куда угодно</span>
+            </SectionTitle>
+
+            <p className="mt-5 max-w-[52ch] text-[17px] text-ink-muted">
+              Все позиции каталога доступны к доставке в любой город России — до двери или пункта
+              выдачи.
+            </p>
+
+            <div className="mt-12 flex flex-wrap gap-x-16 gap-y-8">
+              <div>
+                <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,48px)] leading-none tracking-[-0.02em]">
+                  1 100
+                </div>
+                <div className="mt-2 text-sm text-ink-muted">городов · доставка СДЭК</div>
+              </div>
+              <div>
+                <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,48px)] leading-none tracking-[-0.02em]">
+                  1–7 дней
+                </div>
+                <div className="mt-2 text-sm text-ink-muted">срок в пути</div>
+              </div>
+            </div>
+
+            <div className="mt-12 flex flex-wrap items-baseline gap-x-10 gap-y-4">
+              <ArrowLink href="/dostavka">Рассчитать доставку</ArrowLink>
+              <ArrowLink href="/oplata">Условия и оплата</ArrowLink>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Доставка — светлая половина, без фотографии: контраст и есть граница */}
-      <div className="bg-paper px-6 py-20 text-ink-dark md:py-28 lg:px-14">
-        <div className="mx-auto flex h-full max-w-[620px] flex-col lg:mx-0 lg:mr-auto lg:pl-8">
-          <p className="text-[11px] uppercase tracking-[0.2em] opacity-55">Вы в другом городе</p>
-
-          <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(26px,3vw,34px)] leading-tight tracking-[-0.03em]">
-            Отправим куда угодно
-          </h2>
-
-          <p className="mt-4 max-w-[42ch] text-[17px] opacity-70">
-            Собираем заказ с инструкцией и сертификатом и передаём в СДЭК. Установите у себя.
-          </p>
-
-          <div className="mt-12">
-            <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,48px)] leading-none tracking-[-0.02em]">
-              1 100
-            </div>
-            <div className="mt-2 text-sm opacity-60">городов доставки СДЭК</div>
-          </div>
-
-          <div className="mt-10">
-            <ArrowLink href="/dostavka">Условия доставки</ArrowLink>
-          </div>
-        </div>
-      </div>
-    </section>
+    </Section>
   )
 }

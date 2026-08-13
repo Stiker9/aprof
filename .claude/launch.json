@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3001
+    },
+    {
+      "name": "makety",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve-design.mjs"],
+      "port": 4300
     }
   ]
 }

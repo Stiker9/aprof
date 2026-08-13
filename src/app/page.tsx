@@ -16,11 +16,14 @@ export default async function HomePage() {
   // насчитывает 7 339 вместо 5 808.
   const [brands, totalProducts] = await Promise.all([listBrands(db), countProducts(db)])
   const popular = [...brands].sort((a, b) => b.productCount - a.productCount).slice(0, 24)
+  // Модели складываются по всем маркам, а не по показанным двадцати
+  // четырём: модель принадлежит ровно одной марке, так что сумма честная.
+  const totalModels = brands.reduce((sum, brand) => sum + brand.modelCount, 0)
 
   return (
     <main>
       <Hero productCount={totalProducts} />
-      <Brands brands={popular} totalBrands={brands.length} />
+      <Brands brands={popular} totalBrands={brands.length} totalModels={totalModels} />
       <Promos />
       <InstallDelivery />
       <Works />
