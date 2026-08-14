@@ -15,6 +15,10 @@ const BUMPER_LABEL: Record<ProductRow['bumperCut'], string | null> = {
  * Бейдж наличия сделан заметным намеренно: в каталоге соседствуют товары
  * с отгрузкой сегодня и позиции под заказ на 1–6 месяцев. Если человек
  * не увидит разницу при заказе, он узнает о ней через полгода ожидания.
+ *
+ * Вся карточка — ссылка на товар, а «Узнать цену» лежит поверх неё
+ * отдельной кнопкой. Строку целиком проще нажать, чем целиться в слово
+ * «Подробнее», особенно с телефона.
  */
 export function ProductCard({ product }: { product: ProductRow }) {
   const chips = [
@@ -27,8 +31,8 @@ export function ProductCard({ product }: { product: ProductRow }) {
   ].filter((chip): chip is string => chip !== null)
 
   return (
-    <article className="flex gap-5 rounded-[var(--radius-card)] border border-line bg-surface p-5">
-      <div className="hidden h-36 w-36 shrink-0 items-center justify-center rounded-lg bg-surface-2 sm:flex">
+    <article className="relative flex gap-5 rounded-[var(--radius-card)] border border-line-light bg-white p-5 transition-colors hover:border-accent">
+      <div className="hidden h-32 w-32 shrink-0 items-center justify-center rounded-lg bg-paper-2 sm:flex">
         {product.images[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -38,24 +42,28 @@ export function ProductCard({ product }: { product: ProductRow }) {
             loading="lazy"
           />
         ) : (
-          <span className="text-xs text-ink-dim">нет фото</span>
+          <span className="text-xs opacity-45">нет фото</span>
         )}
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="font-[family-name:var(--font-display)] text-lg text-ink">
+        <Link
+          href={urls.product(product.slug)}
+          className="font-[family-name:var(--font-display)] text-[17px] tracking-[-0.01em] after:absolute after:inset-0 hover:text-accent"
+        >
           {product.article}
-        </div>
-        <div className="mt-1 text-sm text-ink-muted">
+        </Link>
+
+        <div className="mt-1 text-[13px] opacity-55">
           {product.manufacturer}
           {product.country ? ` · ${product.country}` : ''}
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <span className="text-xl font-bold text-accent">{formatPrice(product.price)}</span>
+          <span className="text-[19px] font-bold">{formatPrice(product.price)}</span>
           <span
             className={`rounded px-2 py-1 text-xs font-semibold ${
-              product.inStock ? 'bg-in-stock/15 text-in-stock' : 'bg-on-order/15 text-on-order'
+              product.inStock ? 'bg-in-stock/12 text-in-stock' : 'bg-on-order/12 text-on-order'
             }`}
           >
             {product.deliveryText ?? (product.inStock ? 'в наличии' : 'под заказ')}
@@ -66,27 +74,23 @@ export function ProductCard({ product }: { product: ProductRow }) {
           {chips.map((chip) => (
             <span
               key={chip}
-              className="rounded border border-line px-2 py-1 text-xs text-ink-muted"
+              className="rounded border border-line-light px-2 py-1 text-xs opacity-65"
             >
               {chip}
             </span>
           ))}
         </div>
 
-        <div className="mt-4 flex gap-3">
-          <button
-            type="button"
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white"
-          >
-            Узнать цену
-          </button>
-          <Link
-            href={urls.product(product.slug)}
-            className="rounded-lg border border-line px-4 py-2 text-sm text-ink"
-          >
-            Подробнее
-          </Link>
-        </div>
+        {/*
+          `relative` поднимает кнопку над растянутой ссылкой карточки —
+          иначе нажатие на неё уводило бы на страницу товара.
+        */}
+        <button
+          type="button"
+          className="relative mt-4 rounded-[10px] bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+        >
+          Узнать цену
+        </button>
       </div>
     </article>
   )

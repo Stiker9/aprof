@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { formatCount } from '@/catalog/format'
 import { getBrand, listBrands, listModels } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
-import { Breadcrumbs } from '@/components/breadcrumbs'
+import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
 import { getDb } from '@/db/client'
 
 interface Params {
@@ -39,37 +38,26 @@ export default async function BrandPage({ params }: Params) {
   const models = await listModels(db, brand)
 
   return (
-    <main className="mx-auto w-full max-w-[1400px] px-6 py-8">
-      <Breadcrumbs
-        items={[
-          { label: 'Главная', href: urls.home() },
-          { label: 'Фаркопы', href: urls.catalog() },
-          { label: found.name },
-        ]}
-      />
-
-      <h1 className="mt-6 font-[family-name:var(--font-display)] text-3xl text-ink">
-        Фаркопы на {found.name}
-      </h1>
-      <p className="mt-3 text-ink-muted">
-        {formatCount(models.length, 'модель', 'модели', 'моделей')} ·{' '}
-        {formatCount(found.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
-      </p>
-
-      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <CatalogShell
+      picker={{ brand: found.name }}
+      crumbs={[
+        { label: 'Главная', href: urls.home() },
+        { label: 'Фаркопы', href: urls.catalog() },
+        { label: found.name },
+      ]}
+      title={`Фаркопы на ${found.name}`}
+      summary={`${formatCount(models.length, 'модель', 'модели', 'моделей')} · ${formatCount(found.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}`}
+    >
+      <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {models.map((model) => (
-          <Link
+          <CatalogTile
             key={model.slug}
             href={urls.model(brand, model.slug)}
-            className="rounded-[var(--radius-card)] border border-line bg-surface p-5 hover:border-accent"
-          >
-            <span className="block text-ink">{model.name}</span>
-            <span className="text-xs text-ink-muted">
-              {formatCount(model.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
-            </span>
-          </Link>
+            title={model.name}
+            count={formatCount(model.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
+          />
         ))}
       </div>
-    </main>
+    </CatalogShell>
   )
 }

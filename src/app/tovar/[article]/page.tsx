@@ -9,7 +9,8 @@ import {
 } from '@/catalog/format'
 import { getProduct, listAllProductSlugs, listVariantsForProduct } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
-import { Breadcrumbs } from '@/components/breadcrumbs'
+import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
+import { Tabs } from '@/components/ui/tabs'
 import { getDb } from '@/db/client'
 
 interface Params {
@@ -100,66 +101,98 @@ export default async function ProductPage({ params }: Params) {
   ]
 
   return (
-    <main className="mx-auto w-full max-w-[1400px] px-6 py-8">
-      <Breadcrumbs
-        items={[
-          { label: 'Главная', href: urls.home() },
-          { label: 'Фаркопы', href: urls.catalog() },
-          ...(first
-            ? [
-                { label: first.brand, href: urls.brand(first.brandSlug) },
-                { label: first.model, href: urls.model(first.brandSlug, first.modelSlug) },
-              ]
-            : []),
-          { label: product.article },
-        ]}
-      />
-
-      <h1 className="mt-6 font-[family-name:var(--font-display)] text-3xl text-ink">{title}</h1>
-
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+    <CatalogShell
+      picker={
+        first
+          ? {
+              brand: first.brand,
+              model: first.model,
+              variant: formatVariantShort(
+                first.variant.generation,
+                first.variant.yearFrom,
+                first.variant.yearTo,
+              ),
+            }
+          : undefined
+      }
+      crumbs={[
+        { label: 'Главная', href: urls.home() },
+        { label: 'Фаркопы', href: urls.catalog() },
+        ...(first
+          ? [
+              { label: first.brand, href: urls.brand(first.brandSlug) },
+              { label: first.model, href: urls.model(first.brandSlug, first.modelSlug) },
+            ]
+          : []),
+        { label: product.article },
+      ]}
+      title={title}
+    >
+      <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_380px]">
         <div>
-          <div className="flex aspect-4/3 items-center justify-center rounded-[var(--radius-card)] bg-surface-2">
+          <div className="flex aspect-4/3 items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-line-light bg-white">
             {product.images[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={product.images[0]}
                 alt={`Фаркоп ${product.article}`}
-                className="h-full w-full rounded-[var(--radius-card)] object-contain"
+                className="h-full w-full object-contain"
               />
             ) : (
-              <span className="text-ink-dim">нет фото</span>
+              <span className="text-sm opacity-45">нет фото</span>
             )}
           </div>
 
-          <h2 className="mt-10 font-[family-name:var(--font-display)] text-xl text-ink">
-            Характеристики
-          </h2>
-          <dl className="mt-4">
+          {/*
+            Остальные снимки лентой. Монтажные схемы лежат в том же поле,
+            что и фотографии, и отличить их без разбора адресов нельзя —
+            отдельным блоком «СХЕМА», как в макете, они станут после
+            разбора изображений.
+          */}
+          {product.images.length > 1 && (
+            <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
+              {product.images.slice(1, 7).map((src) => (
+                <div
+                  key={src}
+                  className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-line-light bg-white"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <h2 className="mt-12 text-[19px] font-medium">Характеристики</h2>
+          <dl className="mt-5">
             {specs.map(([key, value]) => (
-              <div key={key} className="flex justify-between border-b border-line py-3 text-sm">
-                <dt className="text-ink-muted">{key}</dt>
-                <dd className="text-ink">{value}</dd>
+              <div
+                key={key}
+                className="flex justify-between gap-6 border-b border-line-light py-3 text-sm"
+              >
+                <dt className="opacity-55">{key}</dt>
+                <dd className="text-right">{value}</dd>
               </div>
             ))}
           </dl>
 
-          <h2 className="mt-10 font-[family-name:var(--font-display)] text-xl text-ink">
-            Описание
-          </h2>
-          <p className="mt-3 text-ink-muted">{product.description}</p>
+          <h2 className="mt-12 text-[19px] font-medium">Описание</h2>
+          <p className="mt-4 max-w-[75ch] leading-relaxed opacity-75">{product.description}</p>
 
           {product.documents.length > 0 && (
             <>
-              <h2 className="mt-10 font-[family-name:var(--font-display)] text-xl text-ink">
-                Документы
-              </h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <h2 className="mt-12 text-[19px] font-medium">Документы</h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {product.documents.map((doc) => (
                   <a
                     key={doc.url}
                     href={doc.url}
-                    className="flex items-center gap-3 rounded-[var(--radius-card)] border border-line p-4 text-sm text-ink"
+                    className="flex items-center gap-3 rounded-[var(--radius-card)] border border-line-light bg-white p-4 text-sm transition-colors hover:border-accent"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -173,70 +206,109 @@ export default async function ProductPage({ params }: Params) {
             </>
           )}
 
+          {/*
+            Ключевой узел перелинковки: отсюда вес карточки уходит на
+            страницы кузовов, а с них обратно на товары. Без этого блока
+            5 808 карточек висели бы тупиками.
+          */}
           {fits.length > 0 && (
             <>
-              <h2 className="mt-10 font-[family-name:var(--font-display)] text-xl text-ink">
-                Подходит к автомобилям
-              </h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <h2 className="mt-12 text-[19px] font-medium">Подходит к автомобилям</h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {fits.map((fit) => (
-                  <Link
+                  <CatalogTile
                     key={`${fit.brandSlug}-${fit.modelSlug}-${fit.variant.slug}`}
                     href={
                       fit.variant.hasOwnPage
                         ? urls.variant(fit.brandSlug, fit.modelSlug, fit.variant.slug)
                         : urls.model(fit.brandSlug, fit.modelSlug)
                     }
-                    className="rounded-[var(--radius-card)] border border-line p-4 text-sm"
-                  >
-                    <span className="block text-ink">
-                      {fit.brand} {fit.model}
-                    </span>
-                    <span className="text-xs text-ink-muted">
-                      {formatVariantShort(
+                    title={`${fit.brand} ${fit.model}`}
+                    count={
+                      formatVariantShort(
                         fit.variant.generation,
                         fit.variant.yearFrom,
                         fit.variant.yearTo,
-                      )}
-                    </span>
-                  </Link>
+                      ) || 'все годы'
+                    }
+                  />
                 ))}
               </div>
             </>
           )}
         </div>
 
-        <aside className="h-fit rounded-[var(--radius-block)] border border-line bg-surface p-6 lg:sticky lg:top-6">
-          <div className="text-sm text-ink-muted">
+        <aside className="h-fit rounded-[var(--radius-block)] border border-line-light bg-white p-7 lg:sticky lg:top-6">
+          <div className="text-[13px] opacity-55">
             {product.manufacturer}
             {product.country ? ` · ${product.country}` : ''} · артикул {product.article}
           </div>
-          <div className="mt-3 text-3xl font-bold text-accent">{formatPrice(product.price)}</div>
+
+          <div className="mt-4 font-[family-name:var(--font-display)] text-[32px] leading-none tracking-[-0.02em]">
+            {formatPrice(product.price)}
+          </div>
+
           <div
-            className={`mt-3 inline-block rounded px-2 py-1 text-xs font-semibold ${
-              product.inStock ? 'bg-in-stock/15 text-in-stock' : 'bg-on-order/15 text-on-order'
+            className={`mt-4 inline-block rounded px-2 py-1 text-xs font-semibold ${
+              product.inStock ? 'bg-in-stock/12 text-in-stock' : 'bg-on-order/12 text-on-order'
             }`}
           >
             {product.deliveryText ?? (product.inStock ? 'в наличии' : 'под заказ')}
           </div>
+
+          {/*
+            Переключатель получения стоит до кнопки, а не после: от него
+            зависит и срок, и итоговая сумма, и человек должен выбрать
+            раньше, чем нажмёт.
+          */}
+          <Tabs
+            name="poluchenie-tovara"
+            tone="light"
+            className="mt-6"
+            tabs={[
+              {
+                label: 'Забрать в СПб',
+                content: (
+                  <div className="text-sm opacity-70">
+                    <p>Санкт-Петербург, Софийская ул. 72</p>
+                    <p className="mt-2">Установка за 3 часа, без записи в приёмные часы</p>
+                  </div>
+                ),
+              },
+              {
+                label: 'Доставка СДЭК',
+                content: (
+                  <div className="text-sm opacity-70">
+                    <p>1 100 городов, до двери или в пункт выдачи</p>
+                    <p className="mt-2">Срок в пути 1–7 дней, с отслеживанием</p>
+                  </div>
+                ),
+              },
+            ]}
+          />
+
           <button
             type="button"
-            className="mt-6 w-full rounded-lg bg-accent px-4 py-3 font-semibold text-white"
+            className="mt-7 w-full rounded-[10px] bg-accent px-4 py-3 font-semibold text-white transition-colors hover:bg-accent-hover"
           >
             Узнать цену
           </button>
           <Link
-            href="/ustanovka-farkopa"
-            className="mt-3 block w-full rounded-lg border border-line px-4 py-3 text-center text-ink"
+            href="/zapis"
+            className="mt-3 block w-full rounded-[10px] border border-line-light px-4 py-3 text-center transition-colors hover:border-accent"
           >
             Записаться на установку
           </Link>
-          <a href="tel:+78121234567" className="mt-6 block text-xl font-bold text-ink">
+
+          <a
+            href="tel:+78121234567"
+            className="mt-7 block text-[19px] font-semibold hover:text-accent"
+          >
             +7 (812) 123-45-67
           </a>
-          <p className="mt-2 text-xs text-ink-dim">Гарантия 2 года · документы для ТО</p>
+          <p className="mt-2 text-xs opacity-50">Гарантия 2 года · документы для ТО</p>
         </aside>
       </div>
-    </main>
+    </CatalogShell>
   )
 }

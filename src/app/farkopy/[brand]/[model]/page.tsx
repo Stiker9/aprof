@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { formatCount, formatYears } from '@/catalog/format'
 import {
@@ -11,7 +10,7 @@ import {
   listVariants,
 } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
-import { Breadcrumbs } from '@/components/breadcrumbs'
+import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
 import { ProductCard } from '@/components/product-card'
 import { getDb } from '@/db/client'
 
@@ -67,52 +66,40 @@ export default async function ModelPage({ params }: Params) {
   const products = single ? await listProductsForVariant(db, variants[0].slug, brand, model) : []
 
   return (
-    <main className="mx-auto w-full max-w-[1400px] px-6 py-8">
-      <Breadcrumbs
-        items={[
-          { label: 'Главная', href: urls.home() },
-          { label: 'Фаркопы', href: urls.catalog() },
-          { label: foundBrand.name, href: urls.brand(brand) },
-          { label: foundModel.name },
-        ]}
-      />
-
-      <h1 className="mt-6 font-[family-name:var(--font-display)] text-3xl text-ink">
-        Фаркопы на {foundBrand.name} {foundModel.name}
-      </h1>
-      <p className="mt-3 text-ink-muted">
-        {single
+    <CatalogShell
+      picker={{ brand: foundBrand.name, model: foundModel.name }}
+      crumbs={[
+        { label: 'Главная', href: urls.home() },
+        { label: 'Фаркопы', href: urls.catalog() },
+        { label: foundBrand.name, href: urls.brand(brand) },
+        { label: foundModel.name },
+      ]}
+      title={`Фаркопы на ${foundBrand.name} ${foundModel.name}`}
+      summary={
+        single
           ? formatCount(foundModel.productCount, 'фаркоп', 'фаркопа', 'фаркопов')
-          : `${formatCount(variants.length, 'поколение', 'поколения', 'поколений')} · ${formatCount(foundModel.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}`}
-      </p>
-
+          : `${formatCount(variants.length, 'поколение', 'поколения', 'поколений')} · ${formatCount(foundModel.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}`
+      }
+    >
       {single ? (
-        <div className="mt-8 space-y-4">
+        <div className="mt-10 space-y-4">
           {products.map((product) => (
             <ProductCard key={product.slug} product={product} />
           ))}
         </div>
       ) : (
-        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {variants.map((variant) => (
-            <Link
+            <CatalogTile
               key={variant.slug}
               href={urls.variant(brand, model, variant.slug)}
-              className="rounded-[var(--radius-card)] border border-line bg-surface p-5 hover:border-accent"
-            >
-              <span className="block text-lg text-ink">
-                {variant.generation ?? formatYears(variant.yearFrom, variant.yearTo) ?? foundModel.name}
-              </span>
-              <span className="block text-sm text-ink-muted">
-                {variant.generation ? formatYears(variant.yearFrom, variant.yearTo) : ''}
-              </span>
-              <span className="mt-2 block text-xs text-ink-dim">
-                {formatCount(variant.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
-              </span>
-            </Link>
+              title={variant.generation ?? formatYears(variant.yearFrom, variant.yearTo)}
+              note={variant.generation ? formatYears(variant.yearFrom, variant.yearTo) : undefined}
+              count={formatCount(variant.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
+            />
           ))}
         </div>
       )}
-    </main>
+    </CatalogShell>
   )
 }
