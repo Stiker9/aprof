@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { urls } from '@/catalog/urls'
+import { CONTACTS, LEGAL_ENTITY } from '@/content/contacts'
 
 const POPULAR = [
   { name: 'Toyota', slug: 'toyota' },
@@ -99,15 +100,17 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-12 flex flex-wrap items-center gap-6 border-t border-line pt-8">
-          <a href="tel:+78121234567" className="text-2xl font-bold text-ink">
-            +7 (812) 123-45-67
+          <a href={CONTACTS.phoneHref} className="text-2xl font-bold text-ink">
+            {CONTACTS.phone}
           </a>
-          <span className="text-sm text-ink-muted">Пн–Сб 9:00–19:00</span>
-          <span className="text-sm text-ink-muted">Санкт-Петербург, Софийская ул. 72</span>
+          <span className="text-sm text-ink-muted">{CONTACTS.hours}</span>
+          <span className="text-sm text-ink-muted">{CONTACTS.address}</span>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-6 text-xs text-ink-dim">
-          <span>© 2026 AUTOPROFI · ИНН 0000000000 · ОГРН 0000000000000</span>
+          <span>
+            © 2026 AUTOPROFI · ИНН {LEGAL_ENTITY.inn} · ОГРН {LEGAL_ENTITY.ogrn}
+          </span>
           {LEGAL.map((l) => (
             <Link key={l.href} href={l.href} className="hover:text-ink-muted">
               {l.label}

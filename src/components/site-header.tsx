@@ -1,9 +1,6 @@
 import Link from 'next/link'
 import { urls } from '@/catalog/urls'
-
-const PHONE = '+7 (812) 123-45-67'
-const PHONE_HREF = 'tel:+78121234567'
-const HOURS = 'Пн–Сб 9:00–19:00'
+import { CONTACTS } from '@/content/contacts'
 
 const NAV = [
   { label: 'Каталог', href: urls.catalog() },
@@ -77,10 +74,10 @@ export function SiteHeader() {
           </Link>
 
           <div className="text-right">
-            <a href={PHONE_HREF} className="block text-[15px] font-semibold text-ink">
-              {PHONE}
+            <a href={CONTACTS.phoneHref} className="block text-[15px] font-semibold text-ink">
+              {CONTACTS.phone}
             </a>
-            <span className="text-[11px] text-ink-muted">{HOURS}</span>
+            <span className="text-[11px] text-ink-muted">{CONTACTS.hours}</span>
           </div>
         </div>
       </div>

@@ -4,6 +4,27 @@ import { absolute, urls } from '@/catalog/urls'
 import { getDb } from '@/db/client'
 
 /**
+ * Страницы вне каталога.
+ *
+ * Правовых здесь нет намеренно: они закрыты от индексации, и место
+ * в карте сайта им ни к чему — это прямое противоречие, за которое
+ * Яндекс ругается в Вебмастере.
+ */
+const STATIC_PAGES = [
+  '/ustanovka-farkopa',
+  '/uslugi',
+  '/akcii',
+  '/dostavka',
+  '/otzyvy',
+  '/zapis',
+  '/kontakty',
+  '/o-nas',
+  '/nashi-raboty',
+  '/garantiya',
+  '/blog',
+]
+
+/**
  * Карта сайта строится из базы, а не пишется руками.
  *
  * Страниц больше восьми тысяч, и любая ручная поддержка разойдётся
@@ -20,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
     { url: absolute(urls.home()), priority: 1 },
     { url: absolute(urls.catalog()), priority: 0.9 },
+    ...STATIC_PAGES.map((path) => ({ url: absolute(path), priority: 0.5 })),
   ]
 
   for (const brand of brands) {
