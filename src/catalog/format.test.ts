@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest'
 import {
+  NBSP,
   formatCount,
   formatNumber,
   formatPrice,
@@ -30,12 +31,24 @@ test('число вместе со словом', () => {
   expect(formatCount(61, 'модель', 'модели', 'моделей')).toBe('61 модель')
   expect(formatCount(34, 'модель', 'модели', 'моделей')).toBe('34 модели')
   expect(formatCount(579, 'фаркоп', 'фаркопа', 'фаркопов')).toBe('579 фаркопов')
+  // Разряды разделяются: «5808 фаркопов» не читается
+  expect(formatCount(5808, 'фаркоп', 'фаркопа', 'фаркопов')).toBe(`5${NBSP}808 фаркопов`)
+})
+
+/**
+ * Разделитель пишется через константу, а не пробелом с клавиатуры:
+ * неразрывный пробел от обычного на глаз не отличить, и тест на такой
+ * опечатке падает с сообщением «ожидалось "5 808" вместо "5 808"».
+ */
+test('разряды разделяются неразрывным пробелом', () => {
+  expect(formatNumber(5808)).toBe(`5${NBSP}808`)
+  expect(formatNumber(5808)).not.toBe('5 808')
 })
 
 test('цена с разделением разрядов', () => {
-  expect(formatPrice(15990)).toBe('15 990 ₽')
-  expect(formatPrice(4090)).toBe('4 090 ₽')
-  expect(formatPrice(199990)).toBe('199 990 ₽')
+  expect(formatPrice(15990)).toBe(`15${NBSP}990${NBSP}₽`)
+  expect(formatPrice(4090)).toBe(`4${NBSP}090${NBSP}₽`)
+  expect(formatPrice(199990)).toBe(`199${NBSP}990${NBSP}₽`)
 })
 
 test('годы выпуска', () => {

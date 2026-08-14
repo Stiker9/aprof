@@ -36,7 +36,7 @@ const LEGAL = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-line bg-surface">
+    <footer className="mt-auto border-t border-line bg-bg">
       <div className="mx-auto max-w-[1400px] px-6 py-14">
         <div className="grid gap-10 md:grid-cols-4">
           <div>

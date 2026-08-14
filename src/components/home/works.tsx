@@ -28,11 +28,11 @@ const WORKS: Work[] = [
  * с заголовком, а справа уходит за край экрана — так видно, что она
  * продолжается, без стрелок и точек.
  */
-const STRIP_PADDING = 'pl-[max(1.5rem,calc((100vw-1400px)/2+1.5rem))]'
+const STRIP_PADDING = 'pl-[max(1.5rem,calc((100%-1400px)/2+1.5rem))]'
 
 export function Works() {
   return (
-    <section className="bg-bg text-ink">
+    <section className="bg-surface text-ink">
       <div className="mx-auto w-full max-w-[1400px] px-6 pt-20 md:pt-28">
         <p className="text-[11px] uppercase tracking-[0.2em] text-ink-dim">Работы</p>
         <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(26px,4vw,34px)] leading-tight tracking-[-0.03em]">

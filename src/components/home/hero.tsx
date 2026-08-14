@@ -2,41 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { formatNumber } from '@/catalog/format'
 import { urls } from '@/catalog/urls'
-
-/**
- * Строка подбора.
- *
- * Пока это разметка без работы: списки не раскрываются, кнопка ведёт
- * в каталог. Живой подбор требует клиентского состояния и связанных
- * списков на 106 марок — отдельная задача.
- */
-function PickerBar() {
-  const fields = ['Марка', 'Модель', 'Кузов и годы']
-
-  return (
-    <div className="border-b border-line bg-surface">
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-6 py-4 lg:flex-row">
-        {fields.map((label) => (
-          <div
-            key={label}
-            className="flex flex-1 items-center justify-between rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-ink-muted"
-          >
-            {label}
-            <span aria-hidden className="text-xs opacity-50">
-              ▾
-            </span>
-          </div>
-        ))}
-        <Link
-          href={urls.catalog()}
-          className="rounded-lg bg-accent px-8 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
-        >
-          Подобрать
-        </Link>
-      </div>
-    </div>
-  )
-}
+import { PickerBar } from '@/components/picker-bar'
 
 export function Hero({ productCount }: { productCount: number }) {
   return (

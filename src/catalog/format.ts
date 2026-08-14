@@ -15,25 +15,42 @@ export function plural(n: number, one: string, few: string, many: string): strin
   return many
 }
 
-/** Число вместе со словом в нужной форме: «61 модель». */
-export function formatCount(n: number, one: string, few: string, many: string): string {
-  return `${n} ${plural(n, one, few, many)}`
+/**
+ * Разделитель разрядов — неразрывный пробел.
+ *
+ * Такой же, какой возвращает `toLocaleString('ru-RU')`. Обычный пробел
+ * позволил бы «5 808» разорваться по строкам, а число, разъехавшееся
+ * по двум строкам, читается как два разных.
+ *
+ * Вынесен в константу, потому что на глаз он неотличим от обычного:
+ * в тестах и сравнениях его нужно писать явно.
+ */
+export const NBSP = ' '
+
+/** Число с разделением разрядов: «5 808», «11,1». */
+export function formatNumber(value: number): string {
+  return value.toLocaleString('ru-RU')
 }
 
-/** Цена с обычными пробелами между разрядами. */
+/**
+ * Число вместе со словом в нужной форме: «61 модель», «5 808 фаркопов».
+ *
+ * Разряды разделяются, потому что счётчики доходят до пяти знаков:
+ * «5808 фаркопов» читается как случайный набор цифр.
+ */
+export function formatCount(n: number, one: string, few: string, many: string): string {
+  return `${formatNumber(n)} ${plural(n, one, few, many)}`
+}
+
+/** Цена: «15 990 ₽». */
 export function formatPrice(value: number): string {
-  return `${value.toLocaleString('ru-RU').replace(/ /g, ' ')} ₽`
+  return `${formatNumber(value)}${NBSP}₽`
 }
 
 /** Диапазон лет выпуска. Пустая строка, если годов в данных нет. */
 export function formatYears(from: number | null, to: number | null): string {
   if (from === null) return ''
   return to === null ? `${from} и новее` : `${from}–${to}`
-}
-
-/** Число с запятой вместо точки — по-русски дробную часть отделяют запятой. */
-export function formatNumber(value: number): string {
-  return value.toLocaleString('ru-RU')
 }
 
 /**

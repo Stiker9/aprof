@@ -1,10 +1,16 @@
 import type { ReactNode } from 'react'
 
-type Tone = 'dark' | 'light'
+/**
+ * Тёмных тонов два, и разница между ними едва заметна — это и есть
+ * замысел: две тёмные секции подряд не сливаются в одно полотно, но и
+ * не спорят друг с другом. Светлый тон один.
+ */
+type Tone = 'dark' | 'dark-2' | 'light'
 
 const TONES: Record<Tone, string> = {
   dark: 'bg-bg text-ink',
-  light: 'bg-paper text-ink-dark',
+  'dark-2': 'bg-surface text-ink',
+  light: 'bg-paper-3 text-ink-dark',
 }
 
 /**

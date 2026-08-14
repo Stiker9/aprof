@@ -31,16 +31,29 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <nav aria-label="Хлебные крошки" className="flex flex-wrap items-center gap-2 text-sm">
+      {/*
+        Цвета заданы прозрачностью от текущего цвета текста, а не
+        отдельными токенами: крошки стоят и на тёмных страницах, и на
+        светлых страницах каталога. С жёстким `text-ink` они пропадали
+        бы на белом фоне.
+      */}
+      <nav
+        aria-label="Хлебные крошки"
+        className="flex flex-wrap items-center gap-2 text-[13px] opacity-55"
+      >
         {items.map((item, index) => (
           <span key={item.label} className="flex items-center gap-2">
-            {index > 0 && <span className="text-ink-dim">→</span>}
+            {index > 0 && (
+              <span aria-hidden className="opacity-60">
+                →
+              </span>
+            )}
             {item.href ? (
-              <Link href={item.href} className="text-ink-muted hover:text-ink">
+              <Link href={item.href} className="transition-opacity hover:opacity-100">
                 {item.label}
               </Link>
             ) : (
-              <span className="text-ink">{item.label}</span>
+              <span>{item.label}</span>
             )}
           </span>
         ))}

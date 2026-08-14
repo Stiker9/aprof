@@ -289,3 +289,18 @@ export async function countProducts(db: DrizzleDb): Promise<number> {
   const rows = await db.select({ id: products.id }).from(products)
   return rows.length
 }
+
+/**
+ * Самая низкая цена в каталоге — для строки «цены от …».
+ *
+ * Считается по базе, а не задаётся числом: цены приходят из источника
+ * и меняются при каждом обновлении каталога. Записанная руками цифра
+ * разошлась бы с карточками товаров уже на первом импорте.
+ */
+export async function minProductPrice(db: DrizzleDb): Promise<number> {
+  const rows = await db.select({ price: products.sourcePrice }).from(products)
+  if (rows.length === 0) {
+    throw new Error('В каталоге нет товаров — не от чего считать минимальную цену')
+  }
+  return rows.reduce((min, row) => (row.price < min ? row.price : min), rows[0].price)
+}

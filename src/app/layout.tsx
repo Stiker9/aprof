@@ -32,13 +32,23 @@ export const metadata: Metadata = {
     'Подберём фаркоп по марке, модели и году. Установка за один визит с документами для ТО, доставка по России.',
 }
 
+/**
+ * Страница лежит на белом поле с отступом в 6 пикселей и скруглена по
+ * углам — так задано макетом. Скругление режет и шапку сверху, и подвал
+ * снизу, поэтому обёртка одна на всё, а не по краям.
+ *
+ * `overflow-hidden` здесь обязателен: без него скругление не обрежет
+ * тёмный фон шапки и подвала, и углы останутся квадратными.
+ */
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="ru" className={`${display.variable} ${body.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-bg text-ink font-[family-name:var(--font-body)]">
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+      <body className="min-h-full bg-white p-1.5 font-[family-name:var(--font-body)] text-ink">
+        <div className="flex min-h-[calc(100vh-12px)] flex-col overflow-hidden rounded-[var(--radius-block)] bg-bg">
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </div>
       </body>
     </html>
   )

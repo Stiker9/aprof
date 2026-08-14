@@ -71,7 +71,7 @@ export function Promos() {
   if (PROMOS.length === 0) return null
 
   return (
-    <Section tone="dark">
+    <Section tone="dark-2">
       <div className="flex flex-wrap items-baseline justify-between gap-6">
         <div>
           <Eyebrow>Акции</Eyebrow>

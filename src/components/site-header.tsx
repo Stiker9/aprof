@@ -17,17 +17,25 @@ const NAV = [
 /**
  * Шапка сайта.
  *
+ * Тёмная полупрозрачная полоса со скруглением сверху — она лежит поверх
+ * страницы, а не отделена от неё границей, и размывает то, что под ней.
+ * Отсюда и цвет с прозрачностью: без размытия он выглядит просто серым.
+ *
  * Гамбургер стоит слева от логотипа намеренно. В макете при прокрутке
  * шапка сжимается в пилюлю, и там он тоже слева — если поставить его
  * справа, точка входа в меню переезжала бы при скролле, и человек
  * каждый раз искал бы её заново.
  *
- * Полное меню-оверлей пока не сделано, гамбургер ведёт в каталог.
+ * Кнопки «Подобрать» здесь нет по макету: сразу под шапкой идёт строка
+ * подбора со своей кнопкой, и вторая рядом была бы шумом.
+ *
+ * Меню-оверлей и сжатие при прокрутке пока не сделаны — гамбургер ведёт
+ * в каталог.
  */
 export function SiteHeader() {
   return (
-    <header className="border-b border-line bg-bg">
-      <div className="mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-4">
+    <header className="rounded-t-[var(--radius-block)] border border-white/8 bg-[rgba(18,18,20,0.44)] backdrop-blur-[26px] backdrop-saturate-[1.35]">
+      <div className="flex h-14 items-center gap-6 px-[22px]">
         <Link
           href={urls.catalog()}
           aria-label="Меню"
@@ -40,32 +48,40 @@ export function SiteHeader() {
 
         <Link
           href={urls.home()}
-          className="shrink-0 font-[family-name:var(--font-display)] text-sm tracking-[0.22em] text-ink"
+          className="shrink-0 font-[family-name:var(--font-display)] text-[15px] tracking-[0.24em] text-ink"
         >
           AUTOPROFI
         </Link>
 
-        <nav className="hidden flex-1 items-center justify-center gap-7 text-sm text-ink-muted lg:flex">
+        <nav className="hidden flex-1 items-center justify-center gap-8 text-sm text-ink lg:flex">
           {NAV.map((item) => (
-            <Link key={item.label} href={item.href} className="transition-colors hover:text-ink">
+            <Link
+              key={item.label}
+              href={item.href}
+              className="transition-opacity hover:opacity-65"
+            >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-5 lg:ml-0">
-          <div className="hidden text-right sm:block">
-            <a href={PHONE_HREF} className="block text-[15px] font-bold text-ink">
+        <div className="ml-auto flex items-center gap-4 lg:ml-0">
+          <Link
+            href={urls.catalog()}
+            aria-label="Поиск"
+            className="hidden h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-white/10 text-ink transition-colors hover:border-white/25 sm:flex"
+          >
+            <span aria-hidden className="text-sm">
+              ⌕
+            </span>
+          </Link>
+
+          <div className="text-right">
+            <a href={PHONE_HREF} className="block text-[15px] font-semibold text-ink">
               {PHONE}
             </a>
             <span className="text-[11px] text-ink-muted">{HOURS}</span>
           </div>
-          <Link
-            href={urls.catalog()}
-            className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
-          >
-            Подобрать
-          </Link>
         </div>
       </div>
     </header>
