@@ -23,11 +23,14 @@ export function PickerBar({
   brand,
   model,
   variant,
+  transparent = false,
 }: {
   /** Выбранные значения, если страница уже сузила подбор. */
   brand?: string
   model?: string
   variant?: string
+  /** На первом экране строка лежит на фотографии, своего фона у неё нет. */
+  transparent?: boolean
 } = {}) {
   const fields = [
     { placeholder: 'Марка', value: brand },
@@ -36,7 +39,7 @@ export function PickerBar({
   ]
 
   return (
-    <div className="bg-bg">
+    <div className={transparent ? undefined : 'bg-bg pt-14'}>
       <div className="mx-auto flex max-w-[1400px] flex-col gap-2.5 px-6 py-4 lg:flex-row">
         {fields.map((field, index) => (
           <div

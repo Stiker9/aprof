@@ -43,10 +43,15 @@ export function Works() {
         </p>
       </div>
 
+      {/*
+        Снимки лежат прямо на фоне, без рамок и скруглений — так задано
+        макетом. Кадр широкий, 520×333: фаркоп снимают вместе с задней
+        частью машины, в квадрат это не помещается.
+      */}
       <div className={`mt-12 flex gap-5 overflow-x-auto pb-2 pr-6 ${STRIP_PADDING}`}>
         {WORKS.map((work) => (
-          <figure key={work.article} className="w-[280px] shrink-0 md:w-[340px]">
-            <div className="flex aspect-[4/3] items-center justify-center rounded-[var(--radius-card)] border border-line bg-surface-2 text-xs text-ink-dim">
+          <figure key={work.article} className="w-[360px] shrink-0 md:w-[520px]">
+            <div className="flex aspect-[520/333] items-center justify-center bg-surface-2 text-xs text-ink-dim">
               фото скоро
             </div>
             <figcaption className="mt-3 text-sm text-ink-muted">

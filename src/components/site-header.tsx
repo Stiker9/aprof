@@ -31,7 +31,7 @@ const NAV = [
  */
 export function SiteHeader() {
   return (
-    <header className="rounded-t-[var(--radius-block)] border border-white/8 bg-[rgba(18,18,20,0.44)] backdrop-blur-[26px] backdrop-saturate-[1.35]">
+    <header className="absolute inset-x-0 top-0 z-50 rounded-t-[var(--radius-block)] border-b border-white/8 bg-[rgba(18,18,20,0.44)] backdrop-blur-[26px] backdrop-saturate-[1.35]">
       <div className="flex h-14 items-center gap-6 px-[22px]">
         <Link
           href={urls.catalog()}

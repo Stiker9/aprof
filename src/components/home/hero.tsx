@@ -4,81 +4,86 @@ import { formatNumber } from '@/catalog/format'
 import { urls } from '@/catalog/urls'
 import { PickerBar } from '@/components/picker-bar'
 
+/**
+ * Первый экран.
+ *
+ * Фотография занимает весь экран целиком и уходит под шапку — ради
+ * этого шапка и сделана стеклянной: она размывает то, что под ней.
+ * Если положить фото только справа и начать его под шапкой, размывать
+ * будет нечего, и стекло превратится в серую полосу.
+ *
+ * Градиент снят с макета: слева почти непрозрачный, к 48% ширины
+ * сходит на нет. Без него текст ложится прямо на кузов и пропадает.
+ */
+/*
+ * Задаётся стилем, а не классом Tailwind: класс, собранный из
+ * переменной, сборщик не увидит — он читает исходник как текст,
+ * и правило просто не попадёт в CSS.
+ */
+const GRADIENT =
+  'linear-gradient(90deg, rgba(8,8,9,0.9) 0%, rgba(8,8,9,0.55) 22%, rgba(8,8,9,0.12) 36%, rgba(8,8,9,0) 48%, rgba(8,8,9,0) 100%)'
+
+const NUMBERS = [
+  { value: null, caption: 'фаркопов в наличии' },
+  { value: '2 года', caption: 'гарантии на работы' },
+  { value: '3 часа', caption: 'средняя установка' },
+]
+
 export function Hero({ productCount }: { productCount: number }) {
   return (
-    <>
-      <PickerBar />
+    <section className="relative isolate min-h-[704px] overflow-hidden bg-bg">
+      <Image
+        src="/images/towbar-hero.webp"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="-z-10 object-cover"
+      />
+      <div className="absolute inset-0 -z-10" style={{ background: GRADIENT }} />
 
-      <section className="relative overflow-hidden bg-bg">
-        {/*
-          Фотография занимает правую половину и растворяется к левому краю.
-          Без градиента текст ложится прямо на кузов и местами пропадает.
-        */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[62%] lg:block">
-          <Image
-            src="/images/towbar-hero.webp"
-            alt=""
-            fill
-            priority
-            sizes="62vw"
-            className="object-cover object-left"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/60 to-transparent" />
-        </div>
+      {/* Отступ под шапку: она вынута из потока и лежит поверх */}
+      <div className="h-14" />
 
-        <div className="relative mx-auto max-w-[1400px] px-6 py-20 md:py-28">
-          <div className="max-w-[50%] min-w-[320px] max-lg:max-w-none">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-ink-dim">
-              Подбор · Установка · Электрика
-            </p>
+      <PickerBar transparent />
 
-            {/*
-              Размер привязан к ширине окна, а не задан числом: Unbounded
-              широкий, и на 45px «Фаркопы с установкой» не влезает в колонку
-              уже при 1200px — заголовок ломается на три строки вместо двух.
-            */}
-            <h1 className="mt-5 font-[family-name:var(--font-display)] text-[clamp(30px,3.2vw,44px)] leading-[1.08] tracking-[-0.01em] text-ink">
-              Фаркопы с установкой
-              <br />в Санкт-Петербурге
-            </h1>
+      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-12">
+        <div className="max-w-[46%] min-w-[320px] max-lg:max-w-none">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-ink-dim">
+            Подбор · Установка · Электрика
+          </p>
 
-            <p className="mt-6 max-w-[46ch] text-[17px] text-ink-muted">
-              Подберём по марке, модели и году. Поставим за один визит — с документами для ТО.
-            </p>
+          <h1 className="mt-5 font-[family-name:var(--font-display)] text-[clamp(30px,3.4vw,45px)] leading-[1.08] tracking-[-0.01em] text-ink">
+            Фаркопы с установкой
+            <br />в Санкт-Петербурге
+          </h1>
 
-            <Link
-              href={urls.catalog()}
-              className="mt-8 inline-flex items-center gap-4 text-ink transition-colors hover:text-accent"
-            >
-              <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line">
-                <span aria-hidden>↘</span>
-              </span>
-              Подобрать фаркоп
-            </Link>
+          <p className="mt-6 max-w-[46ch] text-[17px] text-ink-muted">
+            Подберём по марке, модели и году. Поставим за один визит — с документами для ТО.
+          </p>
 
-            <div className="mt-14 flex flex-wrap gap-x-12 gap-y-6">
-              <div>
+          <Link
+            href={urls.catalog()}
+            className="mt-8 inline-flex items-center gap-4 text-ink transition-colors hover:text-accent"
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25">
+              <span aria-hidden>↘</span>
+            </span>
+            Подобрать фаркоп
+          </Link>
+
+          <div className="mt-12 flex flex-wrap gap-x-14 gap-y-6">
+            {NUMBERS.map((item) => (
+              <div key={item.caption}>
                 <div className="font-[family-name:var(--font-display)] text-[clamp(28px,4vw,42px)] leading-none tracking-[-0.02em] text-ink">
-                  {formatNumber(productCount)}
+                  {item.value ?? formatNumber(productCount)}
                 </div>
-                <div className="mt-2 text-sm text-ink-muted">фаркопов в наличии</div>
+                <div className="mt-2 text-sm text-ink-muted">{item.caption}</div>
               </div>
-              <div>
-                <div className="font-[family-name:var(--font-display)] text-[clamp(28px,4vw,42px)] leading-none tracking-[-0.02em] text-ink">
-                  2 года
-                </div>
-                <div className="mt-2 text-sm text-ink-muted">гарантии на работы</div>
-              </div>
-              <div>
-                <div className="font-[family-name:var(--font-display)] text-[clamp(28px,4vw,42px)] leading-none tracking-[-0.02em] text-ink">
-                  3 часа
-                </div>
-                <div className="mt-2 text-sm text-ink-muted">средняя установка</div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   )
 }
