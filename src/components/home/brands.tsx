@@ -1,9 +1,9 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { formatCount } from '@/catalog/format'
+import { logoFor } from '@/catalog/logos'
 import type { BrandRow } from '@/catalog/queries'
 import { urls } from '@/catalog/urls'
-import { ArrowLink } from '@/components/ui/arrow-link'
-import { Eyebrow, Section } from '@/components/ui/section'
 
 /**
  * Каталог по маркам на главной.
@@ -13,8 +13,11 @@ import { Eyebrow, Section } from '@/components/ui/section'
  *
  * Поиск и фильтры пока не работают — им нужно состояние на клиенте, и
  * они идут одной задачей с живым подбором. Разметка стоит, потому что
- * без неё секция читается иначе: шесть рядов карточек без единого
- * способа сузить выбор выглядят тупиком.
+ * без неё секция читается иначе: шесть рядов плиток без единого способа
+ * сузить выбор выглядят тупиком.
+ *
+ * Логотип есть не у каждой марки: в макете их 25 на 106. Плитка без
+ * логотипа — обычное состояние, а не поломка.
  */
 const FILTERS = ['Все марки', 'Китайские', 'Европейские', 'Японские и корейские', 'Российские']
 
@@ -31,34 +34,33 @@ export function Brands({
   const rest = totalBrands - brands.length
 
   return (
-    <Section tone="light">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <Eyebrow>Каталог</Eyebrow>
-          <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(26px,4vw,34px)] leading-tight tracking-[-0.03em]">
+    <section className="flex min-h-[calc(100vh-16px)] flex-col gap-[clamp(28px,4vh,44px)] overflow-hidden rounded-[var(--radius-block)] bg-paper-3 px-14 pb-[clamp(44px,6vh,64px)] pt-[clamp(56px,8vh,80px)] text-ink-dark">
+      <div className="flex items-start justify-between gap-12">
+        <div className="flex max-w-[560px] flex-col gap-3.5">
+          <div className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A88]">Каталог</div>
+          <h2 className="font-[family-name:var(--font-display)] text-[clamp(26px,2.6vw,35px)] leading-[1.06] tracking-[-0.02em]">
             {formatCount(totalBrands, 'марка', 'марки', 'марок')},
-            <span className="block opacity-45">
-              {formatCount(totalModels, 'модель', 'модели', 'моделей')}
-            </span>
+            <br />
+            {formatCount(totalModels, 'модель', 'модели', 'моделей')}
           </h2>
         </div>
 
-        <div className="flex h-[51px] w-full max-w-[357px] items-center gap-3 rounded-[10px] border border-ink-dark/10 bg-white px-4">
-          <span aria-hidden className="opacity-35">
+        <div className="flex flex-[0_0_320px] items-center gap-3 rounded-xl border border-ink-dark/10 bg-white px-[18px] py-[15px]">
+          <span aria-hidden className="text-[15px] text-[#8A8A88]">
             ⌕
           </span>
-          <span className="text-sm opacity-45">Марка или модель</span>
+          <span className="text-[15px] text-[#8A8A88]">Марка или модель</span>
         </div>
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2.5">
         {FILTERS.map((label, index) => (
           <span
             key={label}
-            className={`rounded-full border px-4 py-2.5 text-sm ${
+            className={`rounded-full px-4 py-2.5 text-sm ${
               index === 0
-                ? 'border-transparent bg-ink-dark text-paper'
-                : 'border-ink-dark/10 bg-white opacity-70'
+                ? 'bg-ink-dark text-paper'
+                : 'border border-ink-dark/10 bg-white text-ink-dark/70'
             }`}
           >
             {label}
@@ -66,36 +68,55 @@ export function Brands({
         ))}
       </div>
 
-      {/*
-        Карточки стоят отдельными плитками с зазором, а не склеены в
-        таблицу через общий фон: в макете каждая со своим скруглением
-        и полупрозрачной подложкой.
-      */}
-      <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        {brands.map((brand) => (
-          <Link
-            key={brand.slug}
-            href={urls.brand(brand.slug)}
-            className="group flex h-[91px] flex-col justify-between rounded-[var(--radius-card)] border border-ink-dark/8 bg-white/72 px-4 py-4 transition-colors hover:border-accent hover:bg-white"
-          >
-            <span className="text-[15px] transition-colors group-hover:text-accent">
-              {brand.name}
-            </span>
-            <span className="text-[11px] uppercase tracking-[0.08em] opacity-45">
-              {formatCount(brand.modelCount, 'модель', 'модели', 'моделей')}
-            </span>
-          </Link>
-        ))}
+      <div className="grid grid-cols-2 gap-[clamp(8px,1vh,12px)] sm:grid-cols-3 lg:grid-cols-6">
+        {brands.map((brand) => {
+          const logo = logoFor(brand.slug)
+          return (
+            <Link
+              key={brand.slug}
+              href={urls.brand(brand.slug)}
+              className="flex flex-col items-center justify-center gap-[clamp(4px,0.7vh,8px)] rounded-[var(--radius-card)] border border-ink-dark/8 bg-white/72 px-2.5 py-[clamp(12px,2vh,22px)] backdrop-blur-[14px] backdrop-saturate-[1.2] transition-colors hover:border-accent hover:bg-white"
+            >
+              {logo ? (
+                <span className="relative block h-[clamp(24px,2.8vh,34px)] w-[clamp(38px,4.4vh,54px)]">
+                  <Image
+                    src={logo}
+                    alt=""
+                    fill
+                    sizes="54px"
+                    className="object-contain"
+                  />
+                </span>
+              ) : null}
+
+              <span className="text-center font-[family-name:var(--font-display)] text-[clamp(13px,1.5vh,16px)] leading-[1.1] text-[#2E2E30]">
+                {brand.name}
+              </span>
+
+              <span className="text-[10px] uppercase tracking-[0.08em] text-[#8A8A88]">
+                {formatCount(brand.modelCount, 'модель', 'модели', 'моделей')}
+              </span>
+            </Link>
+          )
+        })}
       </div>
 
-      <div className="mt-8">
-        <ArrowLink
-          href={urls.catalog()}
-          muted={rest > 0 ? `ещё ${formatCount(rest, 'марка', 'марки', 'марок')}` : undefined}
-        >
+      <div className="mt-auto flex items-center gap-[18px] pt-3">
+        <Link href={urls.catalog()} className="flex items-center gap-3 text-[16px]">
+          <span
+            aria-hidden
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-ink-dark/30 text-sm"
+          >
+            ↗
+          </span>
           Весь каталог
-        </ArrowLink>
+        </Link>
+        {rest > 0 ? (
+          <span className="text-[13px] text-[#8A8A88]">
+            ещё {formatCount(rest, 'марка', 'марки', 'марок')}
+          </span>
+        ) : null}
       </div>
-    </Section>
+    </section>
   )
 }

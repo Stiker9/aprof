@@ -7,18 +7,17 @@ import { PickerBar } from '@/components/picker-bar'
 /**
  * Первый экран.
  *
- * Фотография занимает весь экран целиком и уходит под шапку — ради
- * этого шапка и сделана стеклянной: она размывает то, что под ней.
- * Если положить фото только справа и начать его под шапкой, размывать
- * будет нечего, и стекло превратится в серую полосу.
+ * Занимает всё окно за вычетом полей — `calc(100vh - 16px)`, как в
+ * исходнике макета, а не фиксированную высоту. Нижний предел нужен для
+ * низких окон: без него на ноутбуке с невысоким экраном текст и числа
+ * налезали бы друг на друга.
  *
- * Градиент снят с макета: слева почти непрозрачный, к 48% ширины
+ * Кадров два, и в макете они плавно сменяют друг друга. Смена требует
+ * таймера на клиенте, поэтому пока показывается первый; второй лежит в
+ * разметке и ждёт задачи про анимации — вместе с меню-оверлеем.
+ *
+ * Градиент взят из исходника: слева почти непрозрачный, к 48% ширины
  * сходит на нет. Без него текст ложится прямо на кузов и пропадает.
- */
-/*
- * Задаётся стилем, а не классом Tailwind: класс, собранный из
- * переменной, сборщик не увидит — он читает исходник как текст,
- * и правило просто не попадёт в CSS.
  */
 const GRADIENT =
   'linear-gradient(90deg, rgba(8,8,9,0.9) 0%, rgba(8,8,9,0.55) 22%, rgba(8,8,9,0.12) 36%, rgba(8,8,9,0) 48%, rgba(8,8,9,0) 100%)'
@@ -31,42 +30,38 @@ const NUMBERS = [
 
 export function Hero({ productCount }: { productCount: number }) {
   return (
-    <section className="relative isolate min-h-[704px] overflow-hidden rounded-[var(--radius-block)] bg-bg">
+    <section className="relative h-[calc(100vh-16px)] min-h-[620px] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
       <Image
-        src="/images/towbar-hero.webp"
+        src="/images/hero-farkop.webp"
         alt=""
         fill
         priority
         sizes="100vw"
-        className="-z-10 object-cover"
+        className="object-cover"
       />
-      <div className="absolute inset-0 -z-10" style={{ background: GRADIENT }} />
+      <div className="pointer-events-none absolute inset-0" style={{ background: GRADIENT }} />
 
-      {/* Отступ под шапку: она вынута из потока и лежит поверх */}
-      <div className="h-14" />
+      {/* Строка подбора лежит на фотографии, сразу под пилюлей шапки */}
+      <div className="absolute inset-x-0 top-14 z-[5]">
+        <PickerBar transparent />
+      </div>
 
-      <PickerBar transparent />
-
-      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-12">
+      <div className="absolute inset-x-0 bottom-0 px-14 pb-14">
         <div className="max-w-[46%] min-w-[320px] max-lg:max-w-none">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-ink-dim">
-            Подбор · Установка · Электрика
-          </p>
-
-          <h1 className="mt-5 font-[family-name:var(--font-display)] text-[clamp(30px,3.4vw,45px)] leading-[1.08] tracking-[-0.01em] text-ink">
+          <h1 className="font-[family-name:var(--font-display)] text-[clamp(30px,3.4vw,45px)] leading-[1.08] tracking-[-0.01em]">
             Фаркопы с установкой
             <br />в Санкт-Петербурге
           </h1>
 
-          <p className="mt-6 max-w-[46ch] text-[17px] text-ink-muted">
+          <p className="mt-5 max-w-[46ch] text-[17px] text-ink-muted">
             Подберём по марке, модели и году. Поставим за один визит — с документами для ТО.
           </p>
 
           <Link
             href={urls.catalog()}
-            className="mt-8 inline-flex items-center gap-4 text-ink transition-colors hover:text-accent"
+            className="mt-8 inline-flex items-center gap-4 transition-colors hover:text-accent"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25">
+            <span className="flex h-14 w-14 items-center justify-center border border-white/25">
               <span aria-hidden>↘</span>
             </span>
             Подобрать фаркоп
@@ -75,7 +70,7 @@ export function Hero({ productCount }: { productCount: number }) {
           <div className="mt-12 flex flex-wrap gap-x-14 gap-y-6">
             {NUMBERS.map((item) => (
               <div key={item.caption}>
-                <div className="font-[family-name:var(--font-display)] text-[clamp(28px,4vw,42px)] leading-none tracking-[-0.02em] text-ink">
+                <div className="font-[family-name:var(--font-display)] text-[clamp(28px,4vw,42px)] leading-none tracking-[-0.02em]">
                   {item.value ?? formatNumber(productCount)}
                 </div>
                 <div className="mt-2 text-sm text-ink-muted">{item.caption}</div>

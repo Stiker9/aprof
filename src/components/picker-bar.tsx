@@ -39,8 +39,18 @@ export function PickerBar({
   ]
 
   return (
-    <div className={transparent ? undefined : 'bg-bg pt-14'}>
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-2.5 px-6 py-4 lg:flex-row">
+    <div
+      className={
+        transparent
+          ? 'border-b border-white/8 bg-[rgba(10,10,11,0.72)] backdrop-blur-[22px] backdrop-saturate-[1.3]'
+          : 'bg-bg pt-14'
+      }
+    >
+      <div
+        className={`mx-auto flex flex-col gap-2.5 lg:flex-row ${
+          transparent ? 'px-14 py-4' : 'max-w-[1400px] px-6 py-4'
+        }`}
+      >
         {fields.map((field, index) => (
           <div
             key={field.placeholder}
@@ -57,7 +67,7 @@ export function PickerBar({
 
         <Link
           href={urls.catalog()}
-          className="rounded-[10px] bg-accent px-10 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+          className="shrink-0 rounded-[10px] bg-accent px-[34px] py-3.5 text-center text-sm font-semibold text-white transition-[filter] hover:brightness-110"
         >
           Подобрать
         </Link>
