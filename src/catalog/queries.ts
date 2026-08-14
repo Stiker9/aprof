@@ -291,6 +291,25 @@ export async function countProducts(db: DrizzleDb): Promise<number> {
 }
 
 /**
+ * Доля фаркопов, которые ставятся без выреза бампера.
+ *
+ * Считается по базе, а не берётся из макета. Там стояло «84%» — число,
+ * взятое с потолка, а это обещание покупателю: он читает его до записи
+ * и приезжает, рассчитывая, что бампер резать не будут.
+ *
+ * Позиции без данных о вырезе в расчёт не идут — иначе они молча
+ * ухудшали бы долю, хотя про них попросту ничего не известно.
+ */
+export async function shareWithoutBumperCut(db: DrizzleDb): Promise<number | null> {
+  const rows = await db.select({ bumperCut: products.bumperCut }).from(products)
+  const known = rows.filter((row) => row.bumperCut !== 'unknown')
+  if (known.length === 0) return null
+
+  const free = known.filter((row) => row.bumperCut === 'not_required').length
+  return Math.round((free / known.length) * 100)
+}
+
+/**
  * Самая низкая цена в каталоге — для строки «цены от …».
  *
  * Считается по базе, а не задаётся числом: цены приходят из источника

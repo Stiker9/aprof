@@ -26,13 +26,17 @@ export function CatalogShell({
   title: ReactNode
   /** Строка под заголовком: сколько всего, от какой цены. */
   summary?: ReactNode
-  /** Значения, уже выбранные в строке подбора. */
-  picker?: { brand?: string; model?: string; variant?: string }
+  /**
+   * Значения, уже выбранные в строке подбора, либо `false` — тогда
+   * строки нет совсем. На странице услуги подбирать нечего, и пустые
+   * списки там только сбивали бы с толку.
+   */
+  picker?: { brand?: string; model?: string; variant?: string } | false
   children: ReactNode
 }) {
   return (
     <>
-      <PickerBar {...picker} />
+      {picker === false ? null : <PickerBar {...picker} />}
 
       <main className="flex-1 bg-paper-3 text-ink-dark">
         <div className="mx-auto w-full max-w-[1400px] px-6 py-10">
