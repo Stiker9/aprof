@@ -35,12 +35,17 @@ function Period({ period }: { period: PromoPeriod }) {
 function FeaturedPromo({ promo }: { promo: Promo }) {
   return (
     <article className="relative isolate flex min-h-[547px] flex-col justify-end overflow-hidden rounded-[var(--radius-block)] bg-surface p-8">
+      {/*
+        Фоном стоит монтажная схема, а не фотография машины: акция про
+        установку, и чертёж крепления говорит об этом точнее, чем ещё
+        один снимок кузова, которых на странице и так хватает.
+      */}
       <Image
-        src="/images/product-sample.webp"
+        src="/images/promo-scheme.webp"
         alt=""
         fill
         sizes="(max-width: 1024px) 100vw, 60vw"
-        className="-z-10 object-cover"
+        className="-z-10 object-cover object-center"
       />
       <div className="absolute inset-0 -z-10" style={{ background: PHOTO_OVERLAY }} />
 

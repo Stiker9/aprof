@@ -31,7 +31,7 @@ const NUMBERS = [
 
 export function Hero({ productCount }: { productCount: number }) {
   return (
-    <section className="relative isolate min-h-[704px] overflow-hidden bg-bg">
+    <section className="relative isolate min-h-[704px] overflow-hidden rounded-[var(--radius-block)] bg-bg">
       <Image
         src="/images/towbar-hero.webp"
         alt=""

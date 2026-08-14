@@ -82,14 +82,25 @@ function Delivery() {
 export function InstallDelivery() {
   return (
     <Section tone="dark" className="relative overflow-hidden">
+      {/*
+        Широкий кадр 2104×747 ложится ровно в пропорции секции. Градиент
+        идёт слева направо, а не сверху вниз: текст стоит слева, и
+        затемнять надо ту половину, где он лежит.
+      */}
       <Image
-        src="/images/install-hero.webp"
+        src="/images/prado-embankment.webp"
         alt=""
         fill
         sizes="100vw"
-        className="object-cover opacity-15"
+        className="object-cover object-right"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-bg via-bg/85 to-bg" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(90deg, rgb(10,10,11) 0%, rgba(10,10,11,0.7) 18%, rgba(10,10,11,0.35) 45%, rgba(10,10,11,0.15) 100%)',
+        }}
+      />
 
       <div className="relative">
         <Eyebrow>Как вы получите фаркоп</Eyebrow>

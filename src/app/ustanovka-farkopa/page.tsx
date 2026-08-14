@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { shareWithoutBumperCut } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
 import { Accordion } from '@/components/ui/accordion'
 import { FAQ } from '@/content/faq'
+import { CONTACTS } from '@/content/contacts'
 import { DOCUMENTS, DURATIONS, INCLUDED, PRICES, PRICE_NOTE, STEPS } from '@/content/ustanovka'
 import { getDb } from '@/db/client'
 
@@ -33,9 +35,20 @@ export default async function InstallPage() {
         >
           Записаться
         </Link>
-        <a href="tel:+78121234567" className="text-[19px] font-semibold hover:text-accent">
-          +7 (812) 123-45-67
+        <a href={CONTACTS.phoneHref} className="text-[19px] font-semibold hover:text-accent">
+          {CONTACTS.phone}
         </a>
+      </div>
+
+      <div className="relative mt-10 aspect-[1200/500] overflow-hidden rounded-[var(--radius-block)]">
+        <Image
+          src="/images/install-hero.webp"
+          alt="Установленный фаркоп"
+          fill
+          priority
+          sizes="(max-width: 1400px) 100vw, 1400px"
+          className="object-cover"
+        />
       </div>
 
       <section className="mt-16">

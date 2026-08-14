@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
@@ -131,6 +132,11 @@ export default async function ProductPage({ params }: Params) {
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_380px]">
         <div>
           <div className="flex aspect-4/3 items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-line-light bg-white">
+            {/*
+              Снимки товаров лежат на стороннем сайте и несут чужой
+              водяной знак — до их обработки показываем кадр из макета,
+              чтобы карточка не выглядела пустой.
+            */}
             {product.images[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -139,7 +145,13 @@ export default async function ProductPage({ params }: Params) {
                 className="h-full w-full object-contain"
               />
             ) : (
-              <span className="text-sm opacity-45">нет фото</span>
+              <Image
+                src="/images/product-sample.webp"
+                alt={`Фаркоп ${product.article}`}
+                fill
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                className="object-contain"
+              />
             )}
           </div>
 

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
  * к подстановке снимков, и никто не примет пустой блок за готовый.
  */
 const WORKS = [
+  { car: 'Skoda Kodiaq', article: 'Bosal S-124', photo: '/images/work-kodiaq.webp' },
   { car: 'Toyota RAV4 XA50', article: 'Galia T030A' },
   { car: 'Hyundai Creta I', article: 'Halty H.T97' },
   { car: 'Kia Sportage IV', article: 'Steinhof K-045' },
@@ -41,8 +43,18 @@ export default function WorksPage() {
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {WORKS.map((work) => (
           <figure key={work.article}>
-            <div className="flex aspect-[4/3] items-center justify-center rounded-[var(--radius-card)] border border-line-light bg-white text-xs opacity-40">
-              фото скоро
+            <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-line-light bg-white text-xs opacity-40">
+              {work.photo ? (
+                <Image
+                  src={work.photo}
+                  alt={`Фаркоп ${work.article} на ${work.car}`}
+                  fill
+                  sizes="(max-width: 640px) 100vw, 33vw"
+                  className="object-cover"
+                />
+              ) : (
+                'фото скоро'
+              )}
             </div>
             <figcaption className="mt-3 text-sm">
               {work.car} · <span className="opacity-55">{work.article}</span>

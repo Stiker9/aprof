@@ -63,10 +63,10 @@ export default async function CatalogPage() {
   }
 
   return (
-    <>
+    <main className="flex flex-1 flex-col overflow-hidden rounded-[var(--radius-block)] bg-paper-3 text-ink-dark">
       <PickerBar />
 
-      <main className="bg-paper-3 text-ink-dark">
+      <div>
         <div className="mx-auto w-full max-w-[1400px] px-6 py-10">
           <Breadcrumbs items={[{ label: 'Главная', href: urls.home() }, { label: 'Фаркопы' }]} />
 
@@ -164,7 +164,7 @@ export default async function CatalogPage() {
             </div>
           </section>
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   )
 }

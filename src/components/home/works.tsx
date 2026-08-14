@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { ArrowLink } from '@/components/ui/arrow-link'
 
 /**
@@ -12,15 +13,17 @@ import { ArrowLink } from '@/components/ui/arrow-link'
 interface Work {
   car: string
   article: string
+  /** Снимок из макета. Там он один — остальные ждут фотографий заказчика. */
+  photo?: string
 }
 
 const WORKS: Work[] = [
-  { car: 'Toyota RAV4 XA50', article: 'T110-A' },
-  { car: 'Hyundai Creta I', article: 'H231-A' },
-  { car: 'Kia Sportage IV', article: 'K126-A' },
-  { car: 'Renault Duster II', article: 'R118-A' },
-  { car: 'Volkswagen Tiguan II', article: 'V211-A' },
-  { car: 'Lada Vesta SW Cross', article: 'L041-A' },
+  { car: 'Skoda Kodiaq', article: 'Bosal S-124', photo: '/images/work-kodiaq.webp' },
+  { car: 'Toyota RAV4 XA50', article: 'Galia T030A' },
+  { car: 'Hyundai Creta I', article: 'Halty H.T97' },
+  { car: 'Kia Sportage IV', article: 'Steinhof K-045' },
+  { car: 'Volkswagen Tiguan II', article: 'Oris 3247-A' },
+  { car: 'Lada Vesta SW Cross', article: 'Лидер-плюс L-102' },
 ]
 
 /**
@@ -32,7 +35,7 @@ const STRIP_PADDING = 'pl-[max(1.5rem,calc((100%-1400px)/2+1.5rem))]'
 
 export function Works() {
   return (
-    <section className="bg-surface text-ink">
+    <section className="overflow-hidden rounded-[var(--radius-block)] bg-surface text-ink">
       <div className="mx-auto w-full max-w-[1400px] px-6 pt-20 md:pt-28">
         <p className="text-[11px] uppercase tracking-[0.2em] text-ink-dim">Работы</p>
         <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(26px,4vw,34px)] leading-tight tracking-[-0.03em]">
@@ -51,8 +54,18 @@ export function Works() {
       <div className={`mt-12 flex gap-5 overflow-x-auto pb-2 pr-6 ${STRIP_PADDING}`}>
         {WORKS.map((work) => (
           <figure key={work.article} className="w-[360px] shrink-0 md:w-[520px]">
-            <div className="flex aspect-[520/333] items-center justify-center bg-surface-2 text-xs text-ink-dim">
-              фото скоро
+            <div className="relative flex aspect-[520/333] items-center justify-center overflow-hidden bg-surface-2 text-xs text-ink-dim">
+              {work.photo ? (
+                <Image
+                  src={work.photo}
+                  alt={`Фаркоп ${work.article} на ${work.car}`}
+                  fill
+                  sizes="520px"
+                  className="object-cover"
+                />
+              ) : (
+                'фото скоро'
+              )}
             </div>
             <figcaption className="mt-3 text-sm text-ink-muted">
               {work.car} · <span className="text-ink-dim">{work.article}</span>

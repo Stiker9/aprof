@@ -35,23 +35,27 @@ export function CatalogShell({
   children: ReactNode
 }) {
   return (
-    <>
-      {picker === false ? null : <PickerBar {...picker} />}
+    /*
+      Строка подбора и содержимое лежат в одном скруглённом блоке, а не
+      двумя. В макете шапка занимает его верх со скруглением сверху, а
+      содержимое — низ со скруглением снизу: это одна карточка, а не две
+      встык.
+    */
+    <main className="flex flex-1 flex-col overflow-hidden rounded-[var(--radius-block)] bg-paper-3 text-ink-dark">
+      {picker === false ? <div className="h-14 bg-bg" /> : <PickerBar {...picker} />}
 
-      <main className="flex-1 bg-paper-3 text-ink-dark">
-        <div className="mx-auto w-full max-w-[1400px] px-6 py-10">
-          <Breadcrumbs items={crumbs} />
+      <div className="mx-auto w-full max-w-[1400px] px-6 py-10">
+        <Breadcrumbs items={crumbs} />
 
-          <h1 className="mt-6 font-[family-name:var(--font-display)] text-[clamp(24px,3.4vw,32px)] leading-[1.15] tracking-[-0.02em]">
-            {title}
-          </h1>
+        <h1 className="mt-6 font-[family-name:var(--font-display)] text-[clamp(24px,3.4vw,32px)] leading-[1.15] tracking-[-0.02em]">
+          {title}
+        </h1>
 
-          {summary ? <p className="mt-4 text-sm opacity-55">{summary}</p> : null}
+        {summary ? <p className="mt-4 text-sm opacity-55">{summary}</p> : null}
 
-          {children}
-        </div>
-      </main>
-    </>
+        {children}
+      </div>
+    </main>
   )
 }
 

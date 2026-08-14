@@ -21,7 +21,8 @@ export default async function HomePage() {
   const totalModels = brands.reduce((sum, brand) => sum + brand.modelCount, 0)
 
   return (
-    <main>
+    // Просвет между секциями: каждая — отдельный блок, а не часть полотна
+    <main className="flex flex-col gap-1.5">
       <Hero productCount={totalProducts} />
       <Brands brands={popular} totalBrands={brands.length} totalModels={totalModels} />
       <Promos />

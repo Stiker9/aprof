@@ -30,7 +30,9 @@ export function Section({
   className?: string
 }) {
   return (
-    <section className={`${TONES[tone]} ${className}`}>
+    <section
+      className={`overflow-hidden rounded-[var(--radius-block)] ${TONES[tone]} ${className}`}
+    >
       <div className="mx-auto w-full max-w-[1400px] px-6 py-20 md:py-28">{children}</div>
     </section>
   )
