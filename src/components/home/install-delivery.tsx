@@ -73,7 +73,7 @@ function Delivery() {
 
       <div className="mt-12 flex flex-wrap items-baseline gap-x-10 gap-y-4">
         <ArrowLink href="/dostavka">Рассчитать доставку</ArrowLink>
-        <ArrowLink href="/oplata">Условия и оплата</ArrowLink>
+        <ArrowLink href="/dostavka">Условия доставки</ArrowLink>
       </div>
     </>
   )

@@ -1,3 +1,5 @@
+import { urls } from '@/catalog/urls'
+
 /**
  * Акции.
  *
@@ -50,7 +52,7 @@ export const PROMOS: Promo[] = [
     period: { kind: 'permanent' },
     discount: '−10%',
     discountNote: 'обоим',
-    action: { label: 'Как это работает', href: '/akcii/privedi-druga' },
+    action: { label: 'Как это работает', href: '/akcii' },
   },
   {
     kind: 'list',
@@ -63,6 +65,6 @@ export const PROMOS: Promo[] = [
       { model: 'Kia Sportage', discount: 'скидка 15%' },
       { model: 'Hyundai Tucson', discount: 'скидка 15%' },
     ],
-    action: { label: 'Проверить свою модель', href: '/akcii/akcionnye-pozicii' },
+    action: { label: 'Проверить свою модель', href: urls.catalog() },
   },
 ]

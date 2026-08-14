@@ -10,11 +10,16 @@ const POPULAR = [
   { name: 'Nissan', slug: 'nissan' },
 ]
 
+/**
+ * Три услуги ведут на якоря одной страницы, а не на свои страницы:
+ * по абзацу текста на страницу дало бы четыре пустышки, а сайт
+ * продвигается в поиске, где тонкие страницы тянут вниз весь хост.
+ */
 const SERVICES = [
   { label: 'Установка фаркопа', href: '/ustanovka-farkopa' },
-  { label: 'Электрика и розетка', href: '/uslugi/elektrika' },
-  { label: 'Подбор и консультация', href: '/uslugi/podbor' },
-  { label: 'Сварка и ремонт ТСУ', href: '/uslugi/remont-tsu' },
+  { label: 'Электрика и розетка', href: '/uslugi#elektrika' },
+  { label: 'Подбор и консультация', href: '/uslugi#podbor' },
+  { label: 'Сварка и ремонт ТСУ', href: '/uslugi#remont-tsu' },
 ]
 
 const COMPANY = [

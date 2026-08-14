@@ -61,8 +61,9 @@ export function About() {
         </div>
       </div>
 
+      {/* На главной три отзыва, остальные — на своей странице */}
       <div className="mt-20 grid gap-12 lg:grid-cols-3">
-        {REVIEWS.map((review) => (
+        {REVIEWS.slice(0, 3).map((review) => (
           <figure key={review.author}>
             {/* Кавычка декоративная: её роль берёт на себя blockquote */}
             <span aria-hidden className="block font-[family-name:var(--font-display)] text-4xl leading-none opacity-25">
