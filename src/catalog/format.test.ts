@@ -1,0 +1,88 @@
+import { expect, test } from 'vitest'
+import {
+  NBSP,
+  formatCount,
+  formatNumber,
+  formatPrice,
+  formatVariantLabel,
+  formatVariantShort,
+  formatYears,
+  plural,
+} from './format'
+
+test('склонение по русским правилам', () => {
+  expect(plural(1, 'фаркоп', 'фаркопа', 'фаркопов')).toBe('фаркоп')
+  expect(plural(2, 'фаркоп', 'фаркопа', 'фаркопов')).toBe('фаркопа')
+  expect(plural(5, 'фаркоп', 'фаркопа', 'фаркопов')).toBe('фаркопов')
+  expect(plural(21, 'фаркоп', 'фаркопа', 'фаркопов')).toBe('фаркоп')
+  expect(plural(0, 'фаркоп', 'фаркопа', 'фаркопов')).toBe('фаркопов')
+})
+
+test('склонение на числах, где ошибаются чаще всего', () => {
+  // 11-14 всегда «многие», хотя оканчиваются на 1-4
+  expect(plural(11, 'модель', 'модели', 'моделей')).toBe('моделей')
+  expect(plural(12, 'модель', 'модели', 'моделей')).toBe('моделей')
+  expect(plural(14, 'модель', 'модели', 'моделей')).toBe('моделей')
+  expect(plural(111, 'модель', 'модели', 'моделей')).toBe('моделей')
+  expect(plural(101, 'модель', 'модели', 'моделей')).toBe('модель')
+})
+
+test('число вместе со словом', () => {
+  expect(formatCount(61, 'модель', 'модели', 'моделей')).toBe('61 модель')
+  expect(formatCount(34, 'модель', 'модели', 'моделей')).toBe('34 модели')
+  expect(formatCount(579, 'фаркоп', 'фаркопа', 'фаркопов')).toBe('579 фаркопов')
+  // Разряды разделяются: «5808 фаркопов» не читается
+  expect(formatCount(5808, 'фаркоп', 'фаркопа', 'фаркопов')).toBe(`5${NBSP}808 фаркопов`)
+})
+
+/**
+ * Разделитель пишется через константу, а не пробелом с клавиатуры:
+ * неразрывный пробел от обычного на глаз не отличить, и тест на такой
+ * опечатке падает с сообщением «ожидалось "5 808" вместо "5 808"».
+ */
+test('разряды разделяются неразрывным пробелом', () => {
+  expect(formatNumber(5808)).toBe(`5${NBSP}808`)
+  expect(formatNumber(5808)).not.toBe('5 808')
+})
+
+test('цена с разделением разрядов', () => {
+  expect(formatPrice(15990)).toBe(`15${NBSP}990${NBSP}₽`)
+  expect(formatPrice(4090)).toBe(`4${NBSP}090${NBSP}₽`)
+  expect(formatPrice(199990)).toBe(`199${NBSP}990${NBSP}₽`)
+})
+
+test('годы выпуска', () => {
+  expect(formatYears(1995, 2000)).toBe('1995–2000')
+  expect(formatYears(2025, null)).toBe('2025 и новее')
+  expect(formatYears(null, null)).toBe('')
+})
+
+test('подпись кузова собирается из латинских частей', () => {
+  expect(formatVariantLabel('Toyota', 'RAV4', 'XA10', 1995, 2000)).toBe(
+    'Toyota RAV4 XA10 1995–2000',
+  )
+})
+
+test('подпись без кода поколения не оставляет двойных пробелов', () => {
+  expect(formatVariantLabel('Audi', 'A6', null, 1997, 2004)).toBe('Audi A6 1997–2004')
+})
+
+test('подпись без годов обходится названием', () => {
+  expect(formatVariantLabel('Alfa Romeo', 'Giulia', null, null, null)).toBe('Alfa Romeo Giulia')
+})
+
+test('дробное число пишется через запятую', () => {
+  expect(formatNumber(11.1)).toBe('11,1')
+  expect(formatNumber(13.25)).toBe('13,25')
+  expect(formatNumber(18)).toBe('18')
+})
+
+test('короткая подпись кузова без марки и модели', () => {
+  expect(formatVariantShort('XA10', 1995, 2000)).toBe('XA10 1995–2000')
+  expect(formatVariantShort(null, 1997, 2004)).toBe('1997–2004')
+  expect(formatVariantShort('F30', null, null)).toBe('F30')
+})
+
+test('короткая подпись пуста, когда описывать нечем', () => {
+  expect(formatVariantShort(null, null, null)).toBe('')
+})

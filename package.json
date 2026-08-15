@@ -8,7 +8,8 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
-    "import": "tsx scripts/import.ts"
+    "import": "tsx scripts/import.ts",
+    "check": "tsx scripts/check-build.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

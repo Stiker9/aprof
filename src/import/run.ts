@@ -3,6 +3,7 @@ import { brands, fitments, manufacturers, models, products, variants } from '../
 import { dedupeFitments, dedupeVariants } from './dedupe'
 import { extractCatalog } from './extract'
 import {
+  buildVariantSlugs,
   cleanVariantName,
   normalizeManufacturer,
   parseGeneration,
@@ -111,17 +112,24 @@ export async function importCatalog(html: string, db: DrizzleDb): Promise<Import
   const modelIdByIndex = new Map(modelRows.map((m, i) => [i, m.id]))
 
   // --- кузова ---
-  // Схлопываем дубли и запоминаем карту, чтобы перевести на неё связки.
-  const { kept: uniqueVariants, indexMap: variantIndexMap } = dedupeVariants(raw.variants)
+  // Слаги считаются сразу для всех: они зависят от других кузовов той же
+  // модели. Дедупликация и вставка пользуются одним и тем же набором,
+  // иначе разойдутся и упрутся в уникальный индекс на пару (модель, слаг).
+  const allSlugs = buildVariantSlugs(raw.variants)
+  const {
+    kept: uniqueVariants,
+    keptSlugs,
+    indexMap: variantIndexMap,
+  } = dedupeVariants(raw.variants, allSlugs)
 
   const variantRows = await insertAll(
-    uniqueVariants.map((v) => {
+    uniqueVariants.map((v, i) => {
       const name = cleanVariantName(v.name)
       const years = parseYears(name)
       const modelName = raw.models[v.modelIndex].name
       return {
         modelId: modelIdByIndex.get(v.modelIndex)!,
-        slug: slugify(name),
+        slug: keptSlugs[i],
         name,
         generation: parseGeneration(name, modelName),
         yearFrom: years.from,

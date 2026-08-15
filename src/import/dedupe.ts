@@ -1,5 +1,4 @@
 import type { RawFitment, RawVariant } from './extract'
-import { cleanVariantName, slugify } from './normalize'
 
 /**
  * Схлопывает повторяющиеся связки товар↔кузов.
@@ -46,16 +45,21 @@ export function dedupeFitments(list: RawFitment[]): RawFitment[] {
  * Возвращает оставшиеся кузова и карту «старый индекс → новый»,
  * по которой связки перенаправляются на сохранённую запись.
  */
-export function dedupeVariants(list: RawVariant[]): {
+export function dedupeVariants(
+  list: RawVariant[],
+  slugs: string[],
+): {
   kept: RawVariant[]
+  keptSlugs: string[]
   indexMap: Map<number, number>
 } {
   const kept: RawVariant[] = []
+  const keptSlugs: string[] = []
   const indexMap = new Map<number, number>()
   const newIndexByKey = new Map<string, number>()
 
   list.forEach((variant, oldIndex) => {
-    const key = `${variant.modelIndex}:${slugify(cleanVariantName(variant.name))}`
+    const key = `${variant.modelIndex}:${slugs[oldIndex]}`
     const existing = newIndexByKey.get(key)
 
     if (existing !== undefined) {
@@ -65,9 +69,10 @@ export function dedupeVariants(list: RawVariant[]): {
 
     const newIndex = kept.length
     kept.push(variant)
+    keptSlugs.push(slugs[oldIndex])
     newIndexByKey.set(key, newIndex)
     indexMap.set(oldIndex, newIndex)
   })
 
-  return { kept, indexMap }
+  return { kept, keptSlugs, indexMap }
 }
