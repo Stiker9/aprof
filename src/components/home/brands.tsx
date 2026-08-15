@@ -34,7 +34,14 @@ export function Brands({
   const rest = totalBrands - brands.length
 
   return (
-    <section className="flex min-h-[calc(100vh-16px)] flex-col gap-[clamp(28px,4vh,44px)] overflow-hidden rounded-[var(--radius-block)] bg-paper-3 px-14 pb-[clamp(44px,6vh,64px)] pt-[clamp(56px,8vh,80px)] text-ink-dark">
+    /*
+      Размеры внутри заданы обычной шкалой, а не долями высоты окна, как
+      в исходнике макета. Там они схлопывались к нижней границе на любом
+      невысоком экране: на ноутбуке 1920×980 название марки выходило
+      14,7 пикселя вместо 16, и сетка читалась мелкой. Секция всё так же
+      занимает экран, но текст от его высоты больше не зависит.
+    */
+    <section className="flex min-h-[calc(100vh-16px)] flex-col gap-10 overflow-hidden rounded-[var(--radius-block)] bg-paper-3 px-14 pb-16 pt-20 text-ink-dark">
       <div className="flex items-start justify-between gap-12">
         <div className="flex max-w-[560px] flex-col gap-3.5">
           <div className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A88]">Каталог</div>
@@ -68,32 +75,26 @@ export function Brands({
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-[clamp(8px,1vh,12px)] sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {brands.map((brand) => {
           const logo = logoFor(brand.slug)
           return (
             <Link
               key={brand.slug}
               href={urls.brand(brand.slug)}
-              className="flex flex-col items-center justify-center gap-[clamp(4px,0.7vh,8px)] rounded-[var(--radius-card)] border border-ink-dark/8 bg-white/72 px-2.5 py-[clamp(12px,2vh,22px)] backdrop-blur-[14px] backdrop-saturate-[1.2] transition-colors hover:border-accent hover:bg-white"
+              className="flex flex-col items-center justify-center gap-2.5 rounded-[var(--radius-card)] border border-ink-dark/8 bg-white/72 px-3 py-7 backdrop-blur-[14px] backdrop-saturate-[1.2] transition-colors hover:border-accent hover:bg-white"
             >
               {logo ? (
-                <span className="relative block h-[clamp(24px,2.8vh,34px)] w-[clamp(38px,4.4vh,54px)]">
-                  <Image
-                    src={logo}
-                    alt=""
-                    fill
-                    sizes="54px"
-                    className="object-contain"
-                  />
+                <span className="relative block h-9 w-14">
+                  <Image src={logo} alt="" fill sizes="56px" className="object-contain" />
                 </span>
               ) : null}
 
-              <span className="text-center font-[family-name:var(--font-display)] text-[clamp(13px,1.5vh,16px)] leading-[1.1] text-[#2E2E30]">
+              <span className="text-center font-[family-name:var(--font-display)] text-[18px] leading-[1.1] text-[#2E2E30]">
                 {brand.name}
               </span>
 
-              <span className="text-[10px] uppercase tracking-[0.08em] text-[#8A8A88]">
+              <span className="text-[11px] uppercase tracking-[0.08em] text-[#8A8A88]">
                 {formatCount(brand.modelCount, 'модель', 'модели', 'моделей')}
               </span>
             </Link>
