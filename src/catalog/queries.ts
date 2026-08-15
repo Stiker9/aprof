@@ -1,6 +1,7 @@
 import { and, asc, eq } from 'drizzle-orm'
 import type { DrizzleDb } from '../db/client'
 import { brands, fitments, manufacturers, models, products, variants } from '../db/schema'
+import { formatVariantShort } from './format'
 
 export interface BrandRow {
   slug: string
@@ -288,6 +289,85 @@ export async function listAllProductSlugs(db: DrizzleDb): Promise<string[]> {
 export async function countProducts(db: DrizzleDb): Promise<number> {
   const rows = await db.select({ id: products.id }).from(products)
   return rows.length
+}
+
+/** Одна строка справочника подбора: марка со своими моделями и кузовами. */
+export interface PickerBrand {
+  s: string
+  n: string
+  m: PickerModel[]
+}
+
+export interface PickerModel {
+  s: string
+  n: string
+  v: PickerVariant[]
+}
+
+export interface PickerVariant {
+  s: string
+  n: string
+  /** Есть ли у кузова своя страница. Если нет — вести на страницу модели. */
+  p: boolean
+}
+
+/**
+ * Справочник для подбора: все марки, модели и кузова одним деревом.
+ *
+ * Уезжает в браузер целиком, поэтому ключи однобуквенные, а лишних
+ * полей нет: 106 марок, 956 моделей и 1 949 кузовов при обычных именах
+ * полей весят вчетверо больше, а грузится это ради трёх выпадающих
+ * списков.
+ *
+ * Собирается одним проходом по трём таблицам, а не запросом на каждую
+ * марку: иначе 106 запросов на сборке.
+ */
+export async function buildPickerIndex(db: DrizzleDb): Promise<PickerBrand[]> {
+  const rows = await db
+    .select({
+      brandSlug: brands.slug,
+      brandName: brands.name,
+      modelSlug: models.slug,
+      modelName: models.name,
+      variantSlug: variants.slug,
+      variantGeneration: variants.generation,
+      variantFrom: variants.yearFrom,
+      variantTo: variants.yearTo,
+      variantHasPage: variants.hasOwnPage,
+    })
+    .from(variants)
+    .innerJoin(models, eq(models.id, variants.modelId))
+    .innerJoin(brands, eq(brands.id, models.brandId))
+    .where(and(eq(brands.isPublished, true), eq(models.isPublished, true)))
+    .orderBy(asc(brands.name), asc(models.name), asc(variants.yearFrom))
+
+  const byBrand = new Map<string, PickerBrand>()
+  const byModel = new Map<string, PickerModel>()
+
+  for (const row of rows) {
+    let brand = byBrand.get(row.brandSlug)
+    if (!brand) {
+      brand = { s: row.brandSlug, n: row.brandName, m: [] }
+      byBrand.set(row.brandSlug, brand)
+    }
+
+    const modelKey = `${row.brandSlug}/${row.modelSlug}`
+    let model = byModel.get(modelKey)
+    if (!model) {
+      model = { s: row.modelSlug, n: row.modelName, v: [] }
+      byModel.set(modelKey, model)
+      brand.m.push(model)
+    }
+
+    model.v.push({
+      s: row.variantSlug,
+      n:
+        formatVariantShort(row.variantGeneration, row.variantFrom, row.variantTo) || row.modelName,
+      p: row.variantHasPage,
+    })
+  }
+
+  return [...byBrand.values()]
 }
 
 /**
