@@ -256,9 +256,8 @@ export default async function ProductPage({ params }: Params) {
             {product.country ? ` · ${product.country}` : ''} · артикул {product.article}
           </div>
 
-          <div className="mt-4 font-[family-name:var(--font-display)] text-[32px] leading-none tracking-[-0.02em]">
-            {formatPrice(product.price)}
-          </div>
+          {/* Цена — Wix Madefor 22/600, не Unbounded: см. docs/typography.md */}
+          <div className="mt-4 text-[22px] font-semibold">{formatPrice(product.price)}</div>
 
           <div
             className={`mt-4 inline-block rounded px-2 py-1 text-xs font-semibold ${

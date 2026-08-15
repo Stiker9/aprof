@@ -25,14 +25,14 @@ function Spb() {
 
       <div className="mt-12 flex flex-wrap gap-x-16 gap-y-8">
         <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,48px)] leading-none tracking-[-0.02em]">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
             3 часа
           </div>
-          <div className="mt-2 text-sm text-ink-muted">средняя установка</div>
+          <div className="mt-2 text-[13px] text-ink-muted">средняя установка</div>
         </div>
         <div>
           <div className="text-[19px]">Софийская, 72</div>
-          <div className="mt-2 text-sm text-ink-muted">Пн–Сб 9:00–19:00</div>
+          <div className="mt-2 text-[13px] text-ink-muted">Пн–Сб 9:00–19:00</div>
         </div>
       </div>
 
@@ -58,16 +58,16 @@ function Delivery() {
 
       <div className="mt-12 flex flex-wrap gap-x-16 gap-y-8">
         <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,48px)] leading-none tracking-[-0.02em]">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
             1 100
           </div>
-          <div className="mt-2 text-sm text-ink-muted">городов · доставка СДЭК</div>
+          <div className="mt-2 text-[13px] text-ink-muted">городов · доставка СДЭК</div>
         </div>
         <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,48px)] leading-none tracking-[-0.02em]">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
             1–7 дней
           </div>
-          <div className="mt-2 text-sm text-ink-muted">срок в пути</div>
+          <div className="mt-2 text-[13px] text-ink-muted">срок в пути</div>
         </div>
       </div>
 

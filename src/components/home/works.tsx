@@ -37,11 +37,11 @@ export function Works() {
   return (
     <section className="overflow-hidden rounded-[var(--radius-block)] bg-surface text-ink">
       <div className="mx-auto w-full max-w-[1400px] px-6 pt-20 md:pt-28">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-ink-dim">Работы</p>
-        <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(26px,4vw,34px)] leading-tight tracking-[-0.03em]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dim">Работы</p>
+        <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(30px,3.2vw,46px)] leading-[1.04] tracking-[-0.03em]">
           Три машины в день
         </h2>
-        <p className="mt-4 max-w-[60ch] text-[17px] text-ink-muted">
+        <p className="mt-4 max-w-[60ch] text-[17px] leading-[1.55] text-ink-muted">
           Снимаем каждую установку — посмотрите, как фаркоп выглядит именно на вашей модели.
         </p>
       </div>

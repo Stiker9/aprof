@@ -47,9 +47,10 @@ export function ProductCard({ product }: { product: ProductRow }) {
       </div>
 
       <div className="min-w-0 flex-1">
+        {/* Артикул 18/500, цена 22/600 — см. docs/typography.md */}
         <Link
           href={urls.product(product.slug)}
-          className="font-[family-name:var(--font-display)] text-[17px] tracking-[-0.01em] after:absolute after:inset-0 hover:text-accent"
+          className="text-[18px] font-medium after:absolute after:inset-0 hover:text-accent"
         >
           {product.article}
         </Link>
@@ -60,9 +61,9 @@ export function ProductCard({ product }: { product: ProductRow }) {
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <span className="text-[19px] font-bold">{formatPrice(product.price)}</span>
+          <span className="text-[22px] font-semibold">{formatPrice(product.price)}</span>
           <span
-            className={`rounded px-2 py-1 text-xs font-semibold ${
+            className={`rounded px-2 py-1 text-[12px] font-medium ${
               product.inStock ? 'bg-in-stock/12 text-in-stock' : 'bg-on-order/12 text-on-order'
             }`}
           >
@@ -74,7 +75,7 @@ export function ProductCard({ product }: { product: ProductRow }) {
           {chips.map((chip) => (
             <span
               key={chip}
-              className="rounded border border-line-light px-2 py-1 text-xs opacity-65"
+              className="rounded border border-line-light px-2 py-1 text-[12px] font-medium opacity-65"
             >
               {chip}
             </span>

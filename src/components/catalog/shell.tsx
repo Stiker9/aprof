@@ -47,11 +47,16 @@ export function CatalogShell({
       <div className="mx-auto w-full max-w-[1400px] px-6 py-10">
         <Breadcrumbs items={crumbs} />
 
-        <h1 className="mt-6 font-[family-name:var(--font-display)] text-[clamp(24px,3.4vw,32px)] leading-[1.15] tracking-[-0.02em]">
+        {/*
+          Заголовок страницы-инструмента мельче и плотнее, чем на
+          главной: здесь не рассказ, а работа со списком, и заголовок
+          не должен отжимать данные вниз. См. docs/typography.md
+        */}
+        <h1 className="mt-6 font-[family-name:var(--font-display)] text-[clamp(26px,2.4vw,30px)] font-medium leading-[1.06] tracking-[-0.02em]">
           {title}
         </h1>
 
-        {summary ? <p className="mt-4 text-sm opacity-55">{summary}</p> : null}
+        {summary ? <p className="mt-4 text-[13px] opacity-55">{summary}</p> : null}
 
         {children}
       </div>

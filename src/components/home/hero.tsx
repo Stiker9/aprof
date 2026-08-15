@@ -69,12 +69,12 @@ export function Hero({ productCount }: { productCount: number }) {
 
       <div className="absolute inset-x-0 bottom-0 px-14 pb-14">
         <div className="max-w-[46%] min-w-[320px] max-lg:max-w-none">
-          <h1 className="font-[family-name:var(--font-display)] text-[clamp(30px,3.4vw,45px)] leading-[1.08] tracking-[-0.01em]">
+          <h1 className="font-[family-name:var(--font-display)] text-[clamp(38px,4.4vw,62px)] leading-none tracking-[-0.035em]">
             Фаркопы с установкой
             <br />в Санкт-Петербурге
           </h1>
 
-          <p className="mt-5 max-w-[46ch] text-[17px] text-ink-muted">
+          <p className="mt-6 max-w-[46ch] text-[17px] leading-[1.55] text-ink-muted">
             Подберём по марке, модели и году. Поставим за один визит — с документами для ТО.
           </p>
 
@@ -88,13 +88,14 @@ export function Hero({ productCount }: { productCount: number }) {
             Подобрать фаркоп
           </Link>
 
+          {/* Кегль один на все три — они читаются рядом как ряд, а не по отдельности */}
           <div className="mt-12 flex flex-wrap gap-x-14 gap-y-6">
             {NUMBERS.map((item) => (
               <div key={item.caption}>
-                <div className="font-[family-name:var(--font-display)] text-[clamp(28px,4vw,42px)] leading-none tracking-[-0.02em]">
+                <div className="font-[family-name:var(--font-display)] text-[clamp(34px,2.6vw,40px)] leading-none tracking-[-0.02em]">
                   {item.value ?? formatNumber(productCount)}
                 </div>
-                <div className="mt-2 text-sm text-ink-muted">{item.caption}</div>
+                <div className="mt-2 text-[13px] text-ink-muted">{item.caption}</div>
               </div>
             ))}
           </div>

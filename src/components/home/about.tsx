@@ -31,33 +31,33 @@ export function About() {
 
       <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(30px,4vw,42px)] leading-none tracking-[-0.02em]">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
             12 лет
           </div>
-          <div className="mt-2 text-sm opacity-60">на одном месте</div>
+          <div className="mt-2 text-[13px] opacity-60">на одном месте</div>
         </div>
         <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(30px,4vw,42px)] leading-none tracking-[-0.02em]">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
             3 800
           </div>
-          <div className="mt-2 text-sm opacity-60">установок</div>
+          <div className="mt-2 text-[13px] opacity-60">установок</div>
         </div>
         <div>
           <div className="flex items-baseline gap-3">
-            <span className="font-[family-name:var(--font-display)] text-[clamp(30px,4vw,42px)] leading-none tracking-[-0.02em]">
+            <span className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
               {RATING.score}
             </span>
             <Stars />
           </div>
-          <div className="mt-2 text-sm opacity-60">
+          <div className="mt-2 text-[13px] opacity-60">
             средняя оценка · {RATING.count} отзывов
           </div>
         </div>
         <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(30px,4vw,42px)] leading-none tracking-[-0.02em]">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
             2 года
           </div>
-          <div className="mt-2 text-sm opacity-60">гарантии на работы</div>
+          <div className="mt-2 text-[13px] opacity-60">гарантии на работы</div>
         </div>
       </div>
 
