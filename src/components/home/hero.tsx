@@ -12,9 +12,9 @@ import { PickerBar } from '@/components/picker-bar'
  * низких окон: без него на ноутбуке с невысоким экраном текст и числа
  * налезали бы друг на друга.
  *
- * Кадров два, и в макете они плавно сменяют друг друга. Смена требует
- * таймера на клиенте, поэтому пока показывается первый; второй лежит в
- * разметке и ждёт задачи про анимации — вместе с меню-оверлеем.
+ * Кадров два, и они плавно сменяют друг друга — фаркоп крупным планом
+ * и Prado на набережной. Смена сделана анимацией в globals.css, без
+ * скриптов и таймеров.
  *
  * Градиент взят из исходника: слева почти непрозрачный, к 48% ширины
  * сходит на нет. Без него текст ложится прямо на кузов и пропадает.
@@ -38,6 +38,13 @@ export function Hero({ productCount }: { productCount: number }) {
         priority
         sizes="100vw"
         className="object-cover"
+      />
+      <Image
+        src="/images/hero-prado.webp"
+        alt=""
+        fill
+        sizes="100vw"
+        className="hero-slide-second object-cover"
       />
       <div className="pointer-events-none absolute inset-0" style={{ background: GRADIENT }} />
 
