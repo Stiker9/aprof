@@ -39,10 +39,16 @@ export function Hero({ productCount }: { productCount: number }) {
         sizes="100vw"
         className="object-cover"
       />
+      {/*
+        Второй кадр грузится сразу, а не лениво: он проявляется на
+        четвёртой секунде, и к этому моменту должен быть готов — иначе
+        человек увидит подмену пустотой вместо смены кадра.
+      */}
       <Image
         src="/images/hero-prado.webp"
         alt=""
         fill
+        priority
         sizes="100vw"
         className="hero-slide-second object-cover"
       />
@@ -51,6 +57,14 @@ export function Hero({ productCount }: { productCount: number }) {
       {/* Строка подбора лежит на фотографии, сразу под пилюлей шапки */}
       <div className="absolute inset-x-0 top-14 z-[5]">
         <PickerBar transparent />
+      </div>
+
+      <div
+        aria-hidden
+        className="absolute bottom-8 right-14 z-[6] flex items-center gap-2"
+      >
+        <span className="hero-dot-1 block h-2 rounded-full" />
+        <span className="hero-dot-2 block h-2 rounded-full" />
       </div>
 
       <div className="absolute inset-x-0 bottom-0 px-14 pb-14">
