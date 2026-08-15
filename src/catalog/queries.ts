@@ -291,22 +291,31 @@ export async function countProducts(db: DrizzleDb): Promise<number> {
   return rows.length
 }
 
-/** Одна строка справочника подбора: марка со своими моделями и кузовами. */
+/**
+ * Одна строка справочника подбора.
+ *
+ * Ключи однобуквенные: `s` — адрес, `n` — название, `c` — сколько
+ * фаркопов, дальше вложенный список. Справочник уезжает в браузер
+ * целиком, и с обычными именами полей он весит вчетверо больше.
+ */
 export interface PickerBrand {
   s: string
   n: string
+  c: number
   m: PickerModel[]
 }
 
 export interface PickerModel {
   s: string
   n: string
+  c: number
   v: PickerVariant[]
 }
 
 export interface PickerVariant {
   s: string
   n: string
+  c: number
   /** Есть ли у кузова своя страница. Если нет — вести на страницу модели. */
   p: boolean
 }
@@ -327,12 +336,15 @@ export async function buildPickerIndex(db: DrizzleDb): Promise<PickerBrand[]> {
     .select({
       brandSlug: brands.slug,
       brandName: brands.name,
+      brandCount: brands.productCount,
       modelSlug: models.slug,
       modelName: models.name,
+      modelCount: models.productCount,
       variantSlug: variants.slug,
       variantGeneration: variants.generation,
       variantFrom: variants.yearFrom,
       variantTo: variants.yearTo,
+      variantCount: variants.productCount,
       variantHasPage: variants.hasOwnPage,
     })
     .from(variants)
@@ -347,14 +359,14 @@ export async function buildPickerIndex(db: DrizzleDb): Promise<PickerBrand[]> {
   for (const row of rows) {
     let brand = byBrand.get(row.brandSlug)
     if (!brand) {
-      brand = { s: row.brandSlug, n: row.brandName, m: [] }
+      brand = { s: row.brandSlug, n: row.brandName, c: row.brandCount, m: [] }
       byBrand.set(row.brandSlug, brand)
     }
 
     const modelKey = `${row.brandSlug}/${row.modelSlug}`
     let model = byModel.get(modelKey)
     if (!model) {
-      model = { s: row.modelSlug, n: row.modelName, v: [] }
+      model = { s: row.modelSlug, n: row.modelName, c: row.modelCount, v: [] }
       byModel.set(modelKey, model)
       brand.m.push(model)
     }
@@ -363,6 +375,7 @@ export async function buildPickerIndex(db: DrizzleDb): Promise<PickerBrand[]> {
       s: row.variantSlug,
       n:
         formatVariantShort(row.variantGeneration, row.variantFrom, row.variantTo) || row.modelName,
+      c: row.variantCount,
       p: row.variantHasPage,
     })
   }

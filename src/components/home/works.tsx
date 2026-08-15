@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { ArrowLink } from '@/components/ui/arrow-link'
+import { PhotoStrip } from '@/components/ui/photo-strip'
 
 /**
  * Наши работы.
@@ -26,13 +27,6 @@ const WORKS: Work[] = [
   { car: 'Lada Vesta SW Cross', article: 'Лидер-плюс L-102' },
 ]
 
-/**
- * Отступ слева равен отступу контента: лента начинается по одной линии
- * с заголовком, а справа уходит за край экрана — так видно, что она
- * продолжается, без стрелок и точек.
- */
-const STRIP_PADDING = 'pl-[max(1.5rem,calc((100%-1400px)/2+1.5rem))]'
-
 export function Works() {
   return (
     <section className="overflow-hidden rounded-[var(--radius-block)] bg-surface text-ink">
@@ -51,9 +45,12 @@ export function Works() {
         макетом. Кадр широкий, 520×333: фаркоп снимают вместе с задней
         частью машины, в квадрат это не помещается.
       */}
-      <div className={`mt-12 flex gap-5 overflow-x-auto pb-2 pr-6 ${STRIP_PADDING}`}>
+      <PhotoStrip className="mt-12" ariaLabel="Наши работы">
         {WORKS.map((work) => (
-          <figure key={work.article} className="w-[360px] shrink-0 md:w-[520px]">
+          <figure
+            key={work.article}
+            className="w-[360px] shrink-0 snap-start md:w-[520px]"
+          >
             <div className="relative flex aspect-[520/333] items-center justify-center overflow-hidden bg-surface-2 text-xs text-ink-dim">
               {work.photo ? (
                 <Image
@@ -72,7 +69,7 @@ export function Works() {
             </figcaption>
           </figure>
         ))}
-      </div>
+      </PhotoStrip>
 
       <div className="mx-auto w-full max-w-[1400px] px-6 pb-20 pt-10 md:pb-28">
         <ArrowLink href="/nashi-raboty" muted="больше 3 800 установок">

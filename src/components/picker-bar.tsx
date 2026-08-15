@@ -1,9 +1,11 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { formatCount } from '@/catalog/format'
 import type { PickerBrand } from '@/catalog/queries'
 import { urls } from '@/catalog/urls'
+import { PickerSelect } from '@/components/picker-select'
 
 /**
  * Строка подбора: марка, модель, кузов и годы.
@@ -14,18 +16,9 @@ import { urls } from '@/catalog/urls'
  *
  * Списки связанные: модель нельзя выбрать раньше марки, кузов раньше
  * модели. Это не придирка к порядку — фаркоп подбирается по кузову и
- * годам, а не по модели: у одного RAV4 пять поколений с разными
+ * годам, а не по модели: у одного RAV4 шесть поколений с разными
  * точками крепления, и выбор без кузова даёт ложное совпадение.
- *
- * Справочник грузится не сразу, а при первом обращении к спискам:
- * подбор нужен не каждому посетителю, а весит он больше самой
- * страницы.
  */
-const FIELD =
-  'flex-1 rounded-[10px] border px-4 py-3 text-sm outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-45'
-const FIELD_ACTIVE = 'border-white/12 bg-surface-3 text-ink'
-const FIELD_REST = 'border-white/6 bg-surface-3/50 text-ink'
-
 type State = 'loading' | 'ready' | 'error'
 
 export function PickerBar({
@@ -42,7 +35,6 @@ export function PickerBar({
   transparent?: boolean
 } = {}) {
   const router = useRouter()
-  const id = useId()
 
   const [index, setIndex] = useState<PickerBrand[]>([])
   const [state, setState] = useState<State>('loading')
@@ -52,9 +44,9 @@ export function PickerBar({
 
   /*
     Справочник тянется сразу после отрисовки, а не по касанию списка.
-    На телефоне нажатие на список открывает выбор мгновенно, и если
-    ждать этого момента, человек увидит пустоту. Запрос идёт уже после
-    того, как страница показана, и её появление не задерживает.
+    На телефоне нажатие открывает выбор мгновенно, и если ждать этого
+    момента, человек увидит пустоту. Запрос идёт уже после того, как
+    страница показана, и её появление не задерживает.
   */
   useEffect(() => {
     let живой = true
@@ -111,8 +103,6 @@ export function PickerBar({
       : urls.model(brandSlug, modelSlug)
   })()
 
-  const selectClass = (filled: boolean) => `${FIELD} ${filled ? FIELD_ACTIVE : FIELD_REST}`
-
   return (
     <div
       className={
@@ -130,62 +120,46 @@ export function PickerBar({
           transparent ? 'px-14 py-4' : 'max-w-[1400px] px-6 py-4'
         }`}
       >
-        <select
-          aria-label="Марка"
+        <PickerSelect
+          label="Марка"
           value={brandSlug}
-          disabled={state !== 'ready'}
-          onChange={(event) => {
-            setBrandSlug(event.target.value)
+          options={index}
+          loading={state === 'loading'}
+          disabled={state === 'error'}
+          searchHint={
+            state === 'ready' ? `Поиск по ${formatCount(index.length, 'марке', 'маркам', 'маркам')}` : 'Поиск'
+          }
+          onChange={(slug) => {
+            setBrandSlug(slug)
             setModelSlug('')
             setVariantSlug('')
           }}
-          className={selectClass(Boolean(brandSlug))}
-          id={`${id}-brand`}
-        >
-          <option value="">
-            {state === 'error' ? 'Список недоступен' : state === 'loading' ? 'Загружаем…' : 'Марка'}
-          </option>
-          {index.map((b) => (
-            <option key={b.s} value={b.s}>
-              {b.n}
-            </option>
-          ))}
-        </select>
+        />
 
-        <select
-          aria-label="Модель"
+        <PickerSelect
+          label="Модель"
           value={modelSlug}
+          options={currentBrand?.m ?? []}
           disabled={!currentBrand}
-          onChange={(event) => {
-            setModelSlug(event.target.value)
+          searchHint={
+            currentBrand
+              ? `Поиск по ${formatCount(currentBrand.m.length, 'модели', 'моделям', 'моделям')}`
+              : 'Поиск'
+          }
+          onChange={(slug) => {
+            setModelSlug(slug)
             setVariantSlug('')
           }}
-          className={selectClass(Boolean(modelSlug))}
-          id={`${id}-model`}
-        >
-          <option value="">Модель</option>
-          {currentBrand?.m.map((m) => (
-            <option key={m.s} value={m.s}>
-              {m.n}
-            </option>
-          ))}
-        </select>
+        />
 
-        <select
-          aria-label="Кузов и годы"
+        <PickerSelect
+          label="Кузов и годы"
           value={variantSlug}
+          options={currentModel?.v ?? []}
           disabled={!currentModel}
-          onChange={(event) => setVariantSlug(event.target.value)}
-          className={selectClass(Boolean(variantSlug))}
-          id={`${id}-variant`}
-        >
-          <option value="">Кузов и годы</option>
-          {currentModel?.v.map((v) => (
-            <option key={v.s} value={v.s}>
-              {v.n}
-            </option>
-          ))}
-        </select>
+          searchHint="Поиск по поколениям"
+          onChange={setVariantSlug}
+        />
 
         <button
           type="submit"
