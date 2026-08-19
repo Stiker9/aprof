@@ -14,10 +14,17 @@ export function Contacts() {
         рабочие часы.
       </SectionLead>
 
-      <div className="mt-14 grid gap-14 lg:grid-cols-2 lg:gap-20">
-        <RequestForm />
+      {/*
+        Не 50/50, а 480px формы и 380px контактов с зазором 80 — как
+        в исходнике. Поровну разделённые колонки на широком экране
+        растягивали бы поля ввода до неприличной ширины.
+      */}
+      <div className="mt-14 flex flex-col gap-14 lg:flex-row lg:gap-20">
+        <div className="w-full lg:max-w-[480px]">
+          <RequestForm />
+        </div>
 
-        <div className="grid content-start gap-8">
+        <div className="grid w-full content-start gap-7 lg:w-[380px] lg:shrink-0">
           <div>
             <div className="text-sm opacity-55">Адрес</div>
             <div className="mt-2 text-[19px]">{CONTACTS.address}</div>
@@ -28,7 +35,7 @@ export function Contacts() {
             <div className="text-sm opacity-55">Телефон</div>
             <a
               href={CONTACTS.phoneHref}
-              className="mt-2 block font-[family-name:var(--font-display)] text-[clamp(24px,3vw,32px)] leading-none tracking-[-0.02em] transition-colors hover:text-accent"
+              className="mt-2 block font-[family-name:var(--font-display)] text-[24px] leading-none transition-colors hover:text-accent"
             >
               {CONTACTS.phone}
             </a>
