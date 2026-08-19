@@ -1,122 +1,164 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { PROMOS, type Promo, type PromoPeriod } from '@/content/promos'
-import { ArrowLink } from '@/components/ui/arrow-link'
-import { Eyebrow, Section, SectionTitle } from '@/components/ui/section'
+import { PROMOS, type Promo } from '@/content/promos'
+import { Section } from '@/components/ui/section'
 
 /**
  * Акции.
  *
- * Раскладка неравная: первая акция занимает большую карточку с
- * фотографией, две другие — узкие справа. Это не декорация, а
- * расстановка приоритетов — главная акция месяца должна читаться
- * первой, а не теряться среди трёх одинаковых плиток.
+ * Раскладка неравная: акция месяца занимает большую карточку с
+ * фотографией, «приведи друга» — карточку поменьше тоже с фотографией,
+ * а список моделей — плоскую плитку без снимка. Это расстановка
+ * приоритетов, а не украшение: главная акция должна читаться первой,
+ * а не теряться среди трёх одинаковых плиток.
+ *
+ * Список моделей нарочно без фотографии — в нём смотрят на строки со
+ * скидками, и снимок за ними только мешал бы читать.
  */
-const PHOTO_OVERLAY =
-  'linear-gradient(rgba(13,13,14,0.72) 0%, rgba(13,13,14,0.15) 34%, rgba(13,13,14,0.85) 100%)'
+const OVERLAY_LARGE =
+  'linear-gradient(180deg, rgba(13,13,14,.72) 0%, rgba(13,13,14,.15) 34%, rgba(13,13,14,.88) 100%)'
+const OVERLAY_SMALL =
+  'linear-gradient(180deg, rgba(13,13,14,.6) 0%, rgba(13,13,14,.2) 40%, rgba(13,13,14,.9) 100%)'
 
-function Period({ period }: { period: PromoPeriod }) {
-  if (period.kind === 'until') {
-    return (
-      <span className="inline-block rounded bg-accent px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
-        {period.label}
-      </span>
-    )
-  }
+/** Срок с датой — красная пилюля: ради неё торопятся. */
+function DeadlineBadge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
-      <span aria-hidden className="block h-1.5 w-1.5 rounded-full bg-in-stock" />
+    <span className="self-start rounded-full bg-[#E63329] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em]">
+      {label}
+    </span>
+  )
+}
+
+/**
+ * Бессрочная акция — стеклянная пилюля с зелёной точкой.
+ *
+ * Без точки «постоянно» читается как такой же дедлайн, только без числа.
+ */
+function PermanentBadge() {
+  return (
+    <span className="inline-flex self-start items-center gap-2 rounded-full bg-white/14 px-[13px] py-[7px] text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur-[6px]">
+      <span aria-hidden className="block h-1.5 w-1.5 rounded-full bg-[#4ADE80]" />
       Постоянно
     </span>
   )
 }
 
-/** Большая карточка с фотографией — первая акция в списке. */
+/** Большая карточка акции месяца — с фотографией и белой кнопкой. */
 function FeaturedPromo({ promo }: { promo: Promo }) {
   return (
-    <article className="relative isolate flex min-h-[547px] flex-col justify-end overflow-hidden rounded-[var(--radius-block)] bg-surface p-8">
-      {/*
-        Фоном стоит монтажная схема, а не фотография машины: акция про
-        установку, и чертёж крепления говорит об этом точнее, чем ещё
-        один снимок кузова, которых на странице и так хватает.
-      */}
+    <article className="relative flex min-h-[420px] flex-col overflow-hidden rounded-[var(--radius-block)] bg-[#131316]">
       <Image
         src="/images/promo-scheme.webp"
         alt=""
         fill
         sizes="(max-width: 1024px) 100vw, 60vw"
-        className="-z-10 object-cover object-center"
+        className="object-cover"
       />
-      <div className="absolute inset-0 -z-10" style={{ background: PHOTO_OVERLAY }} />
+      <div className="pointer-events-none absolute inset-0" style={{ background: OVERLAY_LARGE }} />
 
-      <div className="absolute left-8 top-8">
-        <Period period={promo.period} />
-      </div>
-
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <h3 className="font-[family-name:var(--font-display)] text-[clamp(24px,3vw,30px)] leading-tight tracking-[-0.02em] text-ink">
-            {promo.title}
-          </h3>
-          <p className="mt-3 max-w-[40ch] text-[15px] text-ink-muted">{promo.lead}</p>
-          <div className="mt-6">
-            <ArrowLink href={promo.action.href}>{promo.action.label}</ArrowLink>
-          </div>
-        </div>
-
-        {promo.kind === 'text' && (
-          <div className="text-right">
-            <div className="font-[family-name:var(--font-display)] text-[clamp(40px,6vw,58px)] leading-none tracking-[-0.03em] text-accent-bright">
-              {promo.discount}
-            </div>
-            <div className="mt-2 text-sm text-ink-muted">{promo.discountNote}</div>
-          </div>
+      <div className="relative z-[1] flex flex-1 flex-col gap-4 px-[clamp(22px,3vw,32px)] pb-[clamp(22px,3.4vh,32px)] pt-[clamp(20px,3vh,28px)]">
+        {promo.period.kind === 'until' ? (
+          <DeadlineBadge label={promo.period.label} />
+        ) : (
+          <PermanentBadge />
         )}
+
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-6">
+          <div className="flex flex-col gap-2.5">
+            <h3 className="font-[family-name:var(--font-display)] text-[clamp(28px,3vw,36px)] leading-[1.05] tracking-[-0.025em]">
+              {promo.title}
+            </h3>
+            <p className="max-w-[380px] text-base leading-[1.45] text-white/72">{promo.lead}</p>
+            <Link
+              href={promo.action.href}
+              className="mt-2 inline-flex items-center gap-2.5 self-start rounded-full bg-white px-6 py-3.5 text-[15px] font-bold text-[#0D0D0E] transition-colors hover:bg-white/86"
+            >
+              {promo.action.label} <span aria-hidden>→</span>
+            </Link>
+          </div>
+
+          {promo.kind === 'text' && (
+            <div className="shrink-0 text-right">
+              <div className="font-[family-name:var(--font-display)] text-[clamp(52px,6vw,76px)] leading-[.85] tracking-[-0.05em] text-accent-bright">
+                {promo.discount}
+              </div>
+              <div className="mt-1.5 text-[13px] text-white/50">{promo.discountNote}</div>
+            </div>
+          )}
+        </div>
       </div>
     </article>
   )
 }
 
-/** Узкая карточка без фотографии. */
-function SidePromo({ promo }: { promo: Promo }) {
+/** Средняя карточка с фотографией: заголовок и скидка в одну строку. */
+function PhotoPromo({ promo }: { promo: Promo }) {
   return (
-    <article className="flex min-h-[266px] flex-col rounded-[var(--radius-block)] border border-white/6 bg-surface-2 p-6">
-      <Period period={promo.period} />
+    <article className="relative flex min-h-[200px] flex-col overflow-hidden rounded-[var(--radius-block)] bg-[#131316]">
+      <Image
+        src="/images/work-kodiaq.webp"
+        alt=""
+        fill
+        sizes="(max-width: 1024px) 100vw, 40vw"
+        className="object-cover"
+      />
+      <div className="pointer-events-none absolute inset-0" style={{ background: OVERLAY_SMALL }} />
 
-      <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h3 className="font-[family-name:var(--font-display)] text-[19px] leading-tight tracking-[-0.02em] text-ink">
-            {promo.title}
-          </h3>
-          <p className="mt-1.5 text-[13px] text-ink-muted">{promo.lead}</p>
-        </div>
-
-        {promo.kind === 'text' && (
-          <div className="font-[family-name:var(--font-display)] text-[32px] leading-none tracking-[-0.02em] text-accent-bright">
-            {promo.discount}
-          </div>
+      <div className="relative z-[1] flex flex-1 flex-col gap-2.5 px-[26px] py-[22px]">
+        {promo.period.kind === 'until' ? (
+          <DeadlineBadge label={promo.period.label} />
+        ) : (
+          <PermanentBadge />
         )}
+
+        <div className="mt-auto flex items-end justify-between gap-4">
+          <div>
+            <h3 className="mb-[5px] font-[family-name:var(--font-display)] text-[24px] leading-[1.1] tracking-[-0.02em]">
+              {promo.title}
+            </h3>
+            <p className="text-sm leading-[1.4] text-white/68">{promo.lead}</p>
+          </div>
+
+          {promo.kind === 'text' && (
+            <div className="shrink-0 font-[family-name:var(--font-display)] text-[38px] leading-[.9] tracking-[-0.04em] text-accent-bright">
+              {promo.discount}
+            </div>
+          )}
+        </div>
+      </div>
+    </article>
+  )
+}
+
+/** Плитка со списком моделей — без фотографии и без метки срока. */
+function ListPromo({ promo }: { promo: Promo }) {
+  if (promo.kind !== 'list') return null
+
+  return (
+    <article className="flex flex-col gap-3.5 rounded-[var(--radius-block)] border border-white/8 bg-[#16161A] px-[26px] py-6">
+      <div className="flex flex-col gap-1">
+        <h3 className="text-[19px] font-bold leading-[1.2] tracking-[-0.01em]">{promo.title}</h3>
+        <p className="text-[13px] leading-[1.4] text-white/45">{promo.lead}</p>
       </div>
 
-      {promo.kind === 'list' && (
-        <ul className="mt-4">
-          {promo.items.map((item) => (
-            <li
-              key={item.model}
-              className="flex items-baseline justify-between gap-4 border-b border-white/6 py-1.5 text-[13px] last:border-0"
-            >
-              <span className="text-ink">{item.model}</span>
-              <span className="text-accent-bright">{item.discount}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div className="mt-auto pt-4">
-        <Link href={promo.action.href} className="text-[13px] text-accent hover:text-accent-hover">
-          {promo.action.label} →
-        </Link>
+      <div className="flex flex-col">
+        {promo.items.map((item) => (
+          <div
+            key={item.model}
+            className="flex items-baseline justify-between gap-3 border-t border-white/8 py-[11px]"
+          >
+            <span className="text-[15px] font-medium">{item.model}</span>
+            <span className="text-sm font-bold text-accent-bright">{item.discount}</span>
+          </div>
+        ))}
       </div>
+
+      <Link
+        href={promo.action.href}
+        className="mt-auto inline-flex items-center gap-2 self-start text-sm font-semibold text-white/75 transition-colors hover:text-white"
+      >
+        {promo.action.label} <span className="text-accent-bright">→</span>
+      </Link>
     </article>
   )
 }
@@ -126,24 +168,36 @@ export function Promos() {
   // чем её отсутствие.
   if (PROMOS.length === 0) return null
 
-  const [featured, ...rest] = PROMOS
+  const [featured, second, third] = PROMOS
 
   return (
     <Section tone="dark-2">
-      <div className="flex flex-wrap items-baseline justify-between gap-6">
-        <div>
-          <Eyebrow>Акции</Eyebrow>
-          <SectionTitle>Выгоднее сейчас</SectionTitle>
+      {/*
+        Ссылка выровнена по нижней линии заголовка, а не по первой:
+        заголовок крупный, и по верху ссылка висела бы в пустоте.
+      */}
+      <div className="flex flex-wrap items-end justify-between gap-8">
+        <div className="flex flex-col gap-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">Акции</p>
+          <h2 className="font-[family-name:var(--font-display)] text-[clamp(32px,3.3vw,44px)] leading-[1.02] tracking-[-0.03em]">
+            Выгоднее сейчас
+          </h2>
         </div>
-        <ArrowLink href="/akcii">Все акции</ArrowLink>
+
+        <Link
+          href="/akcii"
+          className="inline-flex items-center gap-2.5 border-b border-white/25 pb-1.5 text-[15px] font-bold transition-colors hover:border-accent-hover"
+        >
+          Все акции <span className="text-[17px] text-accent-bright">→</span>
+        </Link>
       </div>
 
-      <div className="mt-12 grid gap-4 lg:grid-cols-[699fr_466fr]">
+      <div className="mt-8 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
         <FeaturedPromo promo={featured} />
+
         <div className="grid gap-4 lg:grid-rows-2">
-          {rest.map((promo) => (
-            <SidePromo key={promo.slug} promo={promo} />
-          ))}
+          {second ? <PhotoPromo promo={second} /> : null}
+          {third ? <ListPromo promo={third} /> : null}
         </div>
       </div>
     </Section>

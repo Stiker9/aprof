@@ -57,12 +57,12 @@ export function CatalogShell({
       <div className="-mb-1.5 h-[60px] rounded-t-[var(--radius-block)] bg-[linear-gradient(180deg,#1A1A20_0%,#141418_100%)]" />
 
       {picker === false ? null : (
-        <div className="sticky top-[62px] z-20 border-b border-white/10 bg-[linear-gradient(180deg,#141418_0%,#191920_55%,#101014_100%)] backdrop-blur-[22px] backdrop-saturate-[1.3]">
+        <div className="z-20 border-b lg:sticky lg:top-[62px] border-white/10 bg-[linear-gradient(180deg,#141418_0%,#191920_55%,#101014_100%)] backdrop-blur-[22px] backdrop-saturate-[1.3]">
           <PickerBar {...picker} bare />
         </div>
       )}
 
-      <div className="flex flex-col gap-7 rounded-b-[var(--radius-block)] bg-white px-14 pb-16 pt-7">
+      <div className="flex flex-col gap-7 rounded-b-[var(--radius-block)] bg-white px-5 pb-10 pt-6 sm:px-8 lg:px-14 lg:pb-16 lg:pt-7">
         <Breadcrumbs items={crumbs} />
 
         <div className="flex flex-col gap-2.5">

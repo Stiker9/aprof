@@ -60,7 +60,7 @@ export default async function InstallPage() {
           }}
         />
 
-        <div className="relative flex h-full flex-col justify-end gap-5 px-14 pb-14">
+        <div className="relative flex h-full flex-col justify-end gap-5 px-5 pb-10 sm:px-8 lg:px-14 lg:pb-14">
           <Breadcrumbs
             items={[{ label: 'Главная', href: urls.home() }, { label: 'Установка фаркопа' }]}
           />
@@ -87,7 +87,7 @@ export default async function InstallPage() {
         </div>
       </section>
 
-      <div className="flex flex-col gap-14 rounded-[var(--radius-block)] bg-white px-14 py-16 text-ink-dark">
+      <div className="flex flex-col gap-14 rounded-[var(--radius-block)] bg-white px-5 py-10 text-ink-dark sm:px-8 lg:px-14 lg:py-16">
         <section className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <h2 className={SECTION_TITLE}>Прайс на установку</h2>
@@ -269,7 +269,7 @@ export default async function InstallPage() {
       */}
       <section
         id="zapis"
-        className="flex scroll-mt-20 flex-col gap-16 rounded-[var(--radius-block)] bg-surface-2 px-14 py-16 text-ink lg:flex-row lg:gap-20"
+        className="flex scroll-mt-20 flex-col gap-16 rounded-[var(--radius-block)] bg-surface-2 px-5 py-10 text-ink sm:px-8 lg:flex-row lg:px-14 lg:py-16 lg:gap-20"
       >
         <div className="flex flex-1 flex-col gap-3.5">
           <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#8A8A88]">

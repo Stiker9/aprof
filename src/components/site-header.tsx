@@ -143,7 +143,7 @@ export function SiteHeader() {
         className="pointer-events-auto relative overflow-hidden border backdrop-blur-[26px] backdrop-saturate-[1.35]"
         style={{
           width: scrolled && !open ? '660px' : '100%',
-          height: open ? '600px' : '56px',
+          height: open ? 'var(--menu-open-height)' : '56px',
           borderRadius: open ? '16px' : scrolled ? '28px' : '18px 18px 0 0',
           background: open ? 'rgba(14,14,16,.86)' : 'rgba(18,18,20,.44)',
           borderColor: open ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.08)',
@@ -248,7 +248,7 @@ export function SiteHeader() {
 
         {/* Раскрытое меню */}
         <div
-          className="absolute inset-x-0 bottom-0 top-14 flex flex-col items-center px-7 pt-3.5 text-ink"
+          className="absolute inset-x-0 bottom-0 top-14 flex flex-col items-center overflow-y-auto px-5 pt-3.5 text-ink sm:px-7"
           aria-hidden={!open}
         >
           <div className="flex w-full max-w-[1100px] flex-1 flex-col">

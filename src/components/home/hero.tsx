@@ -67,7 +67,7 @@ export function Hero({ productCount }: { productCount: number }) {
         <span className="hero-dot-2 block h-2 rounded-full" />
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 px-14 pb-14">
+      <div className="absolute inset-x-0 bottom-0 px-5 pb-10 sm:px-8 lg:px-14 lg:pb-14">
         <div className="max-w-[46%] min-w-[320px] max-lg:max-w-none">
           <h1 className="font-[family-name:var(--font-display)] text-[clamp(38px,4.4vw,62px)] leading-none tracking-[-0.035em]">
             Фаркопы с установкой
