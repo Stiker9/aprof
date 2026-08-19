@@ -25,6 +25,7 @@ export function CatalogShell({
   title,
   summary,
   picker,
+  titleFont = 'display',
   children,
 }: {
   crumbs: Crumb[]
@@ -37,6 +38,18 @@ export function CatalogShell({
    * списки там только сбивали бы с толку.
    */
   picker?: { brand?: string; model?: string; variant?: string } | false
+  /**
+   * Каким шрифтом набрать заголовок.
+   *
+   * `display` — название раздела: «Фаркопы по маркам автомобилей».
+   * Это вывеска, и Unbounded ей к лицу.
+   *
+   * `body` — имя самого товара: «Фаркоп GALIA T030A на Toyota RAV4
+   * XA10 1995–2000». Это длинная строка с артикулом и годами, и в
+   * заголовочном шрифте она читается тяжело — цифры и латиница в
+   * Unbounded широкие. Поэтому текстовым, но плотнее и жирнее.
+   */
+  titleFont?: 'display' | 'body'
   children: ReactNode
 }) {
   return (
@@ -54,11 +67,17 @@ export function CatalogShell({
 
         <div className="flex flex-col gap-2.5">
           {/*
-            Трекинг здесь нулевой, в отличие от заголовков главной:
-            заголовок раздела длинный и читается как название, а не как
+            Трекинг у названия раздела нулевой, в отличие от заголовков
+            главной: оно длинное и читается как вывеска, а не как
             высказывание. Сжимать его по буквам незачем.
           */}
-          <h1 className="font-[family-name:var(--font-display)] text-[32px] leading-[1.15]">
+          <h1
+            className={
+              titleFont === 'display'
+                ? 'font-[family-name:var(--font-display)] text-[32px] leading-[1.15]'
+                : 'max-w-[760px] text-[32px] font-medium leading-[1.2] tracking-[-0.02em]'
+            }
+          >
             {title}
           </h1>
           {summary ? <p className="text-sm text-[#6E6E6C]">{summary}</p> : null}

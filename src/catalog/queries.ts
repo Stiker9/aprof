@@ -1,4 +1,4 @@
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, eq, ne } from 'drizzle-orm'
 import type { DrizzleDb } from '../db/client'
 import { brands, fitments, manufacturers, models, products, variants } from '../db/schema'
 import { formatVariantShort } from './format'
@@ -381,6 +381,69 @@ export async function buildPickerIndex(db: DrizzleDb): Promise<PickerBrand[]> {
   }
 
   return [...byBrand.values()]
+}
+
+/**
+ * Похожие товары — те, что подходят к той же машине.
+ *
+ * «Похожесть» тут не про характеристики, а про задачу: человек смотрит
+ * фаркоп на свой кузов, и полезно ему то, что встанет туда же. Подбирать
+ * по нагрузке или производителю бессмысленно — деталь с другой машины
+ * ему не подойдёт, какой бы близкой по цифрам ни была.
+ *
+ * Сам товар из выдачи исключается, иначе он стоял бы в списке
+ * «похожих» на самого себя.
+ */
+export async function listSimilarProducts(
+  db: DrizzleDb,
+  articleSlug: string,
+  limit = 4,
+): Promise<ProductRow[]> {
+  const [own] = await db
+    .select({ variantId: fitments.variantId })
+    .from(fitments)
+    .innerJoin(products, eq(products.id, fitments.productId))
+    .where(eq(products.slug, articleSlug))
+    .limit(1)
+
+  if (!own) return []
+
+  const rows = await db
+    .select({
+      slug: products.slug,
+      article: products.article,
+      manufacturer: manufacturers.name,
+      country: manufacturers.country,
+      price: products.sourcePrice,
+      inStock: products.inStock,
+      deliveryText: products.deliveryText,
+      images: products.images,
+    })
+    .from(products)
+    .innerJoin(fitments, eq(fitments.productId, products.id))
+    .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))
+    .where(and(eq(fitments.variantId, own.variantId), ne(products.slug, articleSlug)))
+    .orderBy(asc(products.sourcePrice))
+    .limit(limit)
+
+  return rows.map((r) => ({
+    slug: r.slug,
+    article: r.article,
+    manufacturer: r.manufacturer,
+    country: r.country,
+    price: r.price,
+    inStock: r.inStock,
+    deliveryText: r.deliveryText,
+    ballType: null,
+    towLoadKg: null,
+    verticalLoadKg: null,
+    weightKg: null,
+    bumperCut: 'unknown',
+    electricsIncluded: null,
+    description: '',
+    images: r.images,
+    documents: [],
+  }))
 }
 
 /**

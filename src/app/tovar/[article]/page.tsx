@@ -2,16 +2,17 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { formatNumber, formatPrice, formatVariantLabel, formatVariantShort } from '@/catalog/format'
 import {
-  formatNumber,
-  formatPrice,
-  formatVariantLabel,
-  formatVariantShort,
-} from '@/catalog/format'
-import { getProduct, listAllProductSlugs, listVariantsForProduct } from '@/catalog/queries'
+  getProduct,
+  listAllProductSlugs,
+  listSimilarProducts,
+  listVariantsForProduct,
+} from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
-import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
-import { Tabs } from '@/components/ui/tabs'
+import { CatalogShell } from '@/components/catalog/shell'
+import { OrderPanel } from '@/components/product/order-panel'
+import { CONTACTS } from '@/content/contacts'
 import { getDb } from '@/db/client'
 
 interface Params {
@@ -34,8 +35,11 @@ async function load(articleSlug: string) {
   const db = await getDb()
   const product = await getProduct(db, articleSlug)
   if (!product) return null
-  const fits = await listVariantsForProduct(db, articleSlug)
-  return { product, fits }
+  const [fits, similar] = await Promise.all([
+    listVariantsForProduct(db, articleSlug),
+    listSimilarProducts(db, articleSlug),
+  ])
+  return { product, fits, similar }
 }
 
 /**
@@ -81,7 +85,7 @@ export default async function ProductPage({ params }: Params) {
   const data = await load(article)
   if (!data) notFound()
 
-  const { product, fits } = data
+  const { product, fits, similar } = data
   const title = buildTitle(product.article, product.manufacturer, fits)
   const first = fits[0]
 
@@ -100,6 +104,9 @@ export default async function ProductPage({ params }: Params) {
     ],
     ['Страна производства', product.country ?? 'нет данных'],
   ]
+
+  const heading = 'text-[19px] font-medium'
+  const thumbs = product.images.slice(1, 6)
 
   return (
     <CatalogShell
@@ -128,15 +135,16 @@ export default async function ProductPage({ params }: Params) {
         { label: product.article },
       ]}
       title={title}
+      titleFont="body"
     >
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_380px]">
-        <div>
-          <div className="flex aspect-4/3 items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-line-light bg-white">
-            {/*
-              Снимки товаров лежат на стороннем сайте и несут чужой
-              водяной знак — до их обработки показываем кадр из макета,
-              чтобы карточка не выглядела пустой.
-            */}
+      <div className="flex flex-col items-start gap-8 lg:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          {/*
+            Тёмная подложка под снимком не для красоты: фаркопы снимают
+            на светлом фоне и с прозрачностью по краям, и на белом они
+            растворяются — не видно, где кончается деталь.
+          */}
+          <div className="relative h-[440px] overflow-hidden rounded-[14px] bg-[#141416]">
             {product.images[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -155,171 +163,169 @@ export default async function ProductPage({ params }: Params) {
             )}
           </div>
 
-          {/*
-            Остальные снимки лентой. Монтажные схемы лежат в том же поле,
-            что и фотографии, и отличить их без разбора адресов нельзя —
-            отдельным блоком «СХЕМА», как в макете, они станут после
-            разбора изображений.
-          */}
-          {product.images.length > 1 && (
-            <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
-              {product.images.slice(1, 7).map((src) => (
-                <div
-                  key={src}
-                  className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-line-light bg-white"
-                >
+          {thumbs.length > 0 && (
+            <div className="grid grid-cols-5 gap-2.5">
+              {thumbs.map((src) => (
+                <div key={src} className="h-[92px] overflow-hidden rounded-[9px] bg-[#141416]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={src}
-                    alt=""
-                    loading="lazy"
-                    className="h-full w-full object-contain"
-                  />
+                  <img src={src} alt="" loading="lazy" className="h-full w-full object-contain" />
                 </div>
               ))}
             </div>
           )}
-
-          <h2 className="mt-12 text-[19px] font-medium">Характеристики</h2>
-          <dl className="mt-5">
-            {specs.map(([key, value]) => (
-              <div
-                key={key}
-                className="flex justify-between gap-6 border-b border-line-light py-3 text-sm"
-              >
-                <dt className="opacity-55">{key}</dt>
-                <dd className="text-right">{value}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <h2 className="mt-12 text-[19px] font-medium">Описание</h2>
-          <p className="mt-4 max-w-[75ch] leading-relaxed opacity-75">{product.description}</p>
-
-          {product.documents.length > 0 && (
-            <>
-              <h2 className="mt-12 text-[19px] font-medium">Документы</h2>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {product.documents.map((doc) => (
-                  <a
-                    key={doc.url}
-                    href={doc.url}
-                    className="flex items-center gap-3 rounded-[var(--radius-card)] border border-line-light bg-white p-4 text-sm transition-colors hover:border-accent"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="rounded bg-accent px-2 py-1 text-xs font-bold text-white">
-                      PDF
-                    </span>
-                    {doc.label}
-                  </a>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/*
-            Ключевой узел перелинковки: отсюда вес карточки уходит на
-            страницы кузовов, а с них обратно на товары. Без этого блока
-            5 808 карточек висели бы тупиками.
-          */}
-          {fits.length > 0 && (
-            <>
-              <h2 className="mt-12 text-[19px] font-medium">Подходит к автомобилям</h2>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {fits.map((fit) => (
-                  <CatalogTile
-                    key={`${fit.brandSlug}-${fit.modelSlug}-${fit.variant.slug}`}
-                    href={
-                      fit.variant.hasOwnPage
-                        ? urls.variant(fit.brandSlug, fit.modelSlug, fit.variant.slug)
-                        : urls.model(fit.brandSlug, fit.modelSlug)
-                    }
-                    title={`${fit.brand} ${fit.model}`}
-                    count={
-                      formatVariantShort(
-                        fit.variant.generation,
-                        fit.variant.yearFrom,
-                        fit.variant.yearTo,
-                      ) || 'все годы'
-                    }
-                  />
-                ))}
-              </div>
-            </>
-          )}
         </div>
 
-        <aside className="h-fit rounded-[var(--radius-block)] border border-line-light bg-white p-7 lg:sticky lg:top-6">
-          <div className="text-[13px] opacity-55">
-            {product.manufacturer}
-            {product.country ? ` · ${product.country}` : ''} · артикул {product.article}
-          </div>
-
-          {/* Цена — Wix Madefor 22/600, не Unbounded: см. docs/typography.md */}
-          <div className="mt-4 text-[22px] font-semibold">{formatPrice(product.price)}</div>
-
-          <div
-            className={`mt-4 inline-block rounded px-2 py-1 text-xs font-semibold ${
-              product.inStock ? 'bg-in-stock/12 text-in-stock' : 'bg-on-order/12 text-on-order'
-            }`}
-          >
-            {product.deliveryText ?? (product.inStock ? 'в наличии' : 'под заказ')}
-          </div>
-
-          {/*
-            Переключатель получения стоит до кнопки, а не после: от него
-            зависит и срок, и итоговая сумма, и человек должен выбрать
-            раньше, чем нажмёт.
-          */}
-          <Tabs
-            name="poluchenie-tovara"
-            tone="light"
-            className="mt-6"
-            tabs={[
-              {
-                label: 'Забрать в СПб',
-                content: (
-                  <div className="text-sm opacity-70">
-                    <p>Санкт-Петербург, Софийская ул. 72</p>
-                    <p className="mt-2">Установка за 3 часа, без записи в приёмные часы</p>
-                  </div>
-                ),
-              },
-              {
-                label: 'Доставка СДЭК',
-                content: (
-                  <div className="text-sm opacity-70">
-                    <p>1 100 городов, до двери или в пункт выдачи</p>
-                    <p className="mt-2">Срок в пути 1–7 дней, с отслеживанием</p>
-                  </div>
-                ),
-              },
-            ]}
-          />
-
-          <button
-            type="button"
-            className="mt-7 w-full rounded-[10px] bg-accent px-4 py-3 font-semibold text-white transition-colors hover:bg-accent-hover"
-          >
-            Узнать цену
-          </button>
-          <Link
-            href="/zapis"
-            className="mt-3 block w-full rounded-[10px] border border-line-light px-4 py-3 text-center transition-colors hover:border-accent"
-          >
-            Записаться на установку
-          </Link>
-
-          <a
-            href="tel:+78121234567"
-            className="mt-7 block text-[19px] font-semibold hover:text-accent"
-          >
-            +7 (812) 123-45-67
-          </a>
-          <p className="mt-2 text-xs opacity-50">Гарантия 2 года · документы для ТО</p>
-        </aside>
+        <OrderPanel
+          manufacturer={product.manufacturer}
+          country={product.country}
+          article={product.article}
+          price={formatPrice(product.price)}
+          inStock={product.inStock}
+          stockText={product.deliveryText ?? (product.inStock ? 'в наличии' : 'под заказ')}
+        />
       </div>
+
+      <section className="flex max-w-[760px] flex-col gap-3.5">
+        <h2 className={heading}>Характеристики</h2>
+        <dl className="flex flex-col">
+          {specs.map(([key, value]) => (
+            <div
+              key={key}
+              className="grid grid-cols-2 gap-6 border-b border-ink-dark/8 py-3 text-sm"
+            >
+              <dt className="text-[#6E6E6C]">{key}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className="flex max-w-[760px] flex-col gap-2.5">
+        <h2 className={heading}>Описание</h2>
+        <p className="text-[15px] leading-[1.7] text-[#4A4A4C]">{product.description}</p>
+      </section>
+
+      {product.documents.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className={heading}>Документы</h2>
+          <div className="grid max-w-[760px] gap-3 sm:grid-cols-2">
+            {product.documents.map((doc) => (
+              <a
+                key={doc.url}
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 rounded-xl border border-ink-dark/14 px-[22px] py-5 transition-colors hover:border-accent hover:bg-accent-soft"
+              >
+                <span className="shrink-0 rounded-md bg-accent px-[11px] py-2 text-[11px] font-bold tracking-[0.04em] text-[#FFF6F4]">
+                  PDF
+                </span>
+                <span className="flex flex-col gap-[3px]">
+                  <span className="text-[15px] font-medium">{doc.label}</span>
+                  <span className="text-xs text-[#8A8A88]">PDF</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/*
+        Ключевой узел перелинковки: отсюда вес карточки уходит на
+        страницы кузовов, а с них обратно на товары. Без этого блока
+        5 808 карточек висели бы тупиками.
+      */}
+      {fits.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className={heading}>Подходит к автомобилям</h2>
+          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+            {fits.map((fit) => (
+              <Link
+                key={`${fit.brandSlug}-${fit.modelSlug}-${fit.variant.slug}`}
+                href={
+                  fit.variant.hasOwnPage
+                    ? urls.variant(fit.brandSlug, fit.modelSlug, fit.variant.slug)
+                    : urls.model(fit.brandSlug, fit.modelSlug)
+                }
+                className="flex flex-col gap-1 rounded-[10px] border border-ink-dark/12 px-[18px] py-4 transition-colors hover:border-ink-dark"
+              >
+                <span className="text-sm font-medium">
+                  {fit.brand} {fit.model}
+                </span>
+                <span className="text-xs text-[#8A8A88]">
+                  {formatVariantShort(
+                    fit.variant.generation,
+                    fit.variant.yearFrom,
+                    fit.variant.yearTo,
+                  ) || 'все годы'}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="flex flex-col gap-2.5 rounded-[14px] bg-[#F2F1EF] p-6">
+          <h2 className={heading}>Установка в Петербурге</h2>
+          <p className="text-sm leading-[1.5] text-[#6E6E6C]">
+            3 часа работы, гарантия 2 года, документы для ТО. {CONTACTS.address}.
+          </p>
+          <Link href="/ustanovka-farkopa" className="mt-1 text-sm text-accent hover:underline">
+            Цены на установку →
+          </Link>
+        </div>
+        <div className="flex flex-col gap-2.5 rounded-[14px] bg-[#F2F1EF] p-6">
+          <h2 className={heading}>Доставка по России</h2>
+          <p className="text-sm leading-[1.5] text-[#6E6E6C]">
+            СДЭК в 1 100 городов, до двери или в пункт выдачи, с отслеживанием.
+          </p>
+          <Link href="/dostavka" className="mt-1 text-sm text-accent hover:underline">
+            Рассчитать доставку →
+          </Link>
+        </div>
+      </div>
+
+      {similar.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className={heading}>Похожие товары</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {similar.map((item) => (
+              <Link
+                key={item.slug}
+                href={urls.product(item.slug)}
+                className="flex flex-col gap-2.5 rounded-xl border border-ink-dark/10 p-3.5 transition-colors hover:border-ink-dark/28"
+              >
+                <div className="h-[130px] overflow-hidden rounded-[9px] bg-[#141416]">
+                  {item.images[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.images[0]}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-contain"
+                    />
+                  ) : null}
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[17px] font-medium">{item.article}</span>
+                  <span className="text-[11px] text-[#8A8A88]">{item.manufacturer}</span>
+                </div>
+                <span className="text-[18px] font-semibold text-accent">
+                  {formatPrice(item.price)}
+                </span>
+                <span
+                  className={`self-start rounded-md px-2 py-1 text-[11px] font-semibold ${
+                    item.inStock ? 'bg-in-stock/12 text-in-stock' : 'bg-on-order/12 text-on-order'
+                  }`}
+                >
+                  {item.deliveryText ?? (item.inStock ? 'в наличии' : 'под заказ')}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </CatalogShell>
   )
 }
