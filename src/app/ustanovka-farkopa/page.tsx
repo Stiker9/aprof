@@ -3,10 +3,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { shareWithoutBumperCut } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
-import { CatalogShell } from '@/components/catalog/shell'
-import { Accordion } from '@/components/ui/accordion'
-import { FAQ } from '@/content/faq'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { RequestForm } from '@/components/request-form'
 import { CONTACTS } from '@/content/contacts'
+import { FAQ } from '@/content/faq'
 import { DOCUMENTS, DURATIONS, INCLUDED, PRICES, PRICE_NOTE, STEPS } from '@/content/ustanovka'
 import { getDb } from '@/db/client'
 
@@ -17,165 +17,282 @@ export const metadata: Metadata = {
   alternates: { canonical: absolute('/ustanovka-farkopa') },
 }
 
+/** Заголовки разделов внутри белого блока: 28px, средний вес, плотный трекинг. */
+const SECTION_TITLE = 'text-[28px] font-medium tracking-[-0.02em]'
+
+/** Колонки прайса фиксированные: цены должны стоять столбиком, а не плясать. */
+const PRICE_ROW = 'grid grid-cols-[1fr_120px_120px] gap-6 sm:grid-cols-[1fr_180px_180px]'
+
+const WORKS = [
+  { car: 'Skoda Kodiaq', article: 'Bosal S-124', photo: '/images/work-kodiaq.webp' },
+  { car: 'Toyota RAV4', article: 'Galia T030A' },
+  { car: 'Kia Sportage', article: 'Steinhof K-045' },
+  { car: 'Hyundai Tucson', article: 'Halty H.T97' },
+  { car: 'Volkswagen Tiguan', article: 'Oris 3247-A' },
+  { car: 'Lada Vesta', article: 'Лидер-плюс L-102' },
+]
+
 export default async function InstallPage() {
   const db = await getDb()
   const withoutCut = await shareWithoutBumperCut(db)
 
   return (
-    <CatalogShell
-      picker={false}
-      crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'Установка фаркопа' }]}
-      title="Установка фаркопа в Петербурге"
-      summary="Три часа, гарантия два года, документы для ТО. Заезжайте без записи в приёмные часы."
-    >
-      <div className="mt-8 flex flex-wrap items-center gap-5">
-        <Link
-          href="/zapis"
-          className="rounded-[10px] bg-accent px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
-        >
-          Записаться
-        </Link>
-        <a href={CONTACTS.phoneHref} className="text-[19px] font-semibold hover:text-accent">
-          {CONTACTS.phone}
-        </a>
-      </div>
-
-      <div className="relative mt-10 aspect-[1200/500] overflow-hidden rounded-[var(--radius-block)]">
+    <main className="flex flex-1 flex-col gap-1.5">
+      {/*
+        Первый экран страницы услуги — отдельный тёмный блок с фотографией,
+        а не заголовок на белом. Установка продаётся глазами: человек хочет
+        увидеть, как это выглядит, прежде чем читать прайс.
+      */}
+      <section className="relative h-[620px] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
         <Image
           src="/images/install-hero.webp"
-          alt="Установленный фаркоп"
+          alt=""
           fill
           priority
-          sizes="(max-width: 1400px) 100vw, 1400px"
+          sizes="100vw"
           className="object-cover"
         />
-      </div>
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(8,8,9,0.92) 0%, rgba(8,8,9,0.6) 30%, rgba(8,8,9,0.15) 60%, rgba(8,8,9,0) 100%)',
+          }}
+        />
 
-      <section className="mt-16">
-        <h2 className="text-[19px] font-medium">Прайс на установку</h2>
-        <p className="mt-2 text-sm opacity-55">Цены указаны без стоимости фаркопа</p>
+        <div className="relative flex h-full flex-col justify-end gap-5 px-14 pb-14">
+          <Breadcrumbs
+            items={[{ label: 'Главная', href: urls.home() }, { label: 'Установка фаркопа' }]}
+          />
 
-        {/*
-          Две колонки цен, а не одна: работа с чужим изделием стоит
-          дороже, и человек должен увидеть это до приезда, а не узнать
-          при расчёте.
-        */}
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full min-w-[560px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-line-light text-left">
-                <th className="py-3 pr-4 text-[11px] font-medium uppercase tracking-[0.12em] opacity-50">
-                  Вид работы
-                </th>
-                <th className="py-3 pr-4 text-right text-[11px] font-medium uppercase tracking-[0.12em] opacity-50">
-                  Наш фаркоп
-                </th>
-                <th className="py-3 text-right text-[11px] font-medium uppercase tracking-[0.12em] opacity-50">
-                  Ваш фаркоп
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {PRICES.map((row) => (
-                <tr key={row.work} className="border-b border-line-light">
-                  <td className="py-3 pr-4">{row.work}</td>
-                  <td className="py-3 pr-4 text-right font-medium">{row.own}</td>
-                  <td className="py-3 text-right opacity-70">{row.client}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <h1 className="font-[family-name:var(--font-display)] text-[clamp(28px,3.4vw,37px)] leading-[1.04] tracking-[-0.02em]">
+            Установка фаркопа в Петербурге
+          </h1>
 
-        <p className="mt-5 max-w-[70ch] text-sm opacity-55">{PRICE_NOTE}</p>
-      </section>
+          <p className="max-w-[520px] text-[17px] leading-[1.55] text-[#D8D8D5]">
+            Три часа, гарантия два года, документы для ТО. Заезжайте без записи в приёмные часы.
+          </p>
 
-      <section className="mt-16">
-        <h2 className="text-[19px] font-medium">Что входит в работу</h2>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {INCLUDED.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-[var(--radius-card)] border border-line-light bg-white p-6"
+          <div className="flex flex-wrap items-center gap-6">
+            <a
+              href="#zapis"
+              className="rounded-[10px] bg-accent px-[34px] py-4 text-[15px] font-semibold text-[#FFF6F4] transition-[filter] hover:brightness-110"
             >
-              <h3 className="text-[15px] font-medium">{item.title}</h3>
-              <p className="mt-2 text-sm opacity-60">{item.text}</p>
-            </div>
-          ))}
+              Записаться
+            </a>
+            <a href={CONTACTS.phoneHref} className="text-[26px] font-medium">
+              {CONTACTS.phone}
+            </a>
+          </div>
         </div>
       </section>
 
-      <div className="mt-16 grid gap-12 lg:grid-cols-2">
-        <section>
-          <h2 className="text-[19px] font-medium">Сколько занимает</h2>
-          <dl className="mt-6">
-            {DURATIONS.map((row) => (
-              <div
-                key={row.work}
-                className="flex items-baseline justify-between gap-6 border-b border-line-light py-3 text-sm"
-              >
-                <dt className="opacity-70">{row.work}</dt>
-                <dd className="shrink-0 font-medium">{row.time}</dd>
-              </div>
-            ))}
-          </dl>
+      <div className="flex flex-col gap-14 rounded-[var(--radius-block)] bg-white px-14 py-16 text-ink-dark">
+        <section className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <h2 className={SECTION_TITLE}>Прайс на установку</h2>
+            <p className="text-[13px] text-[#8A8A88]">Цены указаны без стоимости фаркопа</p>
+          </div>
 
           {/*
-            Доля считается по базе. В макете стояло «84%» — число с
-            потолка, а человек читает его до записи и приезжает с
-            расчётом, что бампер резать не будут.
+            Две колонки цен, а не одна: работа с чужим изделием стоит
+            дороже, и человек должен увидеть это до приезда, а не узнать
+            при расчёте.
           */}
-          {withoutCut !== null && (
-            <p className="mt-6 max-w-[60ch] text-sm opacity-60">
-              {withoutCut}% фаркопов в каталоге ставятся по штатным точкам без выреза бампера. Для
-              вашей машины скажем точно до записи — это видно в карточке фаркопа.
-            </p>
-          )}
+          <div className="overflow-x-auto">
+            <div className="min-w-[560px]">
+              <div
+                className={`${PRICE_ROW} border-b border-ink-dark/[.18] py-3.5 text-xs uppercase tracking-[0.1em] text-[#8A8A88]`}
+              >
+                <span>Вид работы</span>
+                <span className="text-right">Наш фаркоп</span>
+                <span className="text-right">Ваш фаркоп</span>
+              </div>
+
+              {PRICES.map((row) => (
+                <div
+                  key={row.work}
+                  className={`${PRICE_ROW} border-b border-ink-dark/8 py-[15px] text-[15px] transition-colors hover:bg-[#FAFAF9]`}
+                >
+                  <span>{row.work}</span>
+                  <span className="text-right font-medium">{row.own}</span>
+                  <span className="text-right text-[#6E6E6C]">{row.client}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="max-w-[720px] text-[13px] leading-[1.6] text-[#8A8A88]">{PRICE_NOTE}</p>
         </section>
 
-        <section>
-          <h2 className="text-[19px] font-medium">Как проходим</h2>
-          <ol className="mt-6">
-            {STEPS.map((step, index) => (
-              <li
-                key={step}
-                className="flex items-baseline gap-5 border-b border-line-light py-4 text-sm"
-              >
-                <span className="font-[family-name:var(--font-display)] text-[13px] opacity-35">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                {step}
-              </li>
+        <section className="flex flex-col gap-5">
+          <h2 className={SECTION_TITLE}>Что входит в работу</h2>
+          {/* Ячейки склеены зазором в пиксель — это один порядок работ, а не четыре карточки */}
+          <div className="grid gap-px border border-ink-dark/10 bg-ink-dark/10 sm:grid-cols-2 lg:grid-cols-4">
+            {INCLUDED.map((item) => (
+              <div key={item.title} className="flex flex-col gap-2 bg-white px-6 py-[26px]">
+                <h3 className="text-[18px] font-medium">{item.title}</h3>
+                <p className="text-sm leading-[1.55] text-[#6E6E6C]">{item.text}</p>
+              </div>
             ))}
-          </ol>
+          </div>
+        </section>
+
+        <div className="grid gap-14 lg:grid-cols-2">
+          <section className="flex flex-col gap-5">
+            <h2 className={SECTION_TITLE}>Сколько занимает</h2>
+            <dl className="flex flex-col">
+              {DURATIONS.map((row) => (
+                <div
+                  key={row.work}
+                  className="flex items-center justify-between gap-6 border-b border-ink-dark/8 py-[15px] text-[15px]"
+                >
+                  <dt>{row.work}</dt>
+                  <dd className="shrink-0 font-medium">{row.time}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {/*
+              Доля считается по базе. В макете стояло «84%» — число с
+              потолка, а человек читает его до записи и приезжает с
+              расчётом, что бампер резать не будут.
+            */}
+            {withoutCut !== null && (
+              <p className="max-w-[60ch] text-sm leading-[1.6] text-[#6E6E6C]">
+                {withoutCut}% фаркопов в каталоге ставятся по штатным точкам без выреза бампера. Для
+                вашей машины скажем точно до записи — это видно в карточке фаркопа.
+              </p>
+            )}
+          </section>
+
+          <section className="flex flex-col gap-5">
+            <h2 className={SECTION_TITLE}>Как проходим</h2>
+            <ol className="flex flex-col">
+              {STEPS.map((step, index) => (
+                <li
+                  key={step}
+                  className="flex items-center gap-4 border-b border-ink-dark/8 py-[15px] text-[15px]"
+                >
+                  <span className="min-w-[44px] text-[26px] font-semibold text-accent">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </section>
+        </div>
+
+        <section className="flex flex-col gap-5">
+          <div className="flex items-baseline justify-between gap-6">
+            <h2 className={SECTION_TITLE}>Наши работы</h2>
+            <Link href="/nashi-raboty" className="text-sm text-accent hover:underline">
+              Все работы →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {WORKS.map((work) => (
+              <figure key={work.article} className="flex flex-col gap-2">
+                <div className="relative flex h-[180px] items-center justify-center overflow-hidden rounded-xl bg-[#141416] text-xs text-ink-dim">
+                  {work.photo ? (
+                    <Image
+                      src={work.photo}
+                      alt={`Фаркоп ${work.article} на ${work.car}`}
+                      fill
+                      sizes="200px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    'фото скоро'
+                  )}
+                </div>
+                <figcaption className="text-xs text-[#6E6E6C]">
+                  {work.car} · {work.article}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-5">
+          <h2 className={SECTION_TITLE}>Документы и допуски</h2>
+          <div className="grid gap-3.5 md:grid-cols-2">
+            {DOCUMENTS.map((doc) => (
+              <div
+                key={doc.title}
+                className="flex items-center gap-5 rounded-[14px] border border-ink-dark/14 px-[30px] py-7"
+              >
+                <span className="shrink-0 rounded-lg bg-accent px-3.5 py-[11px] text-xs font-bold tracking-[0.04em] text-[#FFF6F4]">
+                  PDF
+                </span>
+                <span className="flex flex-col gap-1">
+                  <span className="text-[19px] font-medium">{doc.title}</span>
+                  <span className="text-[13px] text-[#8A8A88]">{doc.note}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-[#8A8A88]">Сканы приложим, когда заказчик их передаст.</p>
+        </section>
+
+        <section className="flex flex-col">
+          <h2 className={`${SECTION_TITLE} mb-2`}>Частые вопросы</h2>
+          {FAQ.map((item, index) => (
+            <details
+              key={item.question}
+              open={index === 0}
+              className="group border-b border-ink-dark/8 py-5"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-[18px] marker:hidden [&::-webkit-details-marker]:hidden">
+                {item.question}
+                <span
+                  aria-hidden
+                  className="text-base text-[#8A8A88] transition-transform group-open:rotate-45"
+                >
+                  +
+                </span>
+              </summary>
+              <p className="mt-2.5 max-w-[760px] text-[15px] leading-[1.65] text-[#6E6E6C]">
+                {item.answer}
+              </p>
+            </details>
+          ))}
         </section>
       </div>
 
-      <section className="mt-16">
-        <h2 className="text-[19px] font-medium">Документы и допуски</h2>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {DOCUMENTS.map((doc) => (
-            <div
-              key={doc.title}
-              className="flex items-center gap-4 rounded-[var(--radius-card)] border border-line-light bg-white p-5 text-sm"
-            >
-              <span className="rounded bg-accent px-2 py-1 text-xs font-bold text-white">PDF</span>
-              <span>
-                {doc.title}
-                <span className="block text-xs opacity-50">{doc.note}</span>
-              </span>
-            </div>
-          ))}
+      {/*
+        Запись отдельным блоком в конце, а не ссылкой наверх: человек
+        дочитал прайс и сроки — решение принимается здесь, и форма должна
+        быть здесь же.
+      */}
+      <section
+        id="zapis"
+        className="flex scroll-mt-20 flex-col gap-16 rounded-[var(--radius-block)] bg-surface-2 px-14 py-16 text-ink lg:flex-row lg:gap-20"
+      >
+        <div className="flex flex-1 flex-col gap-3.5">
+          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#8A8A88]">
+            Запись
+          </p>
+          <h2 className="font-[family-name:var(--font-display)] text-[32px] leading-[1.05] tracking-[-0.02em]">
+            Запишитесь на установку
+          </h2>
+          <p className="text-[15px] leading-[1.6] text-[#A8A8A5]">
+            Перезвоним в течение 15 минут в рабочее время и назовём точную цену по вашей машине.
+          </p>
+          <a href={CONTACTS.phoneHref} className="mt-3 text-[24px] font-medium">
+            {CONTACTS.phone}
+          </a>
+          <p className="text-sm text-[#8A8A88]">
+            {CONTACTS.address} · {CONTACTS.hours}
+          </p>
         </div>
-        <p className="mt-4 text-sm opacity-50">Сканы приложим, когда заказчик их передаст.</p>
-      </section>
 
-      <section className="mt-16">
-        <h2 className="text-[19px] font-medium">Частые вопросы</h2>
-        <div className="mt-6">
-          <Accordion items={FAQ} />
+        <div className="flex-1">
+          <RequestForm submitLabel="Записаться" tone="dark" />
         </div>
       </section>
-    </CatalogShell>
+    </main>
   )
 }

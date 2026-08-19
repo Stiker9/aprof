@@ -1,7 +1,12 @@
 import Link from 'next/link'
 
-const FIELD =
-  'w-full rounded-lg border border-line-light bg-white px-4 py-3 text-[15px] text-ink-dark placeholder:opacity-45 focus:border-accent focus:outline-none'
+const FIELD_BASE =
+  'w-full rounded-lg border px-4 py-3 text-[15px] placeholder:opacity-45 focus:border-accent focus:outline-none'
+const FIELD_LIGHT = 'border-line-light bg-white text-ink-dark'
+const FIELD_DARK = 'border-white/12 bg-white/5 text-ink'
+
+/** Подпись поля: мелкая, прописными — как в макете страницы установки. */
+const LABEL = 'text-[11px] uppercase tracking-[0.12em] opacity-55'
 
 /**
  * Форма заявки.
@@ -14,16 +19,25 @@ const FIELD =
  * Согласие на обработку данных обязательно по 152-ФЗ: без отмеченной
  * галочки заявку принимать нельзя, и галочка не должна стоять заранее.
  */
-export function RequestForm({ submitLabel = 'Отправить номер' }: { submitLabel?: string }) {
+export function RequestForm({
+  submitLabel = 'Отправить номер',
+  tone = 'light',
+}: {
+  submitLabel?: string
+  /** На тёмном блоке поля прозрачные, а не белые. */
+  tone?: 'light' | 'dark'
+}) {
+  const FIELD = `${FIELD_BASE} ${tone === 'dark' ? FIELD_DARK : FIELD_LIGHT}`
+
   return (
     <form className="grid gap-4">
       <label className="grid gap-2">
-        <span className="text-sm opacity-70">Имя</span>
+        <span className={LABEL}>Имя</span>
         <input type="text" name="name" autoComplete="name" className={FIELD} />
       </label>
 
       <label className="grid gap-2">
-        <span className="text-sm opacity-70">Телефон</span>
+        <span className={LABEL}>Телефон</span>
         <input
           type="tel"
           name="phone"
@@ -34,12 +48,12 @@ export function RequestForm({ submitLabel = 'Отправить номер' }: {
       </label>
 
       <label className="grid gap-2">
-        <span className="text-sm opacity-70">Марка и модель авто</span>
+        <span className={LABEL}>Марка и модель авто</span>
         <input type="text" name="car" placeholder="Toyota RAV4, 2019" className={FIELD} />
       </label>
 
       <label className="grid gap-2">
-        <span className="text-sm opacity-70">Комментарий</span>
+        <span className={LABEL}>Комментарий</span>
         <textarea name="comment" rows={3} className={`${FIELD} resize-y`} />
       </label>
 
