@@ -68,34 +68,40 @@ export function Hero({ productCount }: { productCount: number }) {
       </div>
 
       <div className="absolute inset-x-0 bottom-0 px-5 pb-10 sm:px-8 lg:px-14 lg:pb-14">
-        <div className="max-w-[46%] min-w-[320px] max-lg:max-w-none">
-          <h1 className="font-[family-name:var(--font-display)] text-[clamp(38px,4.4vw,62px)] leading-none tracking-[-0.035em]">
+        <div className="max-w-[42%] min-w-[420px] max-lg:max-w-none">
+          <h1 className="font-[family-name:var(--font-display)] text-[clamp(30px,3.3vw,45px)] leading-[1.04] tracking-[-0.01em]">
             Фаркопы с установкой
             <br />в Санкт-Петербурге
           </h1>
 
-          <p className="mt-6 max-w-[46ch] text-[17px] leading-[1.55] text-ink-muted">
+          <p className="mt-5 max-w-[46ch] text-[clamp(14px,1.1vw,17px)] leading-[1.5] text-[#D8D8D5]">
             Подберём по марке, модели и году. Поставим за один визит — с документами для ТО.
           </p>
 
           <Link
             href={urls.catalog()}
-            className="mt-8 inline-flex items-center gap-4 transition-colors hover:text-accent"
+            className="mt-6 inline-flex items-center gap-[18px] transition-colors hover:text-accent"
           >
-            <span className="flex h-14 w-14 items-center justify-center border border-white/25">
-              <span aria-hidden>↘</span>
+            <span className="flex h-[clamp(42px,4vh,54px)] w-[clamp(42px,4vh,54px)] items-center justify-center border border-white/55">
+              <span aria-hidden className="text-lg">↘</span>
             </span>
-            Подобрать фаркоп
+            <span className="text-[clamp(14px,1.1vw,17px)]">Подобрать фаркоп</span>
           </Link>
 
-          {/* Кегль один на все три — они читаются рядом как ряд, а не по отдельности */}
-          <div className="mt-12 flex flex-wrap gap-x-14 gap-y-6">
+          {/*
+            Ряд статистики набран заметно мельче заголовка и приглушённым
+            цветом. Это справочные цифры под hero-строкой, а не витрина —
+            в дизайн-системе роль «Цифра» так и задана: 22px флэт, без
+            clamp. Разгонять их до размера заголовка значило бы спорить
+            с ним за внимание, а решать здесь должен только заголовок.
+          */}
+          <div className="mt-8 flex flex-wrap gap-x-7 gap-y-4">
             {NUMBERS.map((item) => (
-              <div key={item.caption}>
-                <div className="font-[family-name:var(--font-display)] text-[clamp(34px,2.6vw,40px)] leading-none tracking-[-0.02em]">
+              <div key={item.caption} className="flex flex-col gap-1.5">
+                <span className="font-[family-name:var(--font-display)] text-[22px] leading-none">
                   {item.value ?? formatNumber(productCount)}
-                </div>
-                <div className="mt-2 text-[13px] text-ink-muted">{item.caption}</div>
+                </span>
+                <span className="text-xs text-[#9C9C9A]">{item.caption}</span>
               </div>
             ))}
           </div>

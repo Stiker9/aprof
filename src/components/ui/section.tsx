@@ -51,14 +51,14 @@ export function Eyebrow({ children }: { children: ReactNode }) {
 }
 
 /**
- * Заголовок секции.
- *
- * Отрицательный трекинг допустим: Unbounded от 30px и выше. У текста
- * трекинг всегда 0 — на мелком кегле он сминает буквы.
+ * Заголовок секции: clamp(27,2.8vw,37) — реальное значение из
+ * АUTOPROFI Дизайн-система.dc.html, роль «Секция». У акций на главной
+ * заголовок крупнее (свой clamp(32,3.3vw,44)) — это единственное
+ * намеренное исключение, набирается инлайн в promos.tsx.
  */
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(30px,3.2vw,46px)] leading-[1.04] tracking-[-0.03em]">
+    <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(27px,2.8vw,37px)] leading-[1.02] tracking-[-0.025em]">
       {children}
     </h2>
   )
@@ -70,15 +70,16 @@ export function SectionLead({ children }: { children: ReactNode }) {
 }
 
 /**
- * Крупное число с подписью.
- *
- * Кегль один на всю страницу: такие числа читаются рядом, и разнобой
- * ломает сравнение. Меняешь здесь — меняется везде.
+ * Крупное число с подписью: clamp(30,3.1vw,42) — роль «Цифра» из
+ * дизайн-системы. Это НЕ то же самое, что огромные цифры в «Один
+ * визит» или в акции месяца — у тех своя, более крупная шкала,
+ * clamp(40,4.4vw,60) и clamp(52,6vw,76) соответственно, потому что
+ * они витрина всей секции, а не подпись статистики.
  */
 export function BigNumber({ value, caption }: { value: string; caption: string }) {
   return (
     <div>
-      <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
+      <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
         {value}
       </div>
       <div className="mt-2 text-[13px] opacity-60">{caption}</div>

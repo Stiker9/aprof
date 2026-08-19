@@ -29,50 +29,63 @@ export function About() {
         Один сервис на Софийской, свои мастера и свой склад. Без посредников и подрядчиков.
       </SectionLead>
 
-      <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
-            12 лет
+      {/* Кегль clamp(30,3.1vw,42) — роль «Цифра» из дизайн-системы, gap 80px как в источнике */}
+      <div className="mt-14 flex flex-wrap gap-x-20 gap-y-8">
+        <div className="flex flex-col gap-2">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
+            12
           </div>
-          <div className="mt-2 text-[13px] opacity-60">на одном месте</div>
+          <div className="text-[13px] opacity-60">лет</div>
         </div>
-        <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
+        <div className="flex flex-col gap-2">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
             3 800
           </div>
-          <div className="mt-2 text-[13px] opacity-60">установок</div>
+          <div className="text-[13px] opacity-60">установок</div>
         </div>
-        <div>
+        <div className="flex flex-col gap-2">
           <div className="flex items-baseline gap-3">
-            <span className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
+            <span className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
               {RATING.score}
             </span>
             <Stars />
           </div>
-          <div className="mt-2 text-[13px] opacity-60">
-            средняя оценка · {RATING.count} отзывов
+          <div className="flex flex-col gap-0.5">
+            <div className="text-[13px] opacity-60">рейтинг</div>
+            <div className="text-xs opacity-45">{RATING.count} отзывов</div>
           </div>
         </div>
-        <div>
-          <div className="font-[family-name:var(--font-display)] text-[clamp(46px,5vw,72px)] leading-none tracking-[-0.03em]">
+        <div className="flex flex-col gap-2">
+          <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
             2 года
           </div>
-          <div className="mt-2 text-[13px] opacity-60">гарантии на работы</div>
+          <div className="text-[13px] opacity-60">гарантии</div>
         </div>
       </div>
 
-      {/* На главной три отзыва, остальные — на своей странице */}
-      <div className="mt-20 grid gap-12 lg:grid-cols-3">
+      {/*
+        На главной три отзыва, остальные — на своей странице. Цитата
+        набрана заголовочным Unbounded 26px, не текстовым 19px: отзывы
+        в макете читаются как журнальный разворот, а не как список
+        карточек, и крупный заголовочный шрифт держит этот тон.
+      */}
+      <div className="mt-[72px] flex flex-col gap-[72px] lg:flex-row lg:gap-14">
         {REVIEWS.slice(0, 3).map((review) => (
-          <figure key={review.author}>
-            {/* Кавычка декоративная: её роль берёт на себя blockquote */}
-            <span aria-hidden className="block font-[family-name:var(--font-display)] text-4xl leading-none opacity-25">
+          <figure key={review.author} className="flex flex-1 gap-6">
+            <span
+              aria-hidden
+              className="shrink-0 font-[family-name:var(--font-display)] text-[48px] leading-[0.7] text-[#D5D2CD]"
+            >
               «
             </span>
-            <blockquote className="mt-3 text-[19px] leading-[1.5]">{review.text}</blockquote>
-            <figcaption className="mt-5 text-sm opacity-55">
-              {review.author} · {review.car} · {review.date}
-            </figcaption>
+            <div className="flex flex-col gap-4">
+              <blockquote className="font-[family-name:var(--font-display)] text-[26px] leading-[1.3] tracking-[-0.01em]">
+                {review.text}
+              </blockquote>
+              <figcaption className="text-[13px] opacity-55">
+                {review.author} · {review.car} · {review.date}
+              </figcaption>
+            </div>
           </figure>
         ))}
       </div>

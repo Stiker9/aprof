@@ -32,7 +32,7 @@ export function Works() {
     <section className="overflow-hidden rounded-[var(--radius-block)] bg-surface text-ink">
       <div className="mx-auto w-full max-w-[1400px] px-6 pt-20 md:pt-28">
         <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dim">Работы</p>
-        <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(30px,3.2vw,46px)] leading-[1.04] tracking-[-0.03em]">
+        <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(27px,2.8vw,37px)] leading-[1.02] tracking-[-0.025em]">
           Три машины в день
         </h2>
         <p className="mt-4 max-w-[60ch] text-[17px] leading-[1.55] text-ink-muted">
