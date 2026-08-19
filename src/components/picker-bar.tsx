@@ -26,6 +26,7 @@ export function PickerBar({
   model,
   variant,
   transparent = false,
+  bare = false,
 }: {
   /** Выбранные значения, если страница уже сузила подбор. */
   brand?: string
@@ -33,6 +34,8 @@ export function PickerBar({
   variant?: string
   /** На первом экране строка лежит на фотографии, своего фона у неё нет. */
   transparent?: boolean
+  /** Внутри липкой полосы каталога: фон и отступы задаёт она сама. */
+  bare?: boolean
 } = {}) {
   const router = useRouter()
 
@@ -106,9 +109,11 @@ export function PickerBar({
   return (
     <div
       className={
-        transparent
-          ? 'border-b border-white/8 bg-[rgba(10,10,11,0.72)] backdrop-blur-[22px] backdrop-saturate-[1.3]'
-          : 'bg-bg pt-14'
+        bare
+          ? undefined
+          : transparent
+            ? 'border-b border-white/8 bg-[rgba(10,10,11,0.72)] backdrop-blur-[22px] backdrop-saturate-[1.3]'
+            : 'bg-bg pt-14'
       }
     >
       <form
@@ -117,7 +122,7 @@ export function PickerBar({
           router.push(target)
         }}
         className={`mx-auto flex flex-col gap-2.5 lg:flex-row ${
-          transparent ? 'px-14 py-4' : 'max-w-[1400px] px-6 py-4'
+          bare || transparent ? 'px-14 py-4' : 'max-w-[1400px] px-6 py-4'
         }`}
       >
         <PickerSelect

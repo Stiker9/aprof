@@ -11,9 +11,14 @@ import { PickerBar } from '@/components/picker-bar'
  * в каталоге сравнивает таблицы, цены и характеристики, и тёмный фон
  * под плотными данными утомляет быстрее.
  *
- * Шапка, строка подбора, крошки, заголовок и строка-сводка одинаковы
- * на четырёх страницах — марка, модель, кузов, товар. Держатся здесь,
- * чтобы не разъезжались.
+ * Блок собран из трёх частей, как в исходнике макета:
+ *
+ * 1. Полоса в 60 пикселей сверху — подложка под плавающую шапку. Шапка
+ *    вынута из потока и лежит поверх; без подложки она висела бы прямо
+ *    на белом содержимом.
+ * 2. Строка подбора. Липкая: при прокрутке длинного списка марок она
+ *    остаётся под рукой, а это главный вход в подбор.
+ * 3. Белое содержимое со скруглением снизу.
  */
 export function CatalogShell({
   crumbs,
@@ -35,28 +40,29 @@ export function CatalogShell({
   children: ReactNode
 }) {
   return (
-    /*
-      Строка подбора и содержимое лежат в одном скруглённом блоке, а не
-      двумя. В макете шапка занимает его верх со скруглением сверху, а
-      содержимое — низ со скруглением снизу: это одна карточка, а не две
-      встык.
-    */
-    <main className="flex flex-1 flex-col overflow-hidden rounded-[var(--radius-block)] bg-paper-3 text-ink-dark">
-      {picker === false ? <div className="h-14 bg-bg" /> : <PickerBar {...picker} />}
+    <main className="flex-1 text-ink-dark">
+      <div className="-mb-1.5 h-[60px] rounded-t-[var(--radius-block)] bg-[linear-gradient(180deg,#1A1A20_0%,#141418_100%)]" />
 
-      <div className="mx-auto w-full max-w-[1400px] px-6 py-10">
+      {picker === false ? null : (
+        <div className="sticky top-[62px] z-20 border-b border-white/10 bg-[linear-gradient(180deg,#141418_0%,#191920_55%,#101014_100%)] backdrop-blur-[22px] backdrop-saturate-[1.3]">
+          <PickerBar {...picker} bare />
+        </div>
+      )}
+
+      <div className="flex flex-col gap-7 rounded-b-[var(--radius-block)] bg-white px-14 pb-16 pt-7">
         <Breadcrumbs items={crumbs} />
 
-        {/*
-          Заголовок страницы-инструмента мельче и плотнее, чем на
-          главной: здесь не рассказ, а работа со списком, и заголовок
-          не должен отжимать данные вниз. См. docs/typography.md
-        */}
-        <h1 className="mt-6 font-[family-name:var(--font-display)] text-[clamp(26px,2.4vw,30px)] font-medium leading-[1.06] tracking-[-0.02em]">
-          {title}
-        </h1>
-
-        {summary ? <p className="mt-4 text-[13px] opacity-55">{summary}</p> : null}
+        <div className="flex flex-col gap-2.5">
+          {/*
+            Трекинг здесь нулевой, в отличие от заголовков главной:
+            заголовок раздела длинный и читается как название, а не как
+            высказывание. Сжимать его по буквам незачем.
+          */}
+          <h1 className="font-[family-name:var(--font-display)] text-[32px] leading-[1.15]">
+            {title}
+          </h1>
+          {summary ? <p className="text-sm text-[#6E6E6C]">{summary}</p> : null}
+        </div>
 
         {children}
       </div>
@@ -84,7 +90,7 @@ export function CatalogTile({
   return (
     <Link
       href={href}
-      className="group flex flex-col justify-between gap-6 rounded-[var(--radius-card)] border border-line-light bg-white px-5 py-4 transition-colors hover:border-accent"
+      className="group flex flex-col justify-between gap-6 rounded-[var(--radius-card)] border border-ink-dark/8 bg-white px-5 py-4 transition-colors hover:border-accent"
     >
       <span>
         <span className="block text-[15px] transition-colors group-hover:text-accent">{title}</span>
