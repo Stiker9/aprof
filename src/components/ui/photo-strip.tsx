@@ -62,7 +62,7 @@ export function PhotoStrip({
 
   return (
     <div className={className}>
-      <div className="mx-auto flex w-full max-w-[1400px] justify-end gap-2 px-6">
+      <div className="flex w-full justify-end gap-2 px-5 sm:px-8 lg:px-14">
         <button
           type="button"
           aria-label="Предыдущие снимки"
@@ -93,7 +93,7 @@ export function PhotoStrip({
         ref={track}
         role="group"
         aria-label={ariaLabel}
-        className="strip mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 pl-[max(1.5rem,calc((100%-1400px)/2+1.5rem))] pr-6 scroll-pl-[max(1.5rem,calc((100%-1400px)/2+1.5rem))]"
+        className="strip mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 pl-5 pr-6 scroll-pl-5 sm:pl-8 sm:scroll-pl-8 lg:pl-14 lg:scroll-pl-14"
       >
         {children}
       </div>

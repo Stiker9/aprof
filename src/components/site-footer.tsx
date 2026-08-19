@@ -43,7 +43,7 @@ const LEGAL = [
 export function SiteFooter() {
   return (
     <footer className="mt-auto overflow-hidden rounded-[var(--radius-block)] bg-bg">
-      <div className="mx-auto max-w-[1400px] px-6 py-14">
+      <div className="w-full px-5 pb-8 pt-12 sm:px-8 lg:px-14 lg:pt-16">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
             <div className="font-[family-name:var(--font-display)] text-sm tracking-[0.22em] text-ink">

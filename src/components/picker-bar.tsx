@@ -122,7 +122,7 @@ export function PickerBar({
           router.push(target)
         }}
         className={`mx-auto flex flex-col gap-2.5 lg:flex-row ${
-          bare || transparent ? 'px-5 py-3 sm:px-8 lg:px-14 lg:py-4' : 'max-w-[1400px] px-6 py-4'
+          'px-5 py-3 sm:px-8 lg:px-14 lg:py-4'
         }`}
       >
         <PickerSelect

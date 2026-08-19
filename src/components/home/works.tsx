@@ -30,7 +30,7 @@ const WORKS: Work[] = [
 export function Works() {
   return (
     <section className="overflow-hidden rounded-[var(--radius-block)] bg-surface text-ink">
-      <div className="mx-auto w-full max-w-[1400px] px-6 pt-20 md:pt-28">
+      <div className="w-full px-5 pt-14 sm:px-8 sm:pt-20 lg:px-14 lg:pt-[clamp(52px,7vh,88px)]">
         <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dim">Работы</p>
         <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(27px,2.8vw,37px)] leading-[1.02] tracking-[-0.025em]">
           Три машины в день
@@ -71,7 +71,7 @@ export function Works() {
         ))}
       </PhotoStrip>
 
-      <div className="mx-auto w-full max-w-[1400px] px-6 pb-20 pt-10 md:pb-28">
+      <div className="w-full px-5 pb-14 pt-10 sm:px-8 sm:pb-20 lg:px-14 lg:pb-[clamp(52px,7vh,88px)]">
         <ArrowLink href="/nashi-raboty" muted="больше 3 800 установок">
           Все работы
         </ArrowLink>
