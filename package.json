@@ -5,10 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prebuild": "tsx scripts/restore-data.ts",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
     "import": "tsx scripts/import.ts",
+    "export-data": "tsx scripts/export-data.ts",
+    "restore-data": "tsx scripts/restore-data.ts",
     "check": "tsx scripts/check-build.ts"
   },
   "dependencies": {
