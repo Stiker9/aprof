@@ -43,7 +43,15 @@ const nextConfig: NextConfig = {
    * restore-data.ts гарантированно смотрят в один и тот же каталог.
    */
   env: {
-    PGLITE_PATH: process.env.PGLITE_PATH ?? path.resolve(__dirname, '.pgdata'),
+    /*
+      `||`, не `??`: в окружении Vercel PGLITE_PATH оказался задан пустой
+      строкой (осталось от более раннего эксперимента в настройках
+      проекта). Пустая строка — не undefined, `??` её не подменяет, и
+      PGlite('') тихо переходит в режим «в памяти» — у каждого процесса
+      сборки тогда своя, никак не связанная с остальными база. Именно
+      это стояло за «relation "variants" does not exist» оба раза.
+    */
+    PGLITE_PATH: process.env.PGLITE_PATH || path.resolve(__dirname, '.pgdata'),
   },
 }
 

@@ -65,7 +65,7 @@ async function connect(): Promise<DrizzleDb> {
     PGLITE_PATH теперь приходит уже абсолютным из next.config.ts (env),
     но explicit path.resolve() — на случай прямого запуска без Next.js.
   */
-  const dataDir = process.env.PGLITE_PATH ?? path.resolve(process.cwd(), '.pgdata')
+  const dataDir = process.env.PGLITE_PATH || path.resolve(process.cwd(), '.pgdata')
 
   // Строка сборки, не рантайма сайта — безопасно логировать всегда.
   console.log(`[db] cwd=${process.cwd()} dataDir=${dataDir} существует=${existsSync(dataDir)}`)

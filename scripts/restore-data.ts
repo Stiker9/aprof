@@ -29,7 +29,7 @@ const DUMP = path.resolve(__dirname, '..', 'data', 'catalog.json.gz')
  * next.config.ts (env.PGLITE_PATH). Оба места обязаны сойтись на одном и
  * том же каталоге вне зависимости от того, откуда запущен процесс.
  */
-const DB_PATH = process.env.PGLITE_PATH ?? path.resolve(__dirname, '..', '.pgdata')
+const DB_PATH = process.env.PGLITE_PATH || path.resolve(__dirname, '..', '.pgdata')
 
 /** Порядок важен: сперва таблицы, на которые ссылаются внешние ключи. */
 const ORDER = [

@@ -9,7 +9,7 @@ import { importCatalog } from '../src/import/run'
 import { verifyIntegrity } from '../src/import/verify'
 
 const SOURCE = 'E:/всякое/WEB/Подбор_фаркопов_все_марки_инструкции_сертификаты.html'
-const DB_PATH = process.env.PGLITE_PATH ?? './.pgdata'
+const DB_PATH = process.env.PGLITE_PATH || './.pgdata'
 
 async function main() {
   console.log('Очищаю старую базу…')
