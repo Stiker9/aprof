@@ -12,9 +12,13 @@ import { PickerBar } from '@/components/picker-bar'
  * низких окон: без него на ноутбуке с невысоким экраном текст и числа
  * налезали бы друг на друга.
  *
- * Кадров два, и они плавно сменяют друг друга — фаркоп крупным планом
- * и Prado на набережной. Смена сделана анимацией в globals.css, без
- * скриптов и таймеров.
+ * Кадр один — Prado на набережной. Раньше здесь было два кадра со
+ * сменой по CSS-анимации (фаркоп крупным планом + Prado), но под
+ * prefers-reduced-motion второй кадр навсегда перекрывал первый
+ * (opacity:1 без анимации, оба absolute inset-0 — верхний по DOM-порядку
+ * просто закрывал нижний), и то, какое фото окажется видно, зависело
+ * от системной настройки анимации, а не от того, что мы хотели
+ * показать. Один статичный кадр надёжнее.
  *
  * Градиент взят из исходника: слева почти непрозрачный, к 48% ширины
  * сходит на нет. Без него текст ложится прямо на кузов и пропадает.
@@ -32,39 +36,18 @@ export function Hero({ productCount }: { productCount: number }) {
   return (
     <section className="relative h-[calc(100vh-16px)] min-h-[620px] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
       <Image
-        src="/images/hero-farkop.webp"
+        src="/images/hero-prado.webp"
         alt=""
         fill
         priority
         sizes="100vw"
         className="object-cover"
       />
-      {/*
-        Второй кадр грузится сразу, а не лениво: он проявляется на
-        четвёртой секунде, и к этому моменту должен быть готов — иначе
-        человек увидит подмену пустотой вместо смены кадра.
-      */}
-      <Image
-        src="/images/hero-prado.webp"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="hero-slide-second object-cover"
-      />
       <div className="pointer-events-none absolute inset-0" style={{ background: GRADIENT }} />
 
       {/* Строка подбора лежит на фотографии, сразу под пилюлей шапки */}
       <div className="absolute inset-x-0 top-14 z-[5]">
         <PickerBar transparent />
-      </div>
-
-      <div
-        aria-hidden
-        className="absolute bottom-8 right-14 z-[6] flex items-center gap-2"
-      >
-        <span className="hero-dot-1 block h-2 rounded-full" />
-        <span className="hero-dot-2 block h-2 rounded-full" />
       </div>
 
       {/*
