@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+import path from 'node:path'
 import { PGlite } from '@electric-sql/pglite'
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite'
@@ -53,7 +55,21 @@ async function connect(): Promise<DrizzleDb> {
     return drizzlePostgres(postgres(url), { schema })
   }
 
-  const dataDir = process.env.PGLITE_PATH ?? './.pgdata'
+  /*
+    Абсолютный путь, не './.pgdata' — тот резолвился относительно
+    process.cwd() того процесса, который его открывает, а «Collecting page
+    data» у Next.js исполняется в отдельном воркере, чей cwd не гарантированно
+    совпадает с тем, откуда запускался npm run prebuild. На чужой машине это
+    приводило к тихому созданию новой пустой PGlite-базы вместо развёрнутой —
+    и падению с «relation "variants" does not exist» при первом же запросе.
+    PGLITE_PATH теперь приходит уже абсолютным из next.config.ts (env),
+    но explicit path.resolve() — на случай прямого запуска без Next.js.
+  */
+  const dataDir = process.env.PGLITE_PATH ?? path.resolve(process.cwd(), '.pgdata')
+
+  // Строка сборки, не рантайма сайта — безопасно логировать всегда.
+  console.log(`[db] cwd=${process.cwd()} dataDir=${dataDir} существует=${existsSync(dataDir)}`)
+
   return drizzlePglite(new PGlite(dataDir), { schema })
 }
 
