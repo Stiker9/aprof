@@ -14,6 +14,7 @@ import { CatalogShell } from '@/components/catalog/shell'
 import { OrderPanel } from '@/components/product/order-panel'
 import { CONTACTS } from '@/content/contacts'
 import { getDb } from '@/db/client'
+import { limitParams } from '@/catalog/build-scope'
 
 interface Params {
   params: Promise<{ article: string }>
@@ -22,7 +23,7 @@ interface Params {
 export async function generateStaticParams() {
   const db = await getDb()
   const slugs = await listAllProductSlugs(db)
-  return slugs.map((article) => ({ article }))
+  return limitParams(slugs.map((article) => ({ article })), '/tovar/[article]')
 }
 
 const BUMPER_TEXT = {

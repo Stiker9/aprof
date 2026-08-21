@@ -5,6 +5,7 @@ import { getBrand, listBrands, listModels } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
 import { getDb } from '@/db/client'
+import { limitParams } from '@/catalog/build-scope'
 
 interface Params {
   params: Promise<{ brand: string }>
@@ -13,7 +14,7 @@ interface Params {
 export async function generateStaticParams() {
   const db = await getDb()
   const brands = await listBrands(db)
-  return brands.map((b) => ({ brand: b.slug }))
+  return limitParams(brands.map((b) => ({ brand: b.slug })), '/farkopy/[brand]')
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

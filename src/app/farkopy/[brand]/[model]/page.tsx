@@ -13,6 +13,7 @@ import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
 import { ProductCard } from '@/components/product-card'
 import { getDb } from '@/db/client'
+import { limitParams } from '@/catalog/build-scope'
 
 interface Params {
   params: Promise<{ brand: string; model: string }>
@@ -28,7 +29,7 @@ export async function generateStaticParams() {
       params.push({ brand: brand.slug, model: model.slug })
     }
   }
-  return params
+  return limitParams(params, '/farkopy/[brand]/[model]')
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

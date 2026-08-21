@@ -12,7 +12,8 @@
     "import": "tsx scripts/import.ts",
     "export-data": "tsx scripts/export-data.ts",
     "restore-data": "tsx scripts/restore-data.ts",
-    "check": "tsx scripts/check-build.ts"
+    "check": "tsx scripts/check-build.ts",
+    "build:design": "node scripts/build-design.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

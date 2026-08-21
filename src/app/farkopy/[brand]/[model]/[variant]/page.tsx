@@ -14,6 +14,7 @@ import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
 import { ProductCard } from '@/components/product-card'
 import { getDb } from '@/db/client'
+import { limitParams } from '@/catalog/build-scope'
 
 interface Params {
   params: Promise<{ brand: string; model: string; variant: string }>
@@ -21,7 +22,7 @@ interface Params {
 
 export async function generateStaticParams() {
   const db = await getDb()
-  return listAllVariantPaths(db)
+  return limitParams(await listAllVariantPaths(db), '/farkopy/[brand]/[model]/[variant]')
 }
 
 async function load(brandSlug: string, modelSlug: string, variantSlug: string) {
