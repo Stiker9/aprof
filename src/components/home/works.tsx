@@ -5,26 +5,28 @@ import { PhotoStrip } from '@/components/ui/photo-strip'
 /**
  * Наши работы.
  *
- * Фотографий пока нет: в базе только снимки товаров с чужого сайта,
- * а установленные фаркопы на машинах есть лишь у заказчика. Здесь
- * стоят заглушки с настоящими подписями — марка, модель, артикул, —
- * чтобы раскладка была готова к подстановке снимков, и чтобы никто
- * не принял пустой блок за готовый.
+ * Восемь снимков из сервиса — те же файлы, что на странице /nashi-raboty,
+ * отобраны разные марки. Порядок не случайный: светлые и тёмные кузова
+ * чередуются, иначе несколько белых машин подряд сливаются в одно пятно.
+ *
+ * Марки взяты с шильдиков на самих фотографиях. Артикул фаркопа нигде не
+ * подписан: на снимках его почти никогда не видно, а выдумывать номер на
+ * сайте, где по нему подбирают деталь, нельзя.
  */
 interface Work {
   car: string
-  article: string
-  /** Снимок из макета. Там он один — остальные ждут фотографий заказчика. */
-  photo?: string
+  photo: string
 }
 
 const WORKS: Work[] = [
-  { car: 'Skoda Kodiaq', article: 'Bosal S-124', photo: '/images/work-kodiaq.webp' },
-  { car: 'Toyota RAV4 XA50', article: 'Galia T030A' },
-  { car: 'Hyundai Creta I', article: 'Halty H.T97' },
-  { car: 'Kia Sportage IV', article: 'Steinhof K-045' },
-  { car: 'Volkswagen Tiguan II', article: 'Oris 3247-A' },
-  { car: 'Lada Vesta SW Cross', article: 'Лидер-плюс L-102' },
+  { car: 'Mazda CX-5', photo: '/images/gallery/mazda-cx5.webp' },
+  { car: 'Chery Tiggo 8 Pro Max', photo: '/images/gallery/chery-tiggo-8-pro-max.webp' },
+  { car: 'Skoda Superb', photo: '/images/gallery/skoda-superb.webp' },
+  { car: 'Geely Belgee X70', photo: '/images/gallery/geely-belgee-x70.webp' },
+  { car: 'Audi SQ8', photo: '/images/gallery/audi-sq8.webp' },
+  { car: 'Lexus NX', photo: '/images/gallery/lexus-nx.webp' },
+  { car: 'Renault Duster', photo: '/images/gallery/renault-duster.webp' },
+  { car: 'BMW X6', photo: '/images/gallery/bmw-x6.webp' },
 ]
 
 export function Works() {
@@ -33,39 +35,38 @@ export function Works() {
       <div className="w-full px-5 pt-14 sm:px-8 sm:pt-20 lg:px-14 lg:pt-[clamp(52px,7vh,88px)]">
         <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dim">Работы</p>
         <h2 className="mt-4 font-[family-name:var(--font-display)] text-[clamp(27px,2.8vw,37px)] leading-[1.02] tracking-[-0.025em]">
-          Три машины в день
+          Галерея работ
         </h2>
         <p className="mt-4 max-w-[60ch] text-[17px] leading-[1.55] text-ink-muted">
-          Снимаем каждую установку — посмотрите, как фаркоп выглядит именно на вашей модели.
+          Фотографии с нашего подъёмника. Найдите свою модель и посмотрите,
+          как фаркоп выглядит вживую.
         </p>
       </div>
 
       {/*
         Снимки лежат прямо на фоне, без рамок и скруглений — так задано
-        макетом. Кадр широкий, 520×333: фаркоп снимают вместе с задней
-        частью машины, в квадрат это не помещается.
+        макетом. Высота кадра тоже оттуда: 42vh с ограничителями снизу и
+        сверху, а не фиксированная. Снимки вертикальные, с телефона, и в
+        такое окно попадает задняя часть машины с фаркопом — то, ради
+        чего кадр и снят.
       */}
       <PhotoStrip className="mt-12" ariaLabel="Наши работы">
         {WORKS.map((work) => (
           <figure
-            key={work.article}
-            className="w-[360px] shrink-0 snap-start md:w-[520px]"
+            key={work.photo}
+            className="w-[280px] shrink-0 snap-start md:w-[360px]"
           >
-            <div className="relative flex aspect-[520/333] items-center justify-center overflow-hidden bg-surface-2 text-xs text-ink-dim">
-              {work.photo ? (
-                <Image
-                  src={work.photo}
-                  alt={`Фаркоп ${work.article} на ${work.car}`}
-                  fill
-                  sizes="520px"
-                  className="object-cover"
-                />
-              ) : (
-                'фото скоро'
-              )}
+            <div className="relative flex h-[clamp(240px,42vh,420px)] items-center justify-center overflow-hidden bg-surface-2 text-xs text-ink-dim">
+              <Image
+                src={work.photo}
+                alt={`Установленный фаркоп на ${work.car}`}
+                fill
+                sizes="360px"
+                className="object-cover"
+              />
             </div>
             <figcaption className="mt-3 text-sm text-ink-muted">
-              {work.car} · <span className="text-ink-dim">{work.article}</span>
+              {work.car}
             </figcaption>
           </figure>
         ))}

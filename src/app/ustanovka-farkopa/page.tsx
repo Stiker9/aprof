@@ -23,13 +23,21 @@ const SECTION_TITLE = 'text-[28px] font-medium tracking-[-0.02em]'
 /** Колонки прайса фиксированные: цены должны стоять столбиком, а не плясать. */
 const PRICE_ROW = 'grid grid-cols-[1fr_120px_120px] gap-6 sm:grid-cols-[1fr_180px_180px]'
 
+/**
+ * Шесть снимков из галереи — марки подобраны так, чтобы светлые и тёмные
+ * кузова чередовались, иначе в ряду они сливаются. Полный набор на
+ * странице /nashi-raboty.
+ *
+ * Артикулы не подписаны: на снимках их не видно, а выдумывать номер на
+ * сайте, где по нему подбирают деталь, нельзя.
+ */
 const WORKS = [
-  { car: 'Skoda Kodiaq', article: 'Bosal S-124', photo: '/images/work-kodiaq.webp' },
-  { car: 'Toyota RAV4', article: 'Galia T030A' },
-  { car: 'Kia Sportage', article: 'Steinhof K-045' },
-  { car: 'Hyundai Tucson', article: 'Halty H.T97' },
-  { car: 'Volkswagen Tiguan', article: 'Oris 3247-A' },
-  { car: 'Lada Vesta', article: 'Лидер-плюс L-102' },
+  { car: 'Haval F7', photo: '/images/gallery/haval-f7.webp' },
+  { car: 'Kia Rio', photo: '/images/gallery/kia-rio.webp' },
+  { car: 'Nissan X-Trail', photo: '/images/gallery/nissan-x-trail.webp' },
+  { car: 'Mercedes-Benz', photo: '/images/gallery/mercedes-benz.webp' },
+  { car: 'Lada Largus', photo: '/images/gallery/lada-largus.webp' },
+  { car: 'Skoda Rapid', photo: '/images/gallery/skoda-rapid.webp' },
 ]
 
 export default async function InstallPage() {
@@ -45,12 +53,25 @@ export default async function InstallPage() {
       */}
       <section className="relative h-[620px] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
         <Image
-          src="/images/install-hero.webp"
+          src="/images/ustanovka-hero-1672.webp"
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover"
+          /*
+            Снимок берётся из ассетов макета в полном размере 1672 на 941.
+            Раньше здесь лежала его уменьшенная копия 1200 на 675, и её
+            приходилось растягивать в блок шириной 1873 — полтора раза, с
+            заметным мылом. Теперь растяжение 1.12.
+
+            Увеличения через scale больше нет: оно добавлялось ради сдвига
+            кадра вбок, но снимок и так вписывается в блок ровно по ширине,
+            двигать нечего — а резкость оно съедало.
+
+            62 процента по вертикали поднимают фаркоп чуть выше середины:
+            сверху уходит пустой тёмный фон.
+          */
+          className="object-cover object-[50%_62%]"
         />
         <div
           className="absolute inset-0"
@@ -194,22 +215,18 @@ export default async function InstallPage() {
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {WORKS.map((work) => (
-              <figure key={work.article} className="flex flex-col gap-2">
+              <figure key={work.photo} className="flex flex-col gap-2">
                 <div className="relative flex h-[180px] items-center justify-center overflow-hidden rounded-xl bg-[#141416] text-xs text-ink-dim">
-                  {work.photo ? (
-                    <Image
-                      src={work.photo}
-                      alt={`Фаркоп ${work.article} на ${work.car}`}
-                      fill
-                      sizes="200px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    'фото скоро'
-                  )}
+                  <Image
+                    src={work.photo}
+                    alt={`Установленный фаркоп на ${work.car}`}
+                    fill
+                    sizes="200px"
+                    className="object-cover object-[50%_65%]"
+                  />
                 </div>
                 <figcaption className="text-xs text-[#6E6E6C]">
-                  {work.car} · {work.article}
+                  {work.car}
                 </figcaption>
               </figure>
             ))}
