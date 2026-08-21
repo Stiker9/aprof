@@ -1,12 +1,19 @@
 import Link from 'next/link'
 
 const FIELD_BASE =
-  'w-full rounded-lg border px-4 py-3 text-[15px] placeholder:opacity-45 focus:border-accent focus:outline-none'
+  'w-full rounded-lg border px-4 py-3 text-[15px] placeholder:opacity-65 focus:border-accent focus:outline-none'
 const FIELD_LIGHT = 'border-line-light bg-white text-ink-dark'
 const FIELD_DARK = 'border-white/12 bg-white/5 text-ink'
 
-/** Подпись поля: мелкая, прописными — как в макете страницы установки. */
-const LABEL = 'text-[11px] uppercase tracking-[0.12em] opacity-55'
+/**
+ * Подпись поля: мелкая, прописными — как в макете страницы установки.
+ *
+ * Прозрачность 75, а не 55 процентов. Текст здесь 11 пикселей и в
+ * разрядку, а на opacity-55 он давал контраст около 3.5 к 1 при норме
+ * 4.5 — подписи над полями читались хуже всего на странице. Подсказки
+ * внутри полей по той же причине подняты с 45 до 65 процентов.
+ */
+const LABEL = 'text-[11px] uppercase tracking-[0.12em] opacity-75'
 
 /**
  * Форма заявки.

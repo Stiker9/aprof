@@ -23,7 +23,6 @@ export default function BookingPage() {
       picker={false}
       crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'Запись' }]}
       title="Записаться на установку"
-      summary="Работаем и без записи, но с ней быстрее — машина встанет на пост сразу по приезде."
     >
       <div className="mt-12 grid gap-14 lg:grid-cols-2 lg:gap-20">
         <RequestForm submitLabel="Записаться" />

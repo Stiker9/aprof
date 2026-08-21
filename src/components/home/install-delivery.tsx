@@ -121,24 +121,44 @@ export function InstallDelivery() {
 
   return (
     <section className="relative flex min-h-[calc(100vh-16px)] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
-      <Image
-        src="/images/odin-vizit.webp"
-        alt=""
-        fill
-        sizes="100vw"
-        className="object-cover"
-      />
       {/*
-        Градиент гасит кадр там, где лежит текст, и отпускает к правому
-        краю. Резать фотографию по границе колонки нельзя — шов виден.
+        Фотография занимает правые 52 процента блока, как в исходнике
+        макета (ГЛАВНАЯ.dc.html: position:absolute right:0 width:52%), а
+        не всю ширину. Разница не косметическая: снимок шириной 1672
+        пикселя в колонке около 970 уменьшается и остаётся резким, а
+        растянутый на все 1873 — наоборот, увеличивается почти на
+        четверть, и кадр заметно мылит.
+
+        Шва по левой границе колонки не видно: градиент лежит внутри неё
+        и начинается сплошным #0A0A0B, полностью укрывая край снимка.
+
+        До lg колонки нет — там фотография во всю ширину, текст поверх.
       */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(90deg, #0A0A0B 0%, rgba(10,10,11,.7) 18%, rgba(10,10,11,0) 46%)',
-        }}
-      />
+      <div className="absolute inset-0 lg:left-auto lg:w-[52%]">
+        <Image
+          src="/images/odin-vizit.webp"
+          alt=""
+          fill
+          /*
+            Не 52vw, хотя колонка именно такой ширины. sizes сообщает
+            браузеру ширину показа, и по ней он выбирает вариант файла.
+            Но колонка почти квадратная (около 974 на 944), а снимок
+            широкий — при object-cover масштаб задаёт высота, а не
+            ширина. По 52vw браузер брал вариант 1080 на 608 и растягивал
+            его по высоте в полтора раза. 1700 пикселей — это ширина,
+            нужная чтобы высота кадра закрыла колонку целиком.
+          */
+          sizes="(max-width: 1024px) 100vw, 1700px"
+          className="object-cover"
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(90deg, #0A0A0B 0%, rgba(10,10,11,.7) 18%, rgba(10,10,11,0) 46%)',
+          }}
+        />
+      </div>
 
       <div className="relative z-[2] flex w-full flex-col gap-[clamp(22px,3.4vh,34px)] px-5 py-[clamp(56px,8vh,88px)] sm:px-8 lg:w-[54%] lg:shrink-0 lg:px-14 lg:pt-[clamp(72px,10vh,104px)]">
         {/*

@@ -44,12 +44,12 @@ export function Hero({ productCount }: { productCount: number }) {
         любой ширине окна.
       */}
       <Image
-        src="/images/hero-prado.webp"
+        src="/images/hero-prado-4k.webp"
         alt=""
         fill
         priority
         sizes="100vw"
-        className="object-cover object-[55%_58%]"
+        className="object-cover object-[55%_15%]"
       />
       <div className="pointer-events-none absolute inset-0" style={{ background: GRADIENT }} />
 

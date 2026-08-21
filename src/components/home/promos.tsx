@@ -95,12 +95,19 @@ function FeaturedPromo({ promo }: { promo: Promo }) {
 function PhotoPromo({ promo }: { promo: Promo }) {
   return (
     <article className="relative flex min-h-[200px] flex-col overflow-hidden rounded-[var(--radius-block)] bg-[#131316]">
+      {/*
+        Обрезка смещена к низу снимка. Кадр вертикальный (665 на 998), а
+        карточка широкая и низкая — в окно попадает узкая полоса. По
+        центру это была задняя фара, а фаркоп — то, ради чего снимок
+        здесь и стоит — оставался ниже границы. 85 процентов выводят в
+        кадр дорожку с фаркопом, как в макете.
+      */}
       <Image
         src="/images/work-kodiaq.webp"
         alt=""
         fill
         sizes="(max-width: 1024px) 100vw, 40vw"
-        className="object-cover"
+        className="object-cover object-[50%_85%]"
       />
       <div className="pointer-events-none absolute inset-0" style={{ background: OVERLAY_SMALL }} />
 
