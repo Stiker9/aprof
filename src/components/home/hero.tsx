@@ -67,7 +67,15 @@ export function Hero({ productCount }: { productCount: number }) {
         <span className="hero-dot-2 block h-2 rounded-full" />
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 px-5 pb-10 sm:px-8 lg:px-14 lg:pb-14">
+      {/*
+        В исходнике этот блок не прижат к низу — у него отступ сверху
+        `padding-top: clamp(140px,20vh,200px)` от верхнего края hero
+        (ГЛАВНАЯ.dc.html, обёртка текста). Раньше здесь стояло
+        `bottom-0 pb-*`, и текст прилипал к самому низу секции — на
+        невысоком окне браузера это выглядело так, будто заголовок
+        «висит внизу», почти без отступа от цифр до края.
+      */}
+      <div className="absolute inset-0 px-5 pt-[clamp(120px,18vh,180px)] pb-10 sm:px-8 lg:px-14 lg:pt-[clamp(140px,20vh,200px)] lg:pb-[clamp(28px,4vh,40px)]">
         <div className="max-w-[42%] min-w-[420px] max-lg:max-w-none">
           <h1 className="font-[family-name:var(--font-display)] text-[clamp(30px,3.3vw,45px)] leading-[1.04] tracking-[-0.01em]">
             Фаркопы с установкой
