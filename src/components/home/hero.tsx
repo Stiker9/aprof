@@ -35,13 +35,21 @@ const NUMBERS = [
 export function Hero({ productCount }: { productCount: number }) {
   return (
     <section className="relative h-[calc(100vh-16px)] min-h-[620px] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
+      {/*
+        object-position сдвинут к низу кадра: на широких экранах
+        object-cover обрезает фото сверху и снизу поровну (контейнер
+        шире по пропорциям, чем сам снимок), а фаркоп на бампере
+        расположен у самого нижнего края фото — при обрезке по центру
+        его срезало. Смещение к низу жертвует небом сверху, зато фаркоп
+        остаётся в кадре при любой ширине окна.
+      */}
       <Image
         src="/images/hero-prado.webp"
         alt=""
         fill
         priority
         sizes="100vw"
-        className="object-cover"
+        className="object-cover object-[55%_100%]"
       />
       <div className="pointer-events-none absolute inset-0" style={{ background: GRADIENT }} />
 
