@@ -36,12 +36,12 @@ export function Hero({ productCount }: { productCount: number }) {
   return (
     <section className="relative h-[calc(100vh-16px)] min-h-[620px] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
       {/*
-        object-position сдвинут к низу кадра: на широких экранах
-        object-cover обрезает фото сверху и снизу поровну (контейнер
-        шире по пропорциям, чем сам снимок), а фаркоп на бампере
-        расположен у самого нижнего края фото — при обрезке по центру
-        его срезало. Смещение к низу жертвует небом сверху, зато фаркоп
-        остаётся в кадре при любой ширине окна.
+        Снимок 2560x1463 (1.75:1) чуть «выше» блока, который на экране
+        1920x1080 близок к 2:1 — object-cover срезает по высоте около
+        13 процентов. Точка обрезки смещена немного вниз от центра:
+        сверху уходит лишнее небо, а крыша машины и фаркоп на бампере
+        (он примерно на 58 процентах высоты кадра) остаются целиком при
+        любой ширине окна.
       */}
       <Image
         src="/images/hero-prado.webp"
@@ -49,7 +49,7 @@ export function Hero({ productCount }: { productCount: number }) {
         fill
         priority
         sizes="100vw"
-        className="object-cover object-[55%_100%]"
+        className="object-cover object-[55%_58%]"
       />
       <div className="pointer-events-none absolute inset-0" style={{ background: GRADIENT }} />
 
