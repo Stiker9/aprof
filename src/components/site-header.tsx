@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState, type MouseEvent } from 'react'
 import { urls } from '@/catalog/urls'
 import { CONTACTS } from '@/content/contacts'
 
@@ -127,6 +128,20 @@ export function SiteHeader() {
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
+  /*
+    Логотип всегда ведёт на главную. Если мы уже на ней, переход
+    никуда не ведёт — поэтому там он вместо перехода поднимает
+    страницу к первому экрану. Это и ожидают от названия в шапке.
+  */
+  const onHome = usePathname() === urls.home()
+
+  const scrollTopOnHome = (event: MouseEvent) => {
+    if (!onHome) return
+    event.preventDefault()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setOpen(false)
+  }
+
   const narrow = open || scrolled
 
   const burger =
@@ -166,6 +181,7 @@ export function SiteHeader() {
             <span className="block h-6 w-6" aria-hidden />
             <Link
               href={urls.home()}
+              onClick={scrollTopOnHome}
               className="font-[family-name:var(--font-display)] text-[15px] tracking-[0.24em] text-ink"
             >
               AUTOPROFI
@@ -217,6 +233,7 @@ export function SiteHeader() {
 
           <Link
             href={urls.home()}
+            onClick={scrollTopOnHome}
             className="font-[family-name:var(--font-display)] text-sm tracking-[0.24em] text-ink"
           >
             AUTOPROFI

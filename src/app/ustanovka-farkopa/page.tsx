@@ -25,6 +25,9 @@ const PRICE_ROW = 'grid grid-cols-[1fr_120px_120px] gap-6 sm:grid-cols-[1fr_180p
 
 /**
  * Шесть снимков из галереи — марки подобраны так, чтобы светлые и тёмные
+ * Все шесть ведут на страницу фаркопов для своей машины, поэтому Mercedes
+ * здесь заменён на Audi: модель того Mercedes по шильдику определить не
+ * вышло, и вести снимок было бы некуда.
  * кузова чередовались, иначе в ряду они сливаются. Полный набор на
  * странице /nashi-raboty.
  *
@@ -32,12 +35,12 @@ const PRICE_ROW = 'grid grid-cols-[1fr_120px_120px] gap-6 sm:grid-cols-[1fr_180p
  * сайте, где по нему подбирают деталь, нельзя.
  */
 const WORKS = [
-  { car: 'Haval F7', photo: '/images/gallery/haval-f7.webp' },
-  { car: 'Kia Rio', photo: '/images/gallery/kia-rio.webp' },
-  { car: 'Nissan X-Trail', photo: '/images/gallery/nissan-x-trail.webp' },
-  { car: 'Mercedes-Benz', photo: '/images/gallery/mercedes-benz.webp' },
-  { car: 'Lada Largus', photo: '/images/gallery/lada-largus.webp' },
-  { car: 'Skoda Rapid', photo: '/images/gallery/skoda-rapid.webp' },
+  { car: 'Haval F7', photo: '/images/gallery/haval-f7.webp', href: urls.model('haval', 'f7') },
+  { car: 'Kia Rio', photo: '/images/gallery/kia-rio.webp', href: urls.model('kia', 'rio') },
+  { car: 'Nissan X-Trail', photo: '/images/gallery/nissan-x-trail.webp', href: urls.model('nissan', 'x-trail') },
+  { car: 'Audi SQ8', photo: '/images/gallery/audi-sq8.webp', href: urls.model('audi', 'q8') },
+  { car: 'Lada Largus', photo: '/images/gallery/lada-largus.webp', href: urls.model('lada', 'largus') },
+  { car: 'Skoda Rapid', photo: '/images/gallery/skoda-rapid.webp', href: urls.model('skoda', 'rapid') },
 ]
 
 export default async function InstallPage() {
@@ -216,18 +219,20 @@ export default async function InstallPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {WORKS.map((work) => (
               <figure key={work.photo} className="flex flex-col gap-2">
-                <div className="relative flex h-[180px] items-center justify-center overflow-hidden rounded-xl bg-[#141416] text-xs text-ink-dim">
-                  <Image
-                    src={work.photo}
-                    alt={`Установленный фаркоп на ${work.car}`}
-                    fill
-                    sizes="200px"
-                    className="object-cover object-[50%_65%]"
-                  />
-                </div>
-                <figcaption className="text-xs text-[#6E6E6C]">
-                  {work.car}
-                </figcaption>
+                <Link href={work.href} className="group flex flex-col gap-2">
+                  <div className="relative h-[180px] overflow-hidden rounded-xl bg-[#141416]">
+                    <Image
+                      src={work.photo}
+                      alt={`Установленный фаркоп на ${work.car}`}
+                      fill
+                      sizes="200px"
+                      className="object-cover object-[50%_65%] transition-transform duration-500 group-hover:scale-[1.06]"
+                    />
+                  </div>
+                  <figcaption className="text-xs text-[#6E6E6C] transition-colors group-hover:text-ink">
+                    {work.car}
+                  </figcaption>
+                </Link>
               </figure>
             ))}
           </div>

@@ -68,6 +68,13 @@ export function Hero({ productCount }: { productCount: number }) {
       */}
       <div className="absolute inset-0 px-5 pt-[clamp(120px,18vh,180px)] pb-10 sm:px-8 lg:px-14 lg:pt-[clamp(140px,20vh,200px)] lg:pb-[clamp(28px,4vh,40px)]">
         <div className="max-w-[42%] min-w-[420px] max-lg:max-w-none">
+          {/*
+            Красная черта над заголовком. На первом экране акцент до этого
+            жил только в кнопке подбора справа, и с левой колонкой ничем
+            не был связан. Черта заводит его туда, не трогая ни текст, ни
+            кнопку — заголовок остаётся единственным белым пятном.
+          */}
+          <span aria-hidden className="mb-6 block h-[3px] w-11 rounded-sm bg-accent" />
           <h1 className="font-[family-name:var(--font-display)] text-[clamp(30px,3.3vw,45px)] leading-[1.04] tracking-[-0.01em]">
             Фаркопы с установкой
             <br />в Санкт-Петербурге
@@ -77,27 +84,38 @@ export function Hero({ productCount }: { productCount: number }) {
             Подберём по марке, модели и году. Поставим за один визит — с документами для ТО.
           </p>
 
+          {/*
+            Кнопка залита белым, а не обведена контуром, как в макете.
+
+            Прежняя занимала 355 на 104 пикселя — больше красной кнопки в
+            строке подбора, — но при прозрачной заливке и рамке в 55%
+            белого терялась на фотографии. Дело было не в размере, а в
+            весе, поэтому «сделать покрупнее» задачу бы не решило.
+
+            Белая, а не красная: красная кнопка «Подобрать» уже стоит на
+            200 пикселей выше, в строке подбора, и вторая такая же рядом
+            читалась бы как дубль. Приём не выдуман — точно так же сделана
+            кнопка «Записаться» в карточке акции.
+          */}
           <Link
             href={urls.catalog()}
-            className="mt-6 inline-flex items-center gap-[18px] transition-colors hover:text-accent"
+            className="mt-7 inline-flex items-center gap-2.5 self-start rounded-full bg-white px-7 py-[15px] text-[16px] font-semibold text-[#0D0D0E] transition-colors hover:bg-[#E8E6E1]"
           >
-            <span className="flex h-[clamp(42px,4vh,54px)] w-[clamp(42px,4vh,54px)] items-center justify-center border border-white/55">
-              <span aria-hidden className="text-lg">↘</span>
-            </span>
-            <span className="text-[clamp(14px,1.1vw,17px)]">Подобрать фаркоп</span>
+            Подобрать фаркоп <span aria-hidden className="text-accent">→</span>
           </Link>
 
           {/*
-            Ряд статистики набран заметно мельче заголовка и приглушённым
-            цветом. Это справочные цифры под hero-строкой, а не витрина —
-            в дизайн-системе роль «Цифра» так и задана: 22px флэт, без
-            clamp. Разгонять их до размера заголовка значило бы спорить
-            с ним за внимание, а решать здесь должен только заголовок.
+            Цифры крупнее, чем задано ролью «Цифра» в дизайн-системе — там
+            22 пикселя флэтом. Подняты по просьбе заказчика: на первом
+            экране это не справка, а доводы, и прежний размер их прятал.
+
+            Верхний предел 32 держит их ниже заголовка (30–45): спорить
+            с ним за внимание они всё равно не должны.
           */}
           <div className="mt-8 flex flex-wrap gap-x-7 gap-y-4">
             {NUMBERS.map((item) => (
               <div key={item.caption} className="flex flex-col gap-1.5">
-                <span className="font-[family-name:var(--font-display)] text-[22px] leading-none">
+                <span className="font-[family-name:var(--font-display)] text-[clamp(26px,2.1vw,32px)] leading-none">
                   {item.value ?? formatNumber(productCount)}
                 </span>
                 <span className="text-xs text-[#9C9C9A]">{item.caption}</span>

@@ -24,12 +24,10 @@ const FILTERS = ['Все марки', 'Китайские', 'Европейск�
 export function Brands({
   brands,
   totalBrands,
-  totalModels,
 }: {
   /** Марки, показанные в сетке, — не все, а первые по числу товаров. */
   brands: BrandRow[]
   totalBrands: number
-  totalModels: number
 }) {
   const rest = totalBrands - brands.length
 
@@ -47,10 +45,14 @@ export function Brands({
           <div className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#8A8A88]">
             Каталог
           </div>
+          {/*
+            В заголовке была пара чисел — «106 марок, 956 моделей».
+            Заказчик попросил их убрать: цифрами хвалятся, а заголовок
+            секции должен говорить, что тут делать. Сами числа никуда не
+            делись — они под каждой плиткой марки и в ссылке внизу.
+          */}
           <h2 className="font-[family-name:var(--font-display)] text-[clamp(30px,3.2vw,46px)] leading-[1.04] tracking-[-0.03em]">
-            {formatCount(totalBrands, 'марка', 'марки', 'марок')},
-            <br />
-            {formatCount(totalModels, 'модель', 'модели', 'моделей')}
+            Выберите марку
           </h2>
         </div>
 

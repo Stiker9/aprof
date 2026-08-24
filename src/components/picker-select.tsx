@@ -118,7 +118,12 @@ export function PickerSelect({
         }`}
       >
         <span className="truncate">{loading ? 'Загружаем…' : (selected?.n ?? label)}</span>
-        <span aria-hidden className={`text-xs transition-transform ${open ? 'rotate-180' : ''}`}>
+        {/*
+          Стрелка фирменного красного, а не цвета текста поля: это
+          единственный намёк на то, что поле раскрывается, и в общей
+          серой строке он терялся.
+        */}
+        <span aria-hidden className={`text-accent text-xs transition-transform ${open ? 'rotate-180' : ''}`}>
           ▾
         </span>
       </button>
