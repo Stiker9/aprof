@@ -8,7 +8,7 @@ import { RATING } from '@/content/reviews'
 export const metadata: Metadata = {
   title: 'О компании AUTOPROFI — сервис по установке фаркопов в Петербурге',
   description:
-    'Сервис на Софийской улице с 2014 года: свои мастера, свой склад, больше 3 800 установок. Гарантия два года на работы.',
+    'Сервис на 1-й Жерновской улице с 2014 года: свои мастера, свой склад, больше 3 800 установок. Гарантия два года на работы.',
   alternates: { canonical: absolute('/o-nas') },
 }
 
@@ -25,7 +25,7 @@ export default function AboutPage() {
       picker={false}
       crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'О нас' }]}
       title="С 2014 года"
-      summary="Один сервис на Софийской, свои мастера и свой склад. Без посредников и подрядчиков."
+      summary="Один сервис на 1-й Жерновской, свои мастера и свой склад. Без посредников и подрядчиков."
     >
       <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         {NUMBERS.map((item) => (
@@ -63,9 +63,11 @@ export default function AboutPage() {
         <div className="rounded-[var(--radius-block)] border border-line-light bg-white p-8">
           <h2 className="text-[19px] font-medium">Где мы</h2>
           <p className="mt-3 text-[17px]">{CONTACTS.address}</p>
-          <p className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</p>
+          {CONTACTS.addressNote ? (
+            <p className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</p>
+          ) : null}
           <p className="mt-4 text-sm opacity-55">
-            {CONTACTS.hours} · {CONTACTS.dayOff}
+            {CONTACTS.dayOff ? `${CONTACTS.hours} · ${CONTACTS.dayOff}` : CONTACTS.hours}
           </p>
           <Link href="/kontakty" className="mt-5 inline-block text-accent hover:underline">
             Контакты и схема проезда →

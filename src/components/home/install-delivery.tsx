@@ -49,13 +49,25 @@ function Spb() {
   return (
     <div className="flex flex-col gap-[34px]">
       <div className="flex max-w-[520px] flex-col gap-5">
+        {/*
+          «Один визит — и вы за рулём» заказчик не понял, и справедливо:
+          «за рулём» — состояние, которое у человека уже есть, он приехал
+          на машине. Фраза обещала то, что и так правда, и не называла,
+          что меняется.
+
+          Само обещание — «без второго приезда» — ушло в подводку, а не в
+          заголовок. В заголовке на строку помещается около тринадцати
+          знаков: при 48 пикселях Unbounded в колонке шириной 520 фраза
+          «Ставим за один визит» занимает 635 и разваливается на четыре
+          строки вместо двух.
+        */}
         <h2 className="font-[family-name:var(--font-display)] text-[clamp(34px,3.8vw,52px)] leading-[1.04] tracking-[-0.03em]">
           Один визит
           <br />
-          <span className="text-[#75757A]">— и вы за рулём</span>
+          <span className="text-[#75757A]">— и всё готово</span>
         </h2>
         <p className="max-w-[440px] text-[17px] leading-[1.55] text-[#C6C6C3]">
-          Приезжайте утром на Софийскую — уедете с фаркопом, электрикой и документами для ТО.
+          Приезжайте на 1-ю Жерновскую — уедете с фаркопом, электрикой и документами для ТО.
         </p>
       </div>
 
@@ -63,7 +75,7 @@ function Spb() {
         <BigStat value="3" unit="часа" caption="средняя установка" />
         <Divider />
         <div className="flex flex-col gap-1">
-          <span className="text-[19px] font-semibold">Софийская, 72</span>
+          <span className="text-[19px] font-semibold">{CONTACTS.addressShort}</span>
           <span className="text-xs text-[#8A8A88]">{CONTACTS.hours}</span>
         </div>
       </div>

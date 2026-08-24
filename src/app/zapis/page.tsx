@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
 import { RequestForm } from '@/components/request-form'
+import { CONTACTS } from '@/content/contacts'
 
 export const metadata: Metadata = {
   title: 'Записаться на установку фаркопа в Санкт-Петербурге',
@@ -48,13 +49,13 @@ export default function BookingPage() {
           <div>
             <div className="text-sm opacity-55">Или просто позвоните</div>
             <a
-              href="tel:+78121234567"
+              href={CONTACTS.phoneHref}
               className="mt-2 block font-[family-name:var(--font-display)] text-[clamp(24px,3vw,32px)] leading-none tracking-[-0.02em] transition-colors hover:text-accent"
             >
-              +7 (812) 123-45-67
+              {CONTACTS.phone}
             </a>
-            <div className="mt-4 text-sm opacity-55">Пн–Сб 9:00–19:00 · воскресенье выходной</div>
-            <div className="mt-1 text-sm opacity-55">Санкт-Петербург, Софийская ул. 72</div>
+            <div className="mt-4 text-sm opacity-55">{CONTACTS.hours}</div>
+            <div className="mt-1 text-sm opacity-55">{CONTACTS.address}</div>
           </div>
 
           <div>

@@ -7,7 +7,7 @@ import { CONTACTS, LEGAL_ENTITY } from '@/content/contacts'
 export const metadata: Metadata = {
   title: 'Контакты — AUTOPROFI, Санкт-Петербург',
   description:
-    'Адрес сервиса на Софийской улице, телефон, часы работы и форма заявки. Перезваниваем в течение 15 минут в рабочие часы.',
+    'Адрес сервиса на 1-й Жерновской улице, телефон, часы работы и форма заявки. Перезваниваем в течение 15 минут в рабочие часы.',
   alternates: { canonical: absolute('/kontakty') },
 }
 
@@ -16,8 +16,8 @@ export default function ContactsPage() {
     <CatalogShell
       picker={false}
       crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'Контакты' }]}
-      title="Приезжайте или позвоните"
-      summary="Работаем без записи, но с ней быстрее. Оставьте номер — перезвоним в течение 15 минут в рабочие часы."
+      title="Оставьте номер — перезвоним"
+      summary="Можно приехать без записи. По записи — сразу на пост, без ожидания. Перезваниваем в течение 15 минут в рабочие часы."
     >
       <div className="mt-12 grid gap-14 lg:grid-cols-2 lg:gap-20">
         <RequestForm />
@@ -26,7 +26,9 @@ export default function ContactsPage() {
           <div>
             <div className="text-sm opacity-55">Адрес</div>
             <div className="mt-2 text-[19px]">{CONTACTS.address}</div>
-            <div className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</div>
+            {CONTACTS.addressNote ? (
+              <div className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</div>
+            ) : null}
           </div>
 
           <div>
@@ -49,17 +51,20 @@ export default function ContactsPage() {
           <div>
             <div className="text-sm opacity-55">Часы работы</div>
             <div className="mt-2 text-[19px]">{CONTACTS.hours}</div>
-            <div className="mt-1 text-sm opacity-55">
-              Воскресенье — выходной
-            </div>
           </div>
 
-          {/*
-            Карта не встроена: любой картографический виджет тянет чужие
-            скрипты и счётчики, а страница должна оставаться быстрой и
-            не отдавать посетителей стороннему домену без нужды.
-            Появится вместе с точной точкой на карте от заказчика.
-          */}
+          <div>
+            <div className="text-sm opacity-55">Как добраться</div>
+            <a
+              href={CONTACTS.routeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-2 text-[19px] text-accent hover:underline"
+            >
+              Построить маршрут <span aria-hidden>→</span>
+            </a>
+          </div>
+
           <div>
             <div className="text-sm opacity-55">Реквизиты</div>
             <div className="mt-2 text-sm opacity-75">
@@ -69,6 +74,22 @@ export default function ContactsPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/*
+        Карта грузится лениво: виджет тянет чужие скрипты, и делать это
+        при открытии страницы незачем — до карты ещё надо долистать.
+        Заголовок у iframe обязателен, иначе для читалки это безымянная
+        рамка, в которую непонятно зачем заходить.
+      */}
+      <div className="mt-14 overflow-hidden rounded-[var(--radius-card)] border border-line-light">
+        <iframe
+          src={CONTACTS.mapEmbedUrl}
+          title={`Сервис AUTOPROFI на карте: ${CONTACTS.address}`}
+          loading="lazy"
+          allowFullScreen
+          className="h-[420px] w-full border-0"
+        />
       </div>
     </CatalogShell>
   )

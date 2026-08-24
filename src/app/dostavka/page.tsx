@@ -3,11 +3,12 @@ import Link from 'next/link'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
 import { Tabs } from '@/components/ui/tabs'
+import { CONTACTS } from '@/content/contacts'
 
 export const metadata: Metadata = {
   title: 'Доставка фаркопов по России и самовывоз в Санкт-Петербурге',
   description:
-    'Отправляем фаркопы СДЭК в 1 100 городов, срок в пути 1–7 дней. Самовывоз с Софийской улицы в Петербурге.',
+    'Отправляем фаркопы СДЭК в 1 100 городов, срок в пути 1–7 дней. Самовывоз в Петербурге.',
   alternates: { canonical: absolute('/dostavka') },
 }
 
@@ -15,8 +16,8 @@ function Pickup() {
   return (
     <div className="max-w-[70ch]">
       <p className="leading-relaxed opacity-75">
-        Забрать заказ можно на Софийской улице, 72. Въезд со двора, вывеска AUTOPROFI. Приезжать
-        лучше в приёмные часы: Пн–Сб с 9:00 до 19:00, воскресенье выходной.
+        Забрать заказ можно на 1-й Жерновской улице, 5. Приезжать
+        лучше в рабочие часы — закрываемся в 20:00.
       </p>
       <p className="mt-4 leading-relaxed opacity-75">
         Если фаркоп ставим мы, забирать его отдельно не нужно — привозите машину, и уедете уже с
@@ -94,8 +95,8 @@ export default function DeliveryPage() {
             Назовите город и модель — посчитаем стоимость и срок.
           </p>
         </div>
-        <a href="tel:+78121234567" className="text-[19px] font-semibold hover:text-accent">
-          +7 (812) 123-45-67
+        <a href={CONTACTS.phoneHref} className="text-[19px] font-semibold hover:text-accent">
+          {CONTACTS.phone}
         </a>
         <Link
           href={urls.catalog()}

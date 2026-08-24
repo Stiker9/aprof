@@ -1,5 +1,4 @@
 import { RequestForm } from '@/components/request-form'
-import { ArrowLink } from '@/components/ui/arrow-link'
 import { Eyebrow, Section, SectionLead, SectionTitle } from '@/components/ui/section'
 import { CONTACTS } from '@/content/contacts'
 
@@ -8,10 +7,22 @@ export function Contacts() {
   return (
     <Section tone="light">
       <Eyebrow>Контакты</Eyebrow>
-      <SectionTitle>Приезжайте или позвоните</SectionTitle>
+      {/*
+        Заголовок называет форму, а не приезд и звонок. Прежнее
+        «Приезжайте или позвоните» перечисляло два способа из трёх, а
+        третий — заявка — занимает половину блока и оставался
+        неназванным. Адрес и телефон никуда не делись, они рядом.
+      */}
+      <SectionTitle>Оставьте номер — перезвоним</SectionTitle>
       <SectionLead>
-        Работаем без записи, но с ней быстрее. Оставьте номер — перезвоним в течение 15 минут в
-        рабочие часы.
+        {/*
+          Прежнее «Работаем без записи, но с ней быстрее» заказчик назвал
+          путаным, и справедливо: оно отвечает на вопрос «нужна запись
+          или нет» словами «и да, и нет», не объясняя, в чём разница.
+          Теперь разница названа — не ждать очереди на пост.
+        */}
+        Можно приехать без записи. По записи — сразу на пост, без ожидания.
+        Перезваниваем в течение 15 минут в рабочие часы.
       </SectionLead>
 
       {/*
@@ -28,7 +39,9 @@ export function Contacts() {
           <div>
             <div className="text-sm opacity-55">Адрес</div>
             <div className="mt-2 text-[19px]">{CONTACTS.address}</div>
-            <div className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</div>
+            {CONTACTS.addressNote ? (
+              <div className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</div>
+            ) : null}
           </div>
 
           <div>
@@ -51,11 +64,33 @@ export function Contacts() {
           <div>
             <div className="text-sm opacity-55">Часы работы</div>
             <div className="mt-2 text-[19px]">{CONTACTS.hours}</div>
-            <div className="mt-1 text-sm opacity-55">Воскресенье — выходной</div>
           </div>
 
-          <ArrowLink href="/kontakty">Схема проезда</ArrowLink>
+          <a
+            href={CONTACTS.routeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[15px] text-accent hover:underline"
+          >
+            Построить маршрут <span aria-hidden>→</span>
+          </a>
         </div>
+      </div>
+
+      {/*
+        Карта грузится лениво: виджет тянет чужие скрипты, и делать это
+        при открытии главной незачем — до контактов ещё надо долистать.
+        Заголовок у iframe обязателен, иначе для читалки это безымянная
+        рамка, в которую непонятно зачем заходить.
+      */}
+      <div className="mt-12 overflow-hidden rounded-[var(--radius-card)] border border-line-light">
+        <iframe
+          src={CONTACTS.mapEmbedUrl}
+          title={`Сервис AUTOPROFI на карте: ${CONTACTS.address}`}
+          loading="lazy"
+          allowFullScreen
+          className="h-[380px] w-full border-0"
+        />
       </div>
     </Section>
   )

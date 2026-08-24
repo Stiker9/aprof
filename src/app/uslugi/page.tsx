@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
+import { CONTACTS } from '@/content/contacts'
 
 export const metadata: Metadata = {
   title: 'Услуги — установка фаркопа, электрика, подбор, ремонт ТСУ',
@@ -51,7 +52,7 @@ export default function ServicesPage() {
       picker={false}
       crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'Услуги' }]}
       title="Услуги"
-      summary="Один сервис на Софийской, свои мастера. Без посредников и подрядчиков."
+      summary="Один сервис на 1-й Жерновской, свои мастера. Без посредников и подрядчиков."
     >
       <div className="mt-12 grid gap-4 md:grid-cols-2">
         {SERVICES.map((service) => (
@@ -80,8 +81,8 @@ export default function ServicesPage() {
             Позвоните — скажем, беремся ли, и сколько это займёт.
           </p>
         </div>
-        <a href="tel:+78121234567" className="text-[19px] font-semibold hover:text-accent">
-          +7 (812) 123-45-67
+        <a href={CONTACTS.phoneHref} className="text-[19px] font-semibold hover:text-accent">
+          {CONTACTS.phone}
         </a>
         <Link
           href="/zapis"
