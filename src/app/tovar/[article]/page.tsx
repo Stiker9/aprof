@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { formatNumber, formatPrice, formatVariantLabel, formatVariantShort } from '@/catalog/format'
@@ -11,6 +10,7 @@ import {
 } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
+import { ProductGallery } from '@/components/product/gallery'
 import { OrderPanel } from '@/components/product/order-panel'
 import { CONTACTS } from '@/content/contacts'
 import { getDb } from '@/db/client'
@@ -107,7 +107,6 @@ export default async function ProductPage({ params }: Params) {
   ]
 
   const heading = 'text-[19px] font-medium'
-  const thumbs = product.images.slice(1, 6)
 
   return (
     <CatalogShell
@@ -140,40 +139,7 @@ export default async function ProductPage({ params }: Params) {
     >
       <div className="flex flex-col items-start gap-8 lg:flex-row">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          {/*
-            Тёмная подложка под снимком не для красоты: фаркопы снимают
-            на светлом фоне и с прозрачностью по краям, и на белом они
-            растворяются — не видно, где кончается деталь.
-          */}
-          <div className="relative h-[440px] overflow-hidden rounded-[14px] bg-[#141416]">
-            {product.images[0] ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={product.images[0]}
-                alt={`Фаркоп ${product.article}`}
-                className="h-full w-full object-contain"
-              />
-            ) : (
-              <Image
-                src="/images/product-sample.webp"
-                alt={`Фаркоп ${product.article}`}
-                fill
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                className="object-contain"
-              />
-            )}
-          </div>
-
-          {thumbs.length > 0 && (
-            <div className="grid grid-cols-5 gap-2.5">
-              {thumbs.map((src) => (
-                <div key={src} className="h-[92px] overflow-hidden rounded-[9px] bg-[#141416]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt="" loading="lazy" className="h-full w-full object-contain" />
-                </div>
-              ))}
-            </div>
-          )}
+          <ProductGallery images={product.images} article={product.article} />
         </div>
 
         <OrderPanel

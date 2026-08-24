@@ -82,8 +82,13 @@ export default async function ModelPage({ params }: Params) {
           : `${formatCount(variants.length, 'поколение', 'поколения', 'поколений')} · ${formatCount(foundModel.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}`
       }
     >
+      {/*
+        Сетка плиток, а не список строк: четыре колонки на широком экране,
+        две на планшете, одна на телефоне. Раньше товары шли строками во
+        всю ширину — на мониторе это оставляло полстраницы пустоты.
+      */}
       {single ? (
-        <div className="mt-10 space-y-4">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.slug} product={product} />
           ))}

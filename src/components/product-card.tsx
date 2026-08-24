@@ -10,88 +10,82 @@ const BUMPER_LABEL: Record<ProductRow['bumperCut'], string | null> = {
 }
 
 /**
- * Карточка товара в списке.
+ * Карточка товара — плитка.
  *
- * Бейдж наличия сделан заметным намеренно: в каталоге соседствуют товары
- * с отгрузкой сегодня и позиции под заказ на 1–6 месяцев. Если человек
- * не увидит разницу при заказе, он узнает о ней через полгода ожидания.
+ * Раньше карточки шли строками во всю ширину: снимок 128 на 128 слева,
+ * текст справа. Заказчик попросил формат, привычный по магазинам
+ * автотоваров, — плитки сеткой, где снимок сверху, а под ним название
+ * и цена.
  *
- * Вся карточка — ссылка на товар, а «Узнать цену» лежит поверх неё
- * отдельной кнопкой. Строку целиком проще нажать, чем целиться в слово
- * «Подробнее», особенно с телефона.
+ * У плитки меньше места под характеристики, чем у строки, поэтому в
+ * карточке остались только те, по которым выбирают:
+ *
+ * - вырез бампера — единственное, что видно на машине снаружи, и первое,
+ *   о чём спрашивают;
+ * - тяговая нагрузка — по ней проверяют, потянет ли прицеп.
+ *
+ * Тип шара и вес ушли на страницу товара: они уточняют выбор, а не
+ * определяют его.
+ *
+ * Бейдж наличия заметный намеренно: в каталоге рядом стоят позиции с
+ * отгрузкой сегодня и под заказ на 1–6 месяцев. Если человек не увидит
+ * разницу при заказе, он узнает о ней через полгода ожидания.
  */
 export function ProductCard({ product }: { product: ProductRow }) {
-  const chips = [
-    product.ballType ? `Шар ${product.ballType}` : null,
-    product.towLoadKg && product.verticalLoadKg
-      ? `${product.towLoadKg}/${product.verticalLoadKg} кг`
-      : null,
-    product.weightKg ? `${formatNumber(product.weightKg)} кг` : null,
-    BUMPER_LABEL[product.bumperCut],
-  ].filter((chip): chip is string => chip !== null)
+  const bumper = BUMPER_LABEL[product.bumperCut]
 
   return (
-    <article className="relative flex gap-5 rounded-[var(--radius-card)] border border-line-light bg-white p-5 transition-colors hover:border-accent">
-      <div className="hidden h-32 w-32 shrink-0 items-center justify-center rounded-lg bg-paper-2 sm:flex">
+    <article className="group relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-line-light bg-white transition-colors hover:border-accent">
+      {/*
+        Снимки фаркопов сняты на светлом фоне и часто с прозрачностью по
+        краям. На белом они растворяются, поэтому подложка чуть темнее
+        карточки, а кадр вписывается целиком, а не обрезается: у детали
+        важна форма, и срезанный кронштейн делает её неузнаваемой.
+      */}
+      <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-paper-2">
         {product.images[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={product.images[0]}
             alt={`Фаркоп ${product.article}`}
-            className="h-full w-full rounded-lg object-contain"
             loading="lazy"
+            className="h-full w-full object-contain p-4 transition-transform duration-500 group-hover:scale-[1.04]"
           />
         ) : (
           <span className="text-xs opacity-45">нет фото</span>
         )}
+
+        <span
+          className={`absolute left-3 top-3 rounded px-2 py-1 text-[12px] font-medium ${
+            product.inStock ? 'bg-in-stock/12 text-in-stock' : 'bg-on-order/12 text-on-order'
+          }`}
+        >
+          {product.deliveryText ?? (product.inStock ? 'в наличии' : 'под заказ')}
+        </span>
       </div>
 
-      <div className="min-w-0 flex-1">
-        {/* Артикул 18/500, цена 22/600 — см. docs/typography.md */}
+      <div className="flex flex-1 flex-col p-4">
         <Link
           href={urls.product(product.slug)}
-          className="text-[18px] font-medium after:absolute after:inset-0 hover:text-accent"
+          className="text-[15px] font-medium leading-[1.3] after:absolute after:inset-0 hover:text-accent"
         >
-          {product.article}
+          {product.manufacturer} {product.article}
         </Link>
 
-        <div className="mt-1 text-[13px] opacity-55">
-          {product.manufacturer}
-          {product.country ? ` · ${product.country}` : ''}
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <span className="text-[22px] font-semibold">{formatPrice(product.price)}</span>
-          <span
-            className={`rounded px-2 py-1 text-[12px] font-medium ${
-              product.inStock ? 'bg-in-stock/12 text-in-stock' : 'bg-on-order/12 text-on-order'
-            }`}
-          >
-            {product.deliveryText ?? (product.inStock ? 'в наличии' : 'под заказ')}
-          </span>
-        </div>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {chips.map((chip) => (
-            <span
-              key={chip}
-              className="rounded border border-line-light px-2 py-1 text-[12px] font-medium opacity-65"
-            >
-              {chip}
-            </span>
-          ))}
-        </div>
+        {bumper || product.towLoadKg ? (
+          <div className="mt-2 text-[13px] leading-[1.5] opacity-55">
+            {[bumper, product.towLoadKg ? `${formatNumber(product.towLoadKg)} кг` : null]
+              .filter(Boolean)
+              .join(' · ')}
+          </div>
+        ) : null}
 
         {/*
-          `relative` поднимает кнопку над растянутой ссылкой карточки —
-          иначе нажатие на неё уводило бы на страницу товара.
+          mt-auto прижимает цену к низу: у карточек в ряду названия разной
+          длины, и без этого цены встают на разной высоте — глаз перестаёт
+          их сравнивать.
         */}
-        <button
-          type="button"
-          className="relative mt-4 rounded-[10px] bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
-        >
-          Узнать цену
-        </button>
+        <div className="mt-auto pt-3 text-[20px] font-semibold">{formatPrice(product.price)}</div>
       </div>
     </article>
   )

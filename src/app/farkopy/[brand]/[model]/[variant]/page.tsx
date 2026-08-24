@@ -101,7 +101,12 @@ export default async function VariantPage({ params }: Params) {
         </>
       }
     >
-      <div className="mt-10 space-y-4">
+      {/*
+        Сетка плиток, а не список строк: четыре колонки на широком экране,
+        две на планшете, одна на телефоне. Раньше товары шли строками во
+        всю ширину — на мониторе это оставляло полстраницы пустоты.
+      */}
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data.products.map((product) => (
           <ProductCard key={product.slug} product={product} />
         ))}
@@ -111,7 +116,7 @@ export default async function VariantPage({ params }: Params) {
         <div className="rounded-[var(--radius-block)] border border-line-light bg-white p-7">
           <h2 className="text-[19px] font-medium">Установка в Петербурге</h2>
           <p className="mt-2 text-sm opacity-60">
-            3 часа работы, гарантия 2 года, документы для ТО. Софийская ул. 72.
+            3 часа работы, гарантия 2 года, документы для ТО. 1-я Жерновская ул., 5.
           </p>
           <Link href="/ustanovka-farkopa" className="mt-4 inline-block text-accent hover:underline">
             Цены на установку →
