@@ -7,7 +7,15 @@ import { Breadcrumbs } from '@/components/breadcrumbs'
 import { RequestForm } from '@/components/request-form'
 import { CONTACTS } from '@/content/contacts'
 import { FAQ } from '@/content/faq'
-import { DOCUMENTS, DURATIONS, INCLUDED, PRICES, PRICE_NOTE, STEPS } from '@/content/ustanovka'
+import {
+  DOCUMENTS,
+  DURATIONS,
+  DURATION_NOTE,
+  INCLUDED,
+  PRICES,
+  PRICE_NOTE,
+  STEPS,
+} from '@/content/ustanovka'
 import { getDb } from '@/db/client'
 
 export const metadata: Metadata = {
@@ -178,6 +186,13 @@ export default async function InstallPage() {
             </dl>
 
             {/*
+              Оговорка стоит сразу под таблицей, а не в конце секции:
+              она относится ко всем четырём срокам, и человек должен
+              прочитать её раньше, чем запомнит одно число из столбца.
+            */}
+            <p className="max-w-[60ch] text-sm leading-[1.6] text-[#6E6E6C]">{DURATION_NOTE}</p>
+
+            {/*
               Доля считается по базе. В макете стояло «84%» — число с
               потолка, а человек читает его до записи и приезжает с
               расчётом, что бампер резать не будут.
@@ -240,23 +255,53 @@ export default async function InstallPage() {
 
         <section className="flex flex-col gap-5">
           <h2 className={SECTION_TITLE}>Документы и допуски</h2>
+          {/*
+            Значок PDF и ссылка — только у документов, скан которых у нас
+            есть. Раньше значок стоял у обоих, и заказчик справедливо
+            заметил, что плитки «не кликабельные»: они выглядели кнопкой
+            скачивания, а файла за ними не было. Пока скана нет, плитка
+            просто называет документ.
+          */}
           <div className="grid gap-3.5 md:grid-cols-2">
-            {DOCUMENTS.map((doc) => (
-              <div
-                key={doc.title}
-                className="flex items-center gap-5 rounded-[14px] border border-ink-dark/14 px-[30px] py-7"
-              >
-                <span className="shrink-0 rounded-lg bg-accent px-3.5 py-[11px] text-xs font-bold tracking-[0.04em] text-[#FFF6F4]">
-                  PDF
-                </span>
-                <span className="flex flex-col gap-1">
-                  <span className="text-[19px] font-medium">{doc.title}</span>
-                  <span className="text-[13px] text-[#8A8A88]">{doc.note}</span>
-                </span>
-              </div>
-            ))}
+            {DOCUMENTS.map((doc) => {
+              const body = (
+                <>
+                  {doc.file ? (
+                    <span className="shrink-0 rounded-lg bg-accent px-3.5 py-[11px] text-xs font-bold tracking-[0.04em] text-[#FFF6F4]">
+                      PDF
+                    </span>
+                  ) : null}
+                  <span className="flex flex-col gap-1">
+                    <span className="text-[19px] font-medium">{doc.title}</span>
+                    <span className="text-[13px] text-[#8A8A88]">{doc.note}</span>
+                  </span>
+                </>
+              )
+
+              const shell = 'flex items-center gap-5 rounded-[14px] border border-ink-dark/14 px-[30px] py-7'
+
+              return doc.file ? (
+                <a
+                  key={doc.title}
+                  href={doc.file}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${shell} transition-colors hover:border-accent`}
+                >
+                  {body}
+                </a>
+              ) : (
+                <div key={doc.title} className={shell}>
+                  {body}
+                </div>
+              )
+            })}
           </div>
-          <p className="text-sm text-[#8A8A88]">Сканы приложим, когда заказчик их передаст.</p>
+          {DOCUMENTS.every((doc) => !doc.file) ? (
+            <p className="text-sm text-[#8A8A88]">
+              Сканы покажем на месте — приложим сюда, когда оцифруем.
+            </p>
+          ) : null}
         </section>
 
         <section className="flex flex-col">

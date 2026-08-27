@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { formatCount, formatPrice } from '@/catalog/format'
-import { logoFor } from '@/catalog/logos'
-import type { BrandRow } from '@/catalog/queries'
 import { countProducts, listBrands, minProductPrice } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
+import { BrandSearch } from '@/components/catalog/brand-search'
 import { CatalogShell } from '@/components/catalog/shell'
 import { CONTACTS } from '@/content/contacts'
 import { CATALOG_FAQ } from '@/content/faq'
@@ -18,36 +16,6 @@ export const metadata: Metadata = {
   alternates: { canonical: absolute(urls.catalog()) },
 }
 
-/**
- * Алфавитный указатель.
- *
- * Список из 106 марок глазами не просматривают — в него прыгают. Буквы
- * собираются из самих марок, а не задаются алфавитом: в каталоге есть
- * и латиница, и кириллица, и половина букв алфавита пустует.
- */
-function AlphabetIndex({ brands }: { brands: BrandRow[] }) {
-  const letters = [...new Set(brands.map((brand) => brand.name[0].toUpperCase()))].sort((a, b) =>
-    a.localeCompare(b, 'ru'),
-  )
-
-  return (
-    <nav
-      aria-label="Марки по алфавиту"
-      className="flex flex-wrap items-center gap-1 border-y border-ink-dark/10 py-3.5"
-    >
-      {letters.map((letter) => (
-        <a
-          key={letter}
-          href={`#letter-${letter}`}
-          className="flex h-8 w-8 items-center justify-center rounded text-sm font-medium transition-colors hover:bg-[#F2F1EF]"
-        >
-          {letter}
-        </a>
-      ))}
-    </nav>
-  )
-}
-
 export default async function CatalogPage() {
   const db = await getDb()
   const [brands, totalProducts, minPrice] = await Promise.all([
@@ -57,61 +25,18 @@ export default async function CatalogPage() {
   ])
   const totalModels = brands.reduce((sum, brand) => sum + brand.modelCount, 0)
 
-  // Первая марка на каждую букву получает якорь — к ней ведёт указатель.
-  const seen = new Set<string>()
-  const anchorOf = (brand: BrandRow) => {
-    const letter = brand.name[0].toUpperCase()
-    if (seen.has(letter)) return undefined
-    seen.add(letter)
-    return `letter-${letter}`
-  }
-
   return (
     <CatalogShell
       crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'Фаркопы' }]}
       title="Фаркопы по маркам автомобилей"
       summary={`${formatCount(totalProducts, 'фаркоп', 'фаркопа', 'фаркопов')} · ${formatCount(totalModels, 'модель', 'модели', 'моделей')} · ${formatCount(brands.length, 'марка', 'марки', 'марок')} · цены от ${formatPrice(minPrice)}`}
     >
-      <AlphabetIndex brands={brands} />
+      <BrandSearch brands={brands} />
 
-      {/*
-        Ячейки склеены в таблицу: зазор в один пиксель на общем фоне даёт
-        сетку разделителей. Отдельными плитками с просветом, как на
-        главной, здесь нельзя — там их две дюжины, а тут 106, и просветы
-        рассыпают список на отдельные карточки вместо единого указателя.
-      */}
-      <div className="grid grid-cols-2 gap-px border border-ink-dark/8 bg-ink-dark/8 sm:grid-cols-3 lg:grid-cols-6">
-        {brands.map((brand) => {
-          const logo = logoFor(brand.slug)
-          return (
-            <Link
-              key={brand.slug}
-              id={anchorOf(brand)}
-              href={urls.brand(brand.slug)}
-              className="flex scroll-mt-32 flex-col items-center justify-center gap-[7px] bg-white px-2.5 py-5 transition-colors hover:bg-[#F2F1EF]"
-            >
-              {logo ? (
-                /*
-                  Логотипы обесцвечены и притушены. В цвете сетка из ста с
-                  лишним марок превращается в рябь: каждый бренд тянет
-                  внимание своим красным или синим, и найти нужную марку
-                  становится труднее, а не легче.
-                */
-                <span className="relative block h-8 w-[52px] brightness-[.55] grayscale">
-                  <Image src={logo} alt="" fill sizes="52px" className="object-contain" />
-                </span>
-              ) : null}
-
-              <span className="text-center text-sm text-[#2E2E30]">{brand.name}</span>
-              <span className="text-[11px] text-[#8A8A88]">
-                {formatCount(brand.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
-              </span>
-            </Link>
-          )
-        })}
-      </div>
-
-      <section className="flex flex-wrap items-center justify-between gap-8 rounded-[var(--radius-card)] bg-[#F2F1EF] px-7 py-6">
+      <section
+        id="ne-nashli"
+        className="flex scroll-mt-32 flex-wrap items-center justify-between gap-8 rounded-[var(--radius-card)] bg-[#F2F1EF] px-7 py-6"
+      >
         <div className="flex flex-col gap-1.5">
           <h2 className="text-[19px] font-medium">Не нашли свою марку?</h2>
           <p className="text-sm text-[#6E6E6C]">

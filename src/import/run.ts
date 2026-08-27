@@ -3,6 +3,7 @@ import { brands, fitments, manufacturers, models, products, variants } from '../
 import { dedupeFitments, dedupeVariants } from './dedupe'
 import { extractCatalog } from './extract'
 import {
+  buildVariantDescriptors,
   buildVariantSlugs,
   cleanVariantName,
   normalizeManufacturer,
@@ -122,6 +123,10 @@ export async function importCatalog(html: string, db: DrizzleDb): Promise<Import
     indexMap: variantIndexMap,
   } = dedupeVariants(raw.variants, allSlugs)
 
+  // Подписи поколений считаются после дедупликации — по тем кузовам,
+  // что реально окажутся на странице: подпись зависит от соседей.
+  const descriptors = buildVariantDescriptors(uniqueVariants)
+
   const variantRows = await insertAll(
     uniqueVariants.map((v, i) => {
       const name = cleanVariantName(v.name)
@@ -131,7 +136,14 @@ export async function importCatalog(html: string, db: DrizzleDb): Promise<Import
         modelId: modelIdByIndex.get(v.modelIndex)!,
         slug: keptSlugs[i],
         name,
-        generation: parseGeneration(name, modelName),
+        /*
+          Сначала словесное различие («3 МК IV универсал»), и только если
+          его нет — латинский код поколения. Порядок именно такой:
+          дескриптор строится из того же названия и включает код, когда
+          тот в названии есть, а вдобавок ловит кузов, который
+          parseGeneration не видит.
+        */
+        generation: descriptors[i] ?? parseGeneration(name, modelName),
         yearFrom: years.from,
         yearTo: years.to,
         sourceUrl: v.sourceUrl,

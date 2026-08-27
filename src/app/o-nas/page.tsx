@@ -12,9 +12,13 @@ export const metadata: Metadata = {
   alternates: { canonical: absolute('/o-nas') },
 }
 
+/*
+  «3 800+», а не «3 800»: цифра округлённая и снизу, установок больше.
+  Знак ставит заказчик — без него число читается как точный учёт.
+*/
 const NUMBERS = [
-  { value: '12 лет', caption: 'на одном месте' },
-  { value: '3 800', caption: 'установок' },
+  { value: '12 лет', caption: 'опыта в установке' },
+  { value: '3 800+', caption: 'установок' },
   { value: RATING.score, caption: `средняя оценка · ${RATING.count} отзывов` },
   { value: '2 года', caption: 'гарантии на работы' },
 ]

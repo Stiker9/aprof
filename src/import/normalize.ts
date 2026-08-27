@@ -154,6 +154,78 @@ export function buildVariantSlugs(items: { modelIndex: number; name: string }[])
 }
 
 /**
+ * Подпись поколения для показа на сайте: то, чем кузова одной модели
+ * отличаются друг от друга словами, а не только годами.
+ *
+ * Зачем понадобилась. Плитки поколений подписывались одним лишь полем
+ * generation, куда parseGeneration кладёт латинский код (XA10, W203).
+ * Такой код есть у 206 кузовов из 2549; у остальных подпись сводилась
+ * к годам — а годы у разных кузовов совпадают. На странице Ford Mondeo
+ * выходило три плитки «1993–2000» подряд, на Volkswagen Polo — две
+ * «1997–2003». Заказчик прочёл это как задвоение каталога, хотя кузова
+ * разные: хетчбек, седан и универсал. Всего таких неразличимых плиток
+ * было 437 в 187 группах.
+ *
+ * Данные при этом были на месте: в name лежит «Форд Мондео 3 МК IV
+ * универсал 2007-2015». Не хватало разбора — parseGeneration ищет
+ * только латинские коды и кириллицу не видит вовсе.
+ *
+ * Считается так же, как слаг: из названия срезается общее начало
+ * группы — марка и модель, они уже названы рядом на странице. Потом
+ * убираются годы, потому что они выводятся отдельной строкой. Остаётся
+ * ровно различие: «3 МК IV универсал», «Классик седан», «Олроуд Кватро».
+ *
+ * Возвращает null, когда сказать нечего: у модели один кузов (срезать
+ * нечего и различать не с чем) или в названии, кроме марки, модели и
+ * годов, ничего нет — так у 451 кузова, включая всю Audi A4
+ * («Ауди А4 2000-2004»). Это не потеря: там и в источнике пусто.
+ *
+ * Считать нужно на том же наборе, что идёт в базу, — после
+ * дедупликации: подпись зависит от соседей по модели.
+ */
+export function buildVariantDescriptors(
+  items: { modelIndex: number; name: string }[],
+): (string | null)[] {
+  const byModel = new Map<number, number[]>()
+  items.forEach((item, index) => {
+    if (!byModel.has(item.modelIndex)) byModel.set(item.modelIndex, [])
+    byModel.get(item.modelIndex)!.push(index)
+  })
+
+  const descriptors = new Array<string | null>(items.length).fill(null)
+
+  for (const indices of byModel.values()) {
+    const names = indices.map((i) => cleanVariantName(items[i].name))
+    const prefixLength = commonWordPrefix(names)
+
+    indices.forEach((itemIndex, position) => {
+      const words = names[position].split(/\s+/)
+      // Общее начало во всё название — это модель с единственным кузовом:
+      // отличать не от чего, подписи нет
+      if (prefixLength >= words.length) return
+
+      const rest = stripYears(words.slice(prefixLength).join(' '))
+      descriptors[itemIndex] = rest || null
+    })
+  }
+
+  return descriptors
+}
+
+/**
+ * Убирает из строки диапазон годов вместе с обрамляющими скобками
+ * и повисшими разделителями: «6 хетчбек (продажи в Европе) 2018-»
+ * превращается в «6 хетчбек (продажи в Европе)».
+ */
+function stripYears(value: string): string {
+  return value
+    .replace(/\(?\s*(19|20)\d{2}\s*-\s*((19|20)\d{2})?\s*\)?/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/[\s,·-]+$/, '')
+    .trim()
+}
+
+/**
  * Вытаскивает код поколения из названия кузова.
  *
  * В источнике марка и модель записаны кириллицей («Тойота РАВ4»),

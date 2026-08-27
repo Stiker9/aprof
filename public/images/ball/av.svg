@@ -1,0 +1,19 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Фаркоп с вертикальным быстросъёмным шаром на ключе">
+  <g fill="none" stroke="#1B1B1F" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M30 66 Q200 46 370 66 L370 100 Q200 80 30 100 Z" />
+    <path d="M30 60 L14 60 L14 122 L30 122" />
+    <path d="M370 60 L386 60 L386 122 L370 122" />
+    <circle cx="22" cy="70" r="3.5" fill="#1B1B1F" stroke="none" />
+    <circle cx="22" cy="112" r="3.5" fill="#1B1B1F" stroke="none" />
+    <circle cx="378" cy="70" r="3.5" fill="#1B1B1F" stroke="none" />
+    <circle cx="378" cy="112" r="3.5" fill="#1B1B1F" stroke="none" />
+    <path d="M148 62 L252 62 L252 130 L148 130 Z" />
+    <path d="M172 144 L172 168" />
+    <path d="M163 158 L172 168 L181 158" />
+    <circle cx="230" cy="84" r="10" />
+    <circle cx="230" cy="80.5" r="2.8" fill="#1B1B1F" stroke="none" />
+    <path d="M230 83.5 L230 89.5" />
+    <path d="M200 176 C200 187 274 196 302 189.28" />
+    <circle cx="320" cy="196" r="24" fill="#1B1B1F" stroke="none" />
+  </g>
+</svg>

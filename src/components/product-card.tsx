@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { formatNumber, formatPrice } from '@/catalog/format'
+import { productDisplayImage } from '@/catalog/product-image'
 import type { ProductRow } from '@/catalog/queries'
 import { urls } from '@/catalog/urls'
 
@@ -33,6 +34,7 @@ const BUMPER_LABEL: Record<ProductRow['bumperCut'], string | null> = {
  */
 export function ProductCard({ product }: { product: ProductRow }) {
   const bumper = BUMPER_LABEL[product.bumperCut]
+  const display = productDisplayImage(product)
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-line-light bg-white transition-colors hover:border-accent">
@@ -41,19 +43,27 @@ export function ProductCard({ product }: { product: ProductRow }) {
         краям. На белом они растворяются, поэтому подложка чуть темнее
         карточки, а кадр вписывается целиком, а не обрезается: у детали
         важна форма, и срезанный кронштейн делает её неузнаваемой.
+
+        Фото поставщика сюда не попадают вовсе — только настоящая схема
+        артикула (kind: 'schema') или обобщённый рисунок по типу шара
+        (kind: 'icon'), см. product-image.ts.
       */}
       <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-paper-2">
-        {product.images[0] ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={product.images[0]}
-            alt={`Фаркоп ${product.article}`}
-            loading="lazy"
-            className="h-full w-full object-contain p-4 transition-transform duration-500 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <span className="text-xs opacity-45">нет фото</span>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={display.src}
+          alt={display.kind === 'schema' ? `Схема ${product.manufacturer} ${product.article}` : `Тип шара: ${product.ballType ?? 'не указан'}`}
+          loading="lazy"
+          className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04] ${
+            display.kind === 'icon' ? 'p-9 opacity-70' : 'p-4'
+          }`}
+        />
+
+        {display.kind === 'icon' ? (
+          <span className="absolute inset-x-0 bottom-0 bg-white/85 px-3 py-1 text-center text-[11px] leading-[1.3] text-ink-muted">
+            изображение обобщённое
+          </span>
+        ) : null}
 
         <span
           className={`absolute left-3 top-3 rounded px-2 py-1 text-[12px] font-medium ${

@@ -30,7 +30,6 @@ const COLUMNS = [
       { label: 'Подбор по автомобилю', href: urls.catalog() },
       { label: 'Электрика и розетка', href: '/uslugi#elektrika' },
       { label: 'Подбор и консультация', href: '/uslugi#podbor' },
-      { label: 'Сварка и ремонт ТСУ', href: '/uslugi#remont-tsu' },
     ],
   },
   {

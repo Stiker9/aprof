@@ -20,7 +20,6 @@ const SERVICES = [
   { label: 'Установка фаркопа', href: '/ustanovka-farkopa' },
   { label: 'Электрика и розетка', href: '/uslugi#elektrika' },
   { label: 'Подбор и консультация', href: '/uslugi#podbor' },
-  { label: 'Сварка и ремонт ТСУ', href: '/uslugi#remont-tsu' },
 ]
 
 const COMPANY = [

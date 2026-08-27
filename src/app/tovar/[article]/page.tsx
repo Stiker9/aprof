@@ -8,6 +8,7 @@ import {
   listSimilarProducts,
   listVariantsForProduct,
 } from '@/catalog/queries'
+import { productDisplayImage } from '@/catalog/product-image'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
 import { ProductGallery } from '@/components/product/gallery'
@@ -89,6 +90,11 @@ export default async function ProductPage({ params }: Params) {
   const { product, fits, similar } = data
   const title = buildTitle(product.article, product.manufacturer, fits)
   const first = fits[0]
+  const display = productDisplayImage(product)
+  const galleryCaption =
+    display.kind === 'schema'
+      ? 'Схема установки этого артикула от завода-изготовителя.'
+      : `Обобщённое изображение по типу шара${product.ballType ? ` (${product.ballType})` : ''} — точный снимок этой позиции пока не публикуем: карточки поставщика помечены знаком его конкурента.`
 
   const specs: [string, string][] = [
     ['Тип шара', product.ballType ?? 'нет данных'],
@@ -139,7 +145,7 @@ export default async function ProductPage({ params }: Params) {
     >
       <div className="flex flex-col items-start gap-8 lg:flex-row">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <ProductGallery images={product.images} article={product.article} />
+          <ProductGallery src={display.src} article={product.article} caption={galleryCaption} />
         </div>
 
         <OrderPanel
@@ -257,22 +263,22 @@ export default async function ProductPage({ params }: Params) {
         <section className="flex flex-col gap-3">
           <h2 className={heading}>Похожие товары</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {similar.map((item) => (
+            {similar.map((item) => {
+              const itemDisplay = productDisplayImage(item)
+              return (
               <Link
                 key={item.slug}
                 href={urls.product(item.slug)}
                 className="flex flex-col gap-2.5 rounded-xl border border-ink-dark/10 p-3.5 transition-colors hover:border-ink-dark/28"
               >
                 <div className="h-[130px] overflow-hidden rounded-[9px] bg-[#141416]">
-                  {item.images[0] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.images[0]}
-                      alt=""
-                      loading="lazy"
-                      className="h-full w-full object-contain"
-                    />
-                  ) : null}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={itemDisplay.src}
+                    alt=""
+                    loading="lazy"
+                    className={`h-full w-full object-contain ${itemDisplay.kind === 'icon' ? 'p-4 opacity-70' : ''}`}
+                  />
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[17px] font-medium">{item.article}</span>
@@ -289,7 +295,8 @@ export default async function ProductPage({ params }: Params) {
                   {item.deliveryText ?? (item.inStock ? 'в наличии' : 'под заказ')}
                 </span>
               </Link>
-            ))}
+              )
+            })}
           </div>
         </section>
       )}

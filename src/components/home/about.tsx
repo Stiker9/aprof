@@ -39,7 +39,7 @@ export function About() {
         </div>
         <div className="flex flex-col gap-2">
           <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
-            3 800
+            3 800+
           </div>
           <div className="text-[13px] opacity-60">установок</div>
         </div>

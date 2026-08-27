@@ -17,7 +17,7 @@ export default function ContactsPage() {
       picker={false}
       crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'Контакты' }]}
       title="Оставьте номер — перезвоним"
-      summary="Можно приехать без записи. По записи — сразу на пост, без ожидания. Перезваниваем в течение 15 минут в рабочие часы."
+      summary="Перезвоним за 15 минут в рабочие часы."
     >
       <div className="mt-12 grid gap-14 lg:grid-cols-2 lg:gap-20">
         <RequestForm />

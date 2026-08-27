@@ -107,5 +107,5 @@ const WORKS: GalleryWork[] = [
 ]
 
 export function Works() {
-  return <WorksGallery works={WORKS} allHref="/nashi-raboty" total="3 800" />
+  return <WorksGallery works={WORKS} allHref="/nashi-raboty" total="3 800+" />
 }

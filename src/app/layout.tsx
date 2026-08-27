@@ -11,16 +11,44 @@ import './globals.css'
  * доступа к fonts.googleapis.com, сборка падает. Внешние CDN в этом
  * проекте не используются и по соображениям скорости — обращение
  * к чужому хосту задерживает первую отрисовку.
+ *
+ * Наборов обязательно два — кириллица И латиница. Долгое время был
+ * подключён только кириллический файл, а цифр, латинских букв и знаков
+ * препинания в нём нет: браузер брал их из системного шрифта, и в одной
+ * строке оказывались два разных начертания. Заметно это было на числах —
+ * «12 лет» и «2 года» на странице «О нас», где цифра и слово выглядели
+ * набранными разными шрифтами, и в заголовке «С 2014 года».
+ *
+ * Расширенные наборы (cyrillic-ext, latin-ext, vietnamese) не берём:
+ * это ещё четыре запроса ради символов, которых на сайте нет.
  */
 const display = localFont({
-  src: '../../node_modules/@fontsource-variable/unbounded/files/unbounded-cyrillic-wght-normal.woff2',
+  src: [
+    {
+      path: '../../node_modules/@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2',
+      style: 'normal',
+    },
+    {
+      path: '../../node_modules/@fontsource-variable/unbounded/files/unbounded-cyrillic-wght-normal.woff2',
+      style: 'normal',
+    },
+  ],
   variable: '--font-display',
   display: 'swap',
   weight: '300 900',
 })
 
 const body = localFont({
-  src: '../../node_modules/@fontsource-variable/wix-madefor-text/files/wix-madefor-text-cyrillic-wght-normal.woff2',
+  src: [
+    {
+      path: '../../node_modules/@fontsource-variable/wix-madefor-text/files/wix-madefor-text-latin-wght-normal.woff2',
+      style: 'normal',
+    },
+    {
+      path: '../../node_modules/@fontsource-variable/wix-madefor-text/files/wix-madefor-text-cyrillic-wght-normal.woff2',
+      style: 'normal',
+    },
+  ],
   variable: '--font-body',
   display: 'swap',
   weight: '400 800',
