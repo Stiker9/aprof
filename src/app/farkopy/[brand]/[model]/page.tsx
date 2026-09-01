@@ -11,7 +11,7 @@ import {
 } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
-import { ProductCard } from '@/components/product-card'
+import { ProductFilter } from '@/components/catalog/product-filter'
 import { getDb } from '@/db/client'
 import { limitParams } from '@/catalog/build-scope'
 
@@ -83,16 +83,13 @@ export default async function ModelPage({ params }: Params) {
       }
     >
       {/*
-        Сетка плиток, а не список строк: четыре колонки на широком экране,
-        две на планшете, одна на телефоне. Раньше товары шли строками во
-        всю ширину — на мониторе это оставляло полстраницы пустоты.
+        У модели с единственным поколением показываем сами товары, и
+        сетка живёт внутри фильтра — он умеет их сужать. Если поколений
+        несколько, здесь плитки поколений, и фильтровать пока нечего:
+        товары появятся страницей глубже.
       */}
       {single ? (
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard key={product.slug} product={product} />
-          ))}
-        </div>
+        <ProductFilter products={products} />
       ) : (
         <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {variants.map((variant) => (

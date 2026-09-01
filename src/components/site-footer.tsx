@@ -41,7 +41,7 @@ const LEGAL = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto overflow-hidden rounded-[var(--radius-block)] bg-bg">
+    <footer className="mt-auto overflow-hidden bg-bg">
       <div className="w-full px-5 pb-8 pt-12 sm:px-8 lg:px-14 lg:pt-16">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
@@ -64,6 +64,7 @@ export function SiteFooter() {
                 </li>
               ))}
               <li>
+                {/* В список марок, а не на верх страницы: ссылка обещает именно марки */}
                 <Link href={urls.catalog()} className="text-accent hover:text-accent-hover">
                   Все 106 марок
                 </Link>

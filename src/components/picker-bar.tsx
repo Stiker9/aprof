@@ -6,6 +6,7 @@ import { formatCount } from '@/catalog/format'
 import type { PickerBrand } from '@/catalog/queries'
 import { urls } from '@/catalog/urls'
 import { PickerSelect } from '@/components/picker-select'
+import { useScrolled } from '@/components/use-scrolled'
 
 /**
  * Строка подбора: марка, модель, кузов и годы.
@@ -38,6 +39,7 @@ export function PickerBar({
   bare?: boolean
 } = {}) {
   const router = useRouter()
+  const scrolled = useScrolled()
 
   const [index, setIndex] = useState<PickerBrand[]>([])
   const [state, setState] = useState<State>('loading')
@@ -121,9 +123,18 @@ export function PickerBar({
           event.preventDefault()
           router.push(target)
         }}
-        className={`mx-auto flex flex-col gap-2.5 lg:flex-row ${
-          'px-5 py-3 sm:px-8 lg:px-14 lg:py-4'
-        }`}
+        /*
+          Отступы ужимаются вместе с шапкой: она садится на 16 пикселей,
+          и строка подбора идёт за ней. Иначе шапка «худеет», а подбор
+          под ней остаётся прежним, и связка распадается — заказчик это
+          и заметил.
+
+          На первом экране строку не подтягиваем к шапке отдельно: она
+          там не липкая и уезжает вместе с фотографией, зазору между
+          ними взяться неоткуда.
+        */
+        className="mx-auto flex flex-col gap-2.5 px-5 py-3 sm:px-8 lg:flex-row lg:px-14 lg:py-4"
+        style={scrolled ? { paddingTop: '8px', paddingBottom: '8px' } : undefined}
       >
         <PickerSelect
           label="Марка"

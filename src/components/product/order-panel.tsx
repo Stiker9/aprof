@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { formatPrice } from '@/catalog/format'
 import { CONTACTS } from '@/content/contacts'
+import { ELECTRICS } from '@/content/ustanovka'
 
 /**
  * Панель заказа в карточке товара.
@@ -28,6 +30,8 @@ export function OrderPanel({
   country,
   article,
   price,
+  priceValue,
+  electricsIncluded,
   inStock,
   stockText,
 }: {
@@ -35,10 +39,18 @@ export function OrderPanel({
   country: string | null
   article: string
   price: string
+  /** Цена числом — для пересчёта комплекта с электрикой. */
+  priceValue: number
+  /** Входит ли электрика в комплект. Тогда выбирать нечего. */
+  electricsIncluded: boolean | null
   inStock: boolean
   stockText: string
 }) {
   const [pickup, setPickup] = useState(true)
+  const [electrics, setElectrics] = useState(ELECTRICS[0].id)
+
+  const chosen = ELECTRICS.find((e) => e.id === electrics) ?? ELECTRICS[0]
+  const total = priceValue + chosen.price
 
   return (
     <aside className="flex w-full flex-col gap-4 rounded-[14px] border border-ink-dark/12 bg-white p-6 shadow-[0_8px_28px_rgba(0,0,0,0.05)] lg:sticky lg:top-[150px] lg:w-[380px] lg:shrink-0">
@@ -57,6 +69,66 @@ export function OrderPanel({
       >
         {stockText}
       </div>
+
+      {/*
+        Выбор электрики. Заказчик попросил, чтобы человек, выбрав фаркоп,
+        сразу видел стоимость комплекта без установки.
+
+        Позиции универсальные и подходят к любому фаркопу, поэтому выбор
+        стоит на каждой карточке. Кроме тех, где электрика уже входит в
+        комплект: предлагать её второй раз незачем — таких товаров в
+        каталоге два, но обработать их всё равно надо.
+
+        Список, а не плитки с картинками, как у конкурента: снимков этих
+        позиций у нас нет, и рисовать пустые рамки под них незачем.
+      */}
+      {electricsIncluded ? (
+        <div className="rounded-[10px] bg-[#F2F1EF] px-4 py-3 text-sm text-[#6E6E6C]">
+          Электрика входит в комплект — докупать ничего не нужно.
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <div className="text-xs font-medium text-[#8A8A88]">Электрика</div>
+          <div className="flex flex-col gap-1.5">
+            {ELECTRICS.map((option) => {
+              const active = option.id === electrics
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setElectrics(option.id)}
+                  aria-pressed={active}
+                  className={`flex cursor-pointer items-start justify-between gap-3 rounded-[10px] border px-3.5 py-2.5 text-left transition-colors ${
+                    active
+                      ? 'border-accent bg-accent-soft'
+                      : 'border-ink-dark/12 hover:border-ink-dark/30'
+                  }`}
+                >
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-[13px] font-medium leading-tight">{option.label}</span>
+                    <span className="text-[11px] leading-tight text-[#8A8A88]">{option.note}</span>
+                  </span>
+                  <span className="shrink-0 text-[13px] font-medium">
+                    {option.price === 0 ? '—' : `+${formatPrice(option.price)}`}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/*
+            Итог показываем, только когда электрика выбрана: без неё это
+            была бы та же цена, что крупно набрана выше, и вторая строка
+            с тем же числом читалась бы как ошибка.
+          */}
+          {chosen.price > 0 ? (
+            <div className="mt-1 flex items-baseline justify-between border-t border-ink-dark/10 pt-2.5">
+              <span className="text-sm">Комплект без установки</span>
+              <span className="text-[19px] font-semibold text-accent">{formatPrice(total)}</span>
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <div className="mt-1 grid grid-cols-2 gap-0.5 rounded-[10px] bg-[#F2F1EF] p-0.5">
         <button

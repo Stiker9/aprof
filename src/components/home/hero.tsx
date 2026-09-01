@@ -7,10 +7,11 @@ import { PickerBar } from '@/components/picker-bar'
 /**
  * Первый экран.
  *
- * Занимает всё окно за вычетом полей — `calc(100vh - 16px)`, как в
- * исходнике макета, а не фиксированную высоту. Нижний предел нужен для
- * низких окон: без него на ноутбуке с невысоким экраном текст и числа
- * налезали бы друг на друга.
+ * Занимает всё окно целиком. Шапка лежит поверх и места в потоке не
+ * занимает, поэтому вычитать её высоту не нужно — фотография доходит
+ * до верхнего края и просвечивает сквозь стекло шапки. Нижний предел
+ * нужен для низких окон: без него на ноутбуке с невысоким экраном
+ * текст и числа налезали бы друг на друга.
  *
  * Кадр один — Prado на набережной. Раньше здесь было два кадра со
  * сменой по CSS-анимации (фаркоп крупным планом + Prado), но под
@@ -23,8 +24,13 @@ import { PickerBar } from '@/components/picker-bar'
  * Градиент взят из исходника: слева почти непрозрачный, к 48% ширины
  * сходит на нет. Без него текст ложится прямо на кузов и пропадает.
  */
+/*
+  Плотность вдвое меньше прежней (было 0.9 / 0.55 / 0.12) — заказчик
+  попросил открыть фотографию. Точки перелома не трогаем: они и задают
+  форму, а не силу затемнения.
+*/
 const GRADIENT =
-  'linear-gradient(90deg, rgba(8,8,9,0.9) 0%, rgba(8,8,9,0.55) 22%, rgba(8,8,9,0.12) 36%, rgba(8,8,9,0) 48%, rgba(8,8,9,0) 100%)'
+  'linear-gradient(90deg, rgba(8,8,9,0.45) 0%, rgba(8,8,9,0.28) 22%, rgba(8,8,9,0.06) 36%, rgba(8,8,9,0) 48%, rgba(8,8,9,0) 100%)'
 
 const NUMBERS = [
   { value: null, caption: 'фаркопов в наличии' },
@@ -34,7 +40,7 @@ const NUMBERS = [
 
 export function Hero({ productCount }: { productCount: number }) {
   return (
-    <section className="relative h-[calc(100vh-16px)] min-h-[620px] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
+    <section className="relative h-[var(--screen-h)] min-h-[620px] overflow-hidden bg-bg text-ink">
       {/*
         Снимок 2560x1463 (1.75:1) чуть «выше» блока, который на экране
         1920x1080 близок к 2:1 — object-cover срезает по высоте около
@@ -53,8 +59,12 @@ export function Hero({ productCount }: { productCount: number }) {
       />
       <div className="pointer-events-none absolute inset-0" style={{ background: GRADIENT }} />
 
-      {/* Строка подбора лежит на фотографии, сразу под пилюлей шапки */}
-      <div className="absolute inset-x-0 top-14 z-[5]">
+      {/*
+        Строка подбора лежит на фотографии сразу под шапкой. Отступ берётся
+        из той же переменной, что и высота шапки: подставь сюда число — и
+        на телефоне, где шапка ниже, между ними осталась бы щель.
+      */}
+      <div className="absolute inset-x-0 top-[var(--header-h)] z-[5]">
         <PickerBar transparent />
       </div>
 
@@ -80,7 +90,13 @@ export function Hero({ productCount }: { productCount: number }) {
             <br />в Санкт-Петербурге
           </h1>
 
-          <p className="mt-5 max-w-[46ch] text-[clamp(14px,1.1vw,17px)] leading-[1.5] text-[#D8D8D5]">
+          {/*
+            Белый, а не серый #D8D8D5, как было. Затемнение фотографии
+            уменьшено вдвое по просьбе заказчика, и на посветлевшем кадре
+            серый провалился ниже нормы контраста. Осветляем текст, а не
+            возвращаем затемнение: открыть фотографию и просили.
+          */}
+          <p className="mt-5 max-w-[46ch] text-[clamp(14px,1.1vw,17px)] leading-[1.5] text-white">
             Подберём по марке, модели и году. Поставим за один визит — с документами для ТО.
           </p>
 
@@ -118,7 +134,13 @@ export function Hero({ productCount }: { productCount: number }) {
                 <span className="font-[family-name:var(--font-display)] text-[clamp(26px,2.1vw,32px)] leading-none">
                   {item.value ?? formatNumber(productCount)}
                 </span>
-                <span className="text-xs text-[#9C9C9A]">{item.caption}</span>
+                {/*
+                  Подписи под цифрами — самый мелкий текст на экране, и
+                  на посветлевшем кадре серый #9C9C9A давал 1,6:1 при
+                  норме 4,5. Белый с лёгкой прозрачностью: заметно тише
+                  самих цифр, но читается.
+                */}
+                <span className="text-xs text-white/90">{item.caption}</span>
               </div>
             ))}
           </div>

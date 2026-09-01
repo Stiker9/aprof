@@ -245,17 +245,19 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
                 key={brand.slug}
                 id={searching ? undefined : anchorOf(brand)}
                 href={urls.brand(brand.slug)}
-                className="flex scroll-mt-32 flex-col items-center justify-center gap-[7px] bg-white px-2.5 py-5 transition-colors hover:bg-paper-2"
+                className="flex scroll-mt-40 flex-col items-center justify-center gap-2.5 bg-white px-2.5 py-6 transition-colors hover:bg-paper-2"
               >
                 {logo ? (
                   /*
-                    Логотипы обесцвечены и притушены. В цвете сетка из ста
-                    с лишним марок превращается в рябь: каждый бренд тянет
-                    внимание своим красным или синим, и найти нужную марку
-                    становится труднее, а не легче.
+                    Логотипы в родном цвете. Раньше они были обесцвечены и
+                    притушены — из опасения, что сетка из ста с лишним
+                    марок превратится в рябь. Логотипов тогда было 25 из
+                    106, и серыми они смотрелись ровно; теперь их 85, и
+                    заказчик попросил цвет: по цвету марку узнают быстрее,
+                    чем по начертанию.
                   */
-                  <span className="relative block h-8 w-[52px] brightness-[.55] grayscale">
-                    <Image src={logo} alt="" fill sizes="52px" className="object-contain" />
+                  <span className="relative block h-12 w-[76px]">
+                    <Image src={logo} alt="" fill sizes="76px" className="object-contain" />
                   </span>
                 ) : null}
 

@@ -113,8 +113,20 @@ export function PickerSelect({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`flex w-full items-center justify-between gap-3 rounded-[10px] border px-4 py-3.5 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
-          selected ? 'border-white/15 bg-surface-3 text-ink' : 'border-white/8 bg-surface-3/50 text-ink-muted'
+        /*
+          Надпись белая во всех состояниях. Раньше у невыбранного поля
+          она была серой (ink-muted) и лежала на тёмной подложке — на
+          фотографии первого экрана читалась с трудом, а у отключённых
+          полей поверх ложилась ещё и прозрачность в 45%, и «Модель» с
+          «Кузовом» пропадали почти совсем.
+
+          Затемнение осталось, как и просил заказчик: пока поле не
+          выбрано, у него слабее рамка и подложка, а пока недоступно —
+          приглушено целиком. Но приглушено до 65%, а не до 45: разница
+          видна, а текст остаётся читаемым.
+        */
+        className={`flex w-full items-center justify-between gap-3 rounded-[10px] border px-4 py-3.5 text-left text-sm text-ink transition-colors disabled:cursor-not-allowed disabled:opacity-65 ${
+          selected ? 'border-white/15 bg-surface-3' : 'border-white/8 bg-surface-3/50'
         }`}
       >
         <span className="truncate">{loading ? 'Загружаем…' : (selected?.n ?? label)}</span>

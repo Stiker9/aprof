@@ -18,8 +18,8 @@ export default async function HomePage() {
   const popular = [...brands].sort((a, b) => b.productCount - a.productCount).slice(0, 24)
 
   return (
-    // Просвет между секциями: каждая — отдельный блок, а не часть полотна
-    <main className="flex flex-col gap-1.5">
+    // Секции идут встык: страница — сплошное полотно, а не стопка плиток
+    <main className="flex flex-col">
       <Hero productCount={totalProducts} />
       <Brands brands={popular} totalBrands={brands.length} />
       <Promos />

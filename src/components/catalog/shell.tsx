@@ -54,15 +54,31 @@ export function CatalogShell({
 }) {
   return (
     <main className="flex-1 text-ink-dark">
-      <div className="-mb-1.5 h-[60px] rounded-t-[var(--radius-block)] bg-[linear-gradient(180deg,#1A1A20_0%,#141418_100%)]" />
+      {/*
+        Тёмная полоса высотой в шапку — подложка под неё. Шапка лежит
+        поверх содержимого и стеклянная: на белой странице без подложки
+        сквозь неё просвечивал бы белый фон, и светлые буквы пропали бы.
+        На главной и на странице установки эту роль играет фотография.
 
+        Высота берётся из той же переменной, что и высота шапки: подставь
+        число — и на телефоне, где шапка ниже, полоса торчала бы из-под
+        неё лишней ступенькой.
+      */}
+      <div className="h-[var(--header-h)] bg-[linear-gradient(180deg,#1A1A20_0%,#141418_100%)]" />
+
+      {/*
+        Строка подбора липнет к ужатой высоте шапки, а не к полной:
+        прилипает она уже после прокрутки, когда шапка села с 72 до 56.
+        От полной высоты между ними осталась бы щель в шестнадцать
+        пикселей, и в неё проезжало бы содержимое страницы.
+      */}
       {picker === false ? null : (
-        <div className="z-20 border-b lg:sticky lg:top-[62px] border-white/10 bg-[linear-gradient(180deg,#141418_0%,#191920_55%,#101014_100%)] backdrop-blur-[22px] backdrop-saturate-[1.3]">
+        <div className="z-20 border-b border-white/10 bg-[linear-gradient(180deg,#141418_0%,#191920_55%,#101014_100%)] backdrop-blur-[22px] backdrop-saturate-[1.3] lg:sticky lg:top-[var(--header-h-min)]">
           <PickerBar {...picker} bare />
         </div>
       )}
 
-      <div className="flex flex-col gap-7 rounded-b-[var(--radius-block)] bg-white px-5 pb-10 pt-6 sm:px-8 lg:px-14 lg:pb-16 lg:pt-7">
+      <div className="flex flex-col gap-7 bg-white px-5 pb-10 pt-6 sm:px-8 lg:px-14 lg:pb-16 lg:pt-7">
         <Breadcrumbs items={crumbs} />
 
         <div className="flex flex-col gap-2.5">

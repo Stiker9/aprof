@@ -63,7 +63,18 @@ export default function AboutPage() {
         </p>
       </div>
 
-      <div className="mt-16 grid gap-4 md:grid-cols-2">
+      {/*
+        Карточка «Документы» отсюда убрана целиком по просьбе заказчика.
+        В ней было только перечисление сертификатов, оговорка про сканы
+        и ссылка на отзывы — и оговорка, и ссылка выглядели заглушками.
+        Сами документы никуда не делись: они названы на странице
+        установки, и там же станут ссылками, когда придут сканы.
+
+        Осталась одна карточка, поэтому сетки на две колонки больше нет —
+        в ней карточка занимала бы половину ширины, а рядом висела бы
+        пустота.
+      */}
+      <div className="mt-16">
         <div className="rounded-[var(--radius-block)] border border-line-light bg-white p-8">
           <h2 className="text-[19px] font-medium">Где мы</h2>
           <p className="mt-3 text-[17px]">{CONTACTS.address}</p>
@@ -75,22 +86,6 @@ export default function AboutPage() {
           </p>
           <Link href="/kontakty" className="mt-5 inline-block text-accent hover:underline">
             Контакты и схема проезда →
-          </Link>
-        </div>
-
-        <div className="rounded-[var(--radius-block)] border border-line-light bg-white p-8">
-          <h2 className="text-[19px] font-medium">Документы</h2>
-          <p className="mt-3 text-sm opacity-65">
-            Сертификат СТО · ГОСТ Р и допуск на электромонтажные работы.
-          </p>
-          {/*
-            Сканы не выкладываем, пока их нет: ссылка на несуществующий
-            PDF хуже отсутствия ссылки — она обещает подтверждение,
-            которого посетитель не получит.
-          */}
-          <p className="mt-4 text-sm opacity-50">Сканы приложим, когда заказчик их передаст.</p>
-          <Link href="/otzyvy" className="mt-5 inline-block text-accent hover:underline">
-            Отзывы клиентов →
           </Link>
         </div>
       </div>

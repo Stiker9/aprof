@@ -27,15 +27,27 @@ export default async function CatalogPage() {
 
   return (
     <CatalogShell
+      /*
+        Заголовок страницы — «Каталог по маркам», и цифры под ним.
+
+        Раньше их было два яруса: сверху «Фаркопы по маркам автомобилей»
+        со строкой цифр, а ниже отдельно «Каталог по маркам» с описанием.
+        Заказчик попросил свести к одному: верхний заголовок с цифрами
+        убрать, цифры перенести под нижний, описание удалить. Двух
+        заголовков об одном и том же на странице действительно не нужно.
+
+        Название для поиска не менялось — оно в metadata и по-прежнему
+        «Каталог фаркопов по маркам автомобилей».
+      */
       crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'Фаркопы' }]}
-      title="Фаркопы по маркам автомобилей"
+      title="Каталог по маркам"
       summary={`${formatCount(totalProducts, 'фаркоп', 'фаркопа', 'фаркопов')} · ${formatCount(totalModels, 'модель', 'модели', 'моделей')} · ${formatCount(brands.length, 'марка', 'марки', 'марок')} · цены от ${formatPrice(minPrice)}`}
     >
       <BrandSearch brands={brands} />
 
       <section
         id="ne-nashli"
-        className="flex scroll-mt-32 flex-wrap items-center justify-between gap-8 rounded-[var(--radius-card)] bg-[#F2F1EF] px-7 py-6"
+        className="flex scroll-mt-40 flex-wrap items-center justify-between gap-8 rounded-[var(--radius-card)] bg-[#F2F1EF] px-7 py-6"
       >
         <div className="flex flex-col gap-1.5">
           <h2 className="text-[19px] font-medium">Не нашли свою марку?</h2>

@@ -37,7 +37,7 @@ export function Section({
 }) {
   return (
     <section
-      className={`overflow-hidden rounded-[var(--radius-block)] ${TONES[tone]} ${className}`}
+      className={`overflow-hidden ${TONES[tone]} ${className}`}
     >
       <div className="w-full px-5 py-14 sm:px-8 sm:py-20 lg:px-14 lg:py-20 xl:py-28">
         {children}

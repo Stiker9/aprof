@@ -39,7 +39,7 @@ export function Brands({
       14,7 пикселя вместо 16, и сетка читалась мелкой. Секция всё так же
       занимает экран, но текст от его высоты больше не зависит.
     */
-    <section className="flex min-h-[calc(100vh-16px)] flex-col gap-10 overflow-hidden rounded-[var(--radius-block)] bg-paper-3 px-5 pb-10 pt-12 sm:px-8 lg:px-14 lg:pb-16 lg:pt-20 text-ink-dark">
+    <section className="flex min-h-[var(--screen-h)] flex-col gap-10 overflow-hidden bg-paper-3 px-5 pb-10 pt-12 sm:px-8 lg:px-14 lg:pb-16 lg:pt-20 text-ink-dark">
       <div className="flex items-start justify-between gap-12">
         <div className="flex max-w-[560px] flex-col gap-3.5">
           <div className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#8A8A88]">
@@ -107,6 +107,7 @@ export function Brands({
       </div>
 
       <div className="mt-auto flex items-center gap-[18px] pt-3">
+        {/* «Весь каталог» — это продолжение сетки марок, ведём прямо в неё */}
         <Link href={urls.catalog()} className="flex items-center gap-3 text-[16px]">
           <span
             aria-hidden

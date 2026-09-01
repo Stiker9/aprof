@@ -8,12 +8,15 @@ import {
   listSimilarProducts,
   listVariantsForProduct,
 } from '@/catalog/queries'
+import { publishableDocuments } from '@/catalog/documents'
 import { productDisplayImage } from '@/catalog/product-image'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
+import { Hint } from '@/components/ui/hint'
 import { ProductGallery } from '@/components/product/gallery'
 import { OrderPanel } from '@/components/product/order-panel'
 import { CONTACTS } from '@/content/contacts'
+import { HINT_TOW, HINT_VERT } from '@/content/terms'
 import { getDb } from '@/db/client'
 import { limitParams } from '@/catalog/build-scope'
 
@@ -91,17 +94,29 @@ export default async function ProductPage({ params }: Params) {
   const title = buildTitle(product.article, product.manufacturer, fits)
   const first = fits[0]
   const display = productDisplayImage(product)
+  const documents = publishableDocuments(product.documents)
   const galleryCaption =
     display.kind === 'schema'
       ? 'Схема установки этого артикула от завода-изготовителя.'
       : `Обобщённое изображение по типу шара${product.ballType ? ` (${product.ballType})` : ''} — точный снимок этой позиции пока не публикуем: карточки поставщика помечены знаком его конкурента.`
 
-  const specs: [string, string][] = [
+  /*
+    Третьим полем — пояснение к термину, если он покупателю не очевиден.
+    Тяговая и вертикальная нагрузка: человек видит «1500 кг» и не знает,
+    масса это прицепа или что-то ещё. Тексты общие с фильтром — там те же
+    два термина.
+  */
+  const specs: [string, string, string?][] = [
     ['Тип шара', product.ballType ?? 'нет данных'],
-    ['Тяговая нагрузка', product.towLoadKg ? `${product.towLoadKg} кг` : 'нет данных'],
+    [
+      'Тяговая нагрузка',
+      product.towLoadKg ? `${product.towLoadKg} кг` : 'нет данных',
+      HINT_TOW,
+    ],
     [
       'Вертикальная нагрузка',
       product.verticalLoadKg ? `${product.verticalLoadKg} кг` : 'нет данных',
+      HINT_VERT,
     ],
     ['Масса фаркопа', product.weightKg ? `${formatNumber(product.weightKg)} кг` : 'нет данных'],
     ['Вырез бампера', BUMPER_TEXT[product.bumperCut]],
@@ -153,6 +168,8 @@ export default async function ProductPage({ params }: Params) {
           country={product.country}
           article={product.article}
           price={formatPrice(product.price)}
+          priceValue={product.price}
+          electricsIncluded={product.electricsIncluded}
           inStock={product.inStock}
           stockText={product.deliveryText ?? (product.inStock ? 'в наличии' : 'под заказ')}
         />
@@ -161,12 +178,15 @@ export default async function ProductPage({ params }: Params) {
       <section className="flex max-w-[760px] flex-col gap-3.5">
         <h2 className={heading}>Характеристики</h2>
         <dl className="flex flex-col">
-          {specs.map(([key, value]) => (
+          {specs.map(([key, value, hint]) => (
             <div
               key={key}
               className="grid grid-cols-2 gap-6 border-b border-ink-dark/8 py-3 text-sm"
             >
-              <dt className="text-[#6E6E6C]">{key}</dt>
+              <dt className="flex items-center gap-1.5 text-[#6E6E6C]">
+                {key}
+                {hint ? <Hint text={hint} /> : null}
+              </dt>
               <dd>{value}</dd>
             </div>
           ))}
@@ -178,11 +198,11 @@ export default async function ProductPage({ params }: Params) {
         <p className="text-[15px] leading-[1.7] text-[#4A4A4C]">{product.description}</p>
       </section>
 
-      {product.documents.length > 0 && (
+      {documents.length > 0 && (
         <section className="flex flex-col gap-3">
           <h2 className={heading}>Документы</h2>
           <div className="grid max-w-[760px] gap-3 sm:grid-cols-2">
-            {product.documents.map((doc) => (
+            {documents.map((doc) => (
               <a
                 key={doc.url}
                 href={doc.url}

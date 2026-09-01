@@ -56,13 +56,13 @@ export default async function InstallPage() {
   const withoutCut = await shareWithoutBumperCut(db)
 
   return (
-    <main className="flex flex-1 flex-col gap-1.5">
+    <main className="flex flex-1 flex-col">
       {/*
         Первый экран страницы услуги — отдельный тёмный блок с фотографией,
         а не заголовок на белом. Установка продаётся глазами: человек хочет
         увидеть, как это выглядит, прежде чем читать прайс.
       */}
-      <section className="relative h-[620px] overflow-hidden rounded-[var(--radius-block)] bg-bg text-ink">
+      <section className="relative h-[620px] overflow-hidden bg-bg text-ink">
         <Image
           src="/images/ustanovka-hero-1672.webp"
           alt=""
@@ -92,7 +92,18 @@ export default async function InstallPage() {
           }}
         />
 
-        <div className="relative flex h-full flex-col justify-end gap-5 px-5 pb-10 sm:px-8 lg:px-14 lg:pb-14">
+        {/*
+          Текст стоит по центру блока, а не прижат к низу, как было: прежде
+          над ним оставалось около 280 пикселей пустого кадра, а под ним 50,
+          и заголовок читался съехавшим вниз.
+
+          Верхний отступ больше нижнего ровно на высоту шапки: она лежит
+          поверх блока и закрывает его первые пиксели. Центрируй по
+          геометрии секции — текст встал бы выше середины того, что
+          человек видит. Разница сдвигает его вниз на половину скрытой
+          полосы, и симметричной становится видимая часть.
+        */}
+        <div className="relative flex h-full flex-col justify-center gap-5 px-5 pb-10 pt-[calc(2.5rem+var(--header-h))] sm:px-8 lg:px-14 lg:pb-14 lg:pt-[calc(3.5rem+var(--header-h))]">
           <Breadcrumbs
             items={[{ label: 'Главная', href: urls.home() }, { label: 'Установка фаркопа' }]}
           />
@@ -119,7 +130,7 @@ export default async function InstallPage() {
         </div>
       </section>
 
-      <div className="flex flex-col gap-14 rounded-[var(--radius-block)] bg-white px-5 py-10 text-ink-dark sm:px-8 lg:px-14 lg:py-16">
+      <div className="flex flex-col gap-14 bg-white px-5 py-10 text-ink-dark sm:px-8 lg:px-14 lg:py-16">
         <section className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <h2 className={SECTION_TITLE}>Прайс на установку</h2>
@@ -336,7 +347,7 @@ export default async function InstallPage() {
       */}
       <section
         id="zapis"
-        className="flex scroll-mt-20 flex-col gap-16 rounded-[var(--radius-block)] bg-surface-2 px-5 py-10 text-ink sm:px-8 lg:flex-row lg:px-14 lg:py-16 lg:gap-20"
+        className="flex scroll-mt-20 flex-col gap-16 bg-surface-2 px-5 py-10 text-ink sm:px-8 lg:flex-row lg:px-14 lg:py-16 lg:gap-20"
       >
         <div className="flex flex-1 flex-col gap-3.5">
           <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#8A8A88]">

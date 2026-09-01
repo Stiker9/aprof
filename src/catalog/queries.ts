@@ -479,3 +479,131 @@ export async function minProductPrice(db: DrizzleDb): Promise<number> {
   }
   return rows.reduce((min, row) => (row.price < min ? row.price : min), rows[0].price)
 }
+
+/**
+ * Весь каталог в сжатом виде — для страницы подбора, где 5 808 позиций
+ * фильтруются на клиенте.
+ *
+ * Запись — массив, а не объект: имена полей повторились бы 5 808 раз и
+ * весили бы больше значений. Порядок полей зафиксирован здесь и читается
+ * на той стороне — см. CompactProduct.
+ *
+ * Схема артикула кладётся одним именем файла, а не полным адресом:
+ * начало у всех одинаковое, и повторять его 3 630 раз незачем. Кладётся
+ * только у заводов, чьи чертежи проверены (см. product-image.ts), —
+ * у остальных null, и подбор покажет обобщённый рисунок по типу шара.
+ */
+export type CompactProduct = [
+  slug: string,
+  article: string,
+  manufacturer: string,
+  price: number,
+  inStock: 0 | 1,
+  deliveryText: string | null,
+  ballType: string | null,
+  towLoadKg: number | null,
+  verticalLoadKg: number | null,
+  bumperCut: 0 | 1 | 2,
+  schemaFile: string | null,
+]
+
+const CLEAN_SCHEMA_MANUFACTURERS = new Set([
+  'Steinhof',
+  'GALIA',
+  'Oris',
+  'ТСС',
+  'PT GROUP',
+  'Motodor',
+  'Berg',
+])
+
+export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProduct[]> {
+  const rows = await db
+    .select({
+      slug: products.slug,
+      article: products.article,
+      manufacturer: manufacturers.name,
+      price: products.sourcePrice,
+      inStock: products.inStock,
+      deliveryText: products.deliveryText,
+      ballType: products.ballType,
+      towLoadKg: products.towLoadKg,
+      verticalLoadKg: products.verticalLoadKg,
+      bumperCut: products.bumperCut,
+      images: products.images,
+    })
+    .from(products)
+    .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))
+    .orderBy(asc(products.sourcePrice), asc(products.id))
+
+  return rows.map((r) => {
+    let schemaFile: string | null = null
+    if (CLEAN_SCHEMA_MANUFACTURERS.has(r.manufacturer)) {
+      const schema = r.images.find((url) => url.includes('/shema/'))
+      if (schema) schemaFile = schema.split('/shema/')[1]
+    }
+
+    return [
+      r.slug,
+      r.article,
+      r.manufacturer,
+      r.price,
+      r.inStock ? 1 : 0,
+      r.deliveryText,
+      r.ballType,
+      r.towLoadKg,
+      r.verticalLoadKg,
+      r.bumperCut === 'not_required' ? 0 : r.bumperCut === 'required' ? 1 : 2,
+      schemaFile,
+    ]
+  })
+}
+
+/**
+ * Какие товары подходят каждому кузову — для подбора по параметрам.
+ *
+ * Отдаётся вместе со списком товаров: там человек выбирает машину прямо
+ * в карточке фильтра, и список должен сузиться на месте, без перехода
+ * на страницу кузова.
+ *
+ * Ключ — «марка/модель/кузов», потому что слаг кузова сам по себе не
+ * уникален: «2010-2015» встречается у десятков моделей.
+ *
+ * Значения — не слаги товаров, а их порядковые номера в том же списке,
+ * что отдаёт listAllProductsCompact. Слагами это весило бы вчетверо
+ * больше при том же смысле; порядок у обоих запросов один и тот же —
+ * по возрастанию цены, затем по id.
+ */
+export type FitmentIndex = Record<string, number[]>
+
+export async function buildFitmentIndex(db: DrizzleDb): Promise<FitmentIndex> {
+  const ordered = await db
+    .select({ id: products.id })
+    .from(products)
+    .orderBy(asc(products.sourcePrice), asc(products.id))
+
+  const position = new Map(ordered.map((p, i) => [p.id, i]))
+
+  const rows = await db
+    .select({
+      brand: brands.slug,
+      model: models.slug,
+      variant: variants.slug,
+      productId: fitments.productId,
+    })
+    .from(fitments)
+    .innerJoin(variants, eq(variants.id, fitments.variantId))
+    .innerJoin(models, eq(models.id, variants.modelId))
+    .innerJoin(brands, eq(brands.id, models.brandId))
+
+  const index: FitmentIndex = {}
+  for (const row of rows) {
+    const key = `${row.brand}/${row.model}/${row.variant}`
+    const pos = position.get(row.productId)
+    if (pos === undefined) continue
+    ;(index[key] ??= []).push(pos)
+  }
+
+  for (const key of Object.keys(index)) index[key].sort((a, b) => a - b)
+  return index
+}

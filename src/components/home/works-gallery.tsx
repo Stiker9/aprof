@@ -42,6 +42,17 @@ export interface GalleryWork {
   href?: string
   /** Производитель фаркопа — только если виден на снимке. */
   article?: string
+  /**
+   * Зачем ставили фаркоп: «Для перевозки прицепа», «Под велокрепление».
+   *
+   * ЗАГЛУШКА. На снимках этого не написано, и мы этого не знаем —
+   * значения проставлены по типу машины как образец разметки. Заказчик
+   * помнит каждую работу и поправит их в админке; до этого показывать
+   * их как факт нельзя.
+   */
+  use?: string
+  /** Надпись на кнопке у крупного кадра. Разная, чтобы не звучать шаблоном. */
+  cta?: string
   /** Тип кузова для фильтра. */
   body?: 'Кроссоверы' | 'Седаны' | 'Универсалы'
   /**
@@ -86,7 +97,7 @@ export function WorksGallery({
   }
 
   return (
-    <section className="overflow-hidden rounded-[var(--radius-block)] bg-surface text-ink">
+    <section className="overflow-hidden bg-surface text-ink">
       <div className="w-full px-5 py-12 sm:px-8 sm:py-14 lg:px-14 lg:py-[clamp(40px,5vh,64px)]">
         <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-6">
           <div>
@@ -153,8 +164,29 @@ export function WorksGallery({
               }}
             />
 
+            {/*
+              Подпись в два яруса: сверху зачем ставили, снизу на какую
+              машину. Так просил заказчик — по образцу, где строка целиком
+              звучит «Для перевозки прицепа на Renault Duster». Разбито на
+              две строки, потому что машина здесь ещё и заголовок кадра:
+              одной строкой она потеряла бы вес.
+            */}
             <figcaption className="absolute inset-x-6 bottom-7 z-[1] flex flex-wrap items-end justify-between gap-6 sm:inset-x-9">
               <div>
+                {/*
+                  Подпись белая, а не красная. Красным она сперва и была —
+                  фирменный цвет, — но на светлых кузовах пропадала: серый
+                  под ней и красный поверх дают слишком слабый контраст, а
+                  мелкий кегль с широкой разрядкой добивал остаток.
+
+                  Красное на кадре теперь одно — кнопка. Два красных пятна
+                  на одном снимке спорили бы между собой.
+                */}
+                {hero.use ? (
+                  <div className="mb-1.5 text-[13px] font-medium uppercase tracking-[0.14em] text-white/85">
+                    {hero.use}
+                  </div>
+                ) : null}
                 <div className="font-[family-name:var(--font-display)] text-[clamp(22px,2.2vw,30px)] leading-[1.1] tracking-[-0.02em]">
                   {hero.car}
                 </div>
@@ -166,9 +198,9 @@ export function WorksGallery({
               {hero.href ? (
                 <Link
                   href={hero.href}
-                  className="whitespace-nowrap rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0B0B0C] transition-colors hover:bg-accent hover:text-white"
+                  className="whitespace-nowrap rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-soft transition-[filter] hover:brightness-110"
                 >
-                  Фаркопы на {hero.car}
+                  {hero.cta ?? `Фаркопы на ${hero.car}`}
                 </Link>
               ) : null}
             </figcaption>
@@ -187,7 +219,7 @@ export function WorksGallery({
                   type="button"
                   onClick={() => setCurrent(index)}
                   aria-current={active}
-                  className={`relative min-h-[130px] w-[180px] shrink-0 cursor-pointer overflow-hidden rounded-[var(--radius-card)] bg-surface-2 outline-2 -outline-offset-2 transition-[outline-color] lg:min-h-[88px] lg:w-auto lg:flex-1 ${
+                  className={`relative min-h-[140px] w-[190px] shrink-0 cursor-pointer overflow-hidden rounded-[var(--radius-card)] bg-surface-2 outline-2 -outline-offset-2 transition-[outline-color] lg:min-h-[104px] lg:w-auto lg:flex-1 ${
                     active ? 'outline-accent' : 'outline-transparent hover:outline-white/50'
                   }`}
                 >
@@ -207,8 +239,18 @@ export function WorksGallery({
                         'linear-gradient(0deg, rgba(11,11,12,.82) 0%, rgba(11,11,12,.05) 65%)',
                     }}
                   />
-                  <span className="absolute bottom-3.5 left-4 z-[1] text-left text-sm font-medium leading-[1.2]">
-                    {work.car}
+                  {/*
+                    Назначение над названием машины — тем же порядком, что
+                    и на крупном кадре. Кегль мелкий: миниатюра высотой
+                    88 пикселей, и две строки в полный размер её забьют.
+                  */}
+                  <span className="absolute inset-x-4 bottom-3 z-[1] flex flex-col gap-0.5 text-left">
+                    {work.use ? (
+                      <span className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.12em] text-white/80">
+                        {work.use}
+                      </span>
+                    ) : null}
+                    <span className="text-sm font-medium leading-[1.2]">{work.car}</span>
                   </span>
                 </button>
               )
