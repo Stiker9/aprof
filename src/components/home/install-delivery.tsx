@@ -132,7 +132,7 @@ export function InstallDelivery() {
   const [pickup, setPickup] = useState(true)
 
   return (
-    <section className="relative flex min-h-[var(--screen-h)] overflow-hidden bg-bg text-ink">
+    <section className="relative flex min-h-[var(--screen-h)] overflow-hidden border-t border-white/10 bg-bg text-ink">
       {/*
         Фотография занимает правые 52 процента блока, как в исходнике
         макета (ГЛАВНАЯ.dc.html: position:absolute right:0 width:52%), а

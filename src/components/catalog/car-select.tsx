@@ -47,7 +47,7 @@ export function CarSelect({
           onChange={(e) => onChange({ brand: e.target.value, model: '', variant: '' })}
           className={FIELD}
         >
-          <option value="">Любая</option>
+          <option value="">Не выбрано</option>
           {index.map((b) => (
             <option key={b.s} value={b.s}>
               {b.n}
@@ -64,7 +64,7 @@ export function CarSelect({
           onChange={(e) => onChange({ ...value, model: e.target.value, variant: '' })}
           className={FIELD}
         >
-          <option value="">{brand ? 'Любая' : 'Сначала марка'}</option>
+          <option value="">{brand ? 'Не выбрано' : 'Сначала марка'}</option>
           {brand?.m.map((m) => (
             <option key={m.s} value={m.s}>
               {m.n}

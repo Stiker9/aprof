@@ -96,16 +96,31 @@ export function WorksGallery({
     setCurrent(0)
   }
 
+  /*
+    Секция светлая, хотя соседние — тёмные.
+
+    До перехода на классическую вёрстку секции были отдельными окнами с
+    просветами, и три тёмные подряд (акции, «Один визит», работы) не
+    мешали. Встык они слились в одно чёрное полотно на три экрана.
+
+    Светлой сделана именно галерея: снимки тёмные сами по себе, на
+    светлом поле они читаются как кадры в рамке, а не как продолжение
+    фона. Тон #efedea, а не #f7f6f4 соседнего «О нас» — чтобы и две
+    светлые секции подряд не слились.
+
+    Подписи на самих снимках остались белыми явно: секция задаёт
+    тёмный текст, а они лежат поверх фотографии.
+  */
   return (
-    <section className="overflow-hidden bg-surface text-ink">
+    <section className="overflow-hidden bg-paper-2 text-ink-dark">
       <div className="w-full px-5 py-12 sm:px-8 sm:py-14 lg:px-14 lg:py-[clamp(40px,5vh,64px)]">
         <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-6">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dim">Работы</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dark/65">Работы</p>
             <h2 className="mt-3 font-[family-name:var(--font-display)] text-[clamp(27px,2.8vw,37px)] leading-[1.02] tracking-[-0.025em]">
               Галерея работ
             </h2>
-            <p className="mt-3 max-w-[52ch] text-[17px] leading-[1.55] text-ink-muted">
+            <p className="mt-3 max-w-[52ch] text-[17px] leading-[1.55] text-[#5C5C5A]">
               Фотографии с нашего подъёмника. Найдите свою модель и посмотрите, как фаркоп
               выглядит вживую.
             </p>
@@ -115,7 +130,7 @@ export function WorksGallery({
             <b className="block font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] font-normal leading-none tracking-[-0.02em]">
               {total}
             </b>
-            <span className="mt-2 block text-sm text-ink-muted">установок с 2014 года</span>
+            <span className="mt-2 block text-sm text-[#5C5C5A]">установок с 2014 года</span>
           </div>
         </div>
         {/*
@@ -137,7 +152,7 @@ export function WorksGallery({
                 className={`cursor-pointer rounded-full border px-5 py-2.5 text-sm font-medium transition-colors ${
                   active
                     ? 'border-accent bg-accent text-accent-soft'
-                    : 'border-white/20 text-ink-muted hover:border-white hover:text-ink'
+                    : 'border-ink-dark/20 text-[#5C5C5A] hover:border-ink-dark hover:text-ink-dark'
                 }`}
               >
                 {name}
@@ -171,7 +186,7 @@ export function WorksGallery({
               две строки, потому что машина здесь ещё и заголовок кадра:
               одной строкой она потеряла бы вес.
             */}
-            <figcaption className="absolute inset-x-6 bottom-7 z-[1] flex flex-wrap items-end justify-between gap-6 sm:inset-x-9">
+            <figcaption className="absolute inset-x-6 bottom-7 z-[1] flex flex-wrap text-white items-end justify-between gap-6 sm:inset-x-9">
               <div>
                 {/*
                   Подпись белая, а не красная. Красным она сперва и была —
@@ -191,7 +206,7 @@ export function WorksGallery({
                   {hero.car}
                 </div>
                 {hero.article ? (
-                  <div className="mt-2 text-[15px] text-ink-muted">Фаркоп {hero.article}</div>
+                  <div className="mt-2 text-[15px] text-white/70">Фаркоп {hero.article}</div>
                 ) : null}
               </div>
 
@@ -220,7 +235,7 @@ export function WorksGallery({
                   onClick={() => setCurrent(index)}
                   aria-current={active}
                   className={`relative min-h-[140px] w-[190px] shrink-0 cursor-pointer overflow-hidden rounded-[var(--radius-card)] bg-surface-2 outline-2 -outline-offset-2 transition-[outline-color] lg:min-h-[104px] lg:w-auto lg:flex-1 ${
-                    active ? 'outline-accent' : 'outline-transparent hover:outline-white/50'
+                    active ? 'outline-accent' : 'outline-transparent hover:outline-ink-dark/45'
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -250,7 +265,7 @@ export function WorksGallery({
                         {work.use}
                       </span>
                     ) : null}
-                    <span className="text-sm font-medium leading-[1.2]">{work.car}</span>
+                    <span className="text-sm font-medium leading-[1.2] text-white">{work.car}</span>
                   </span>
                 </button>
               )
@@ -259,7 +274,7 @@ export function WorksGallery({
             {rest > 0 ? (
               <Link
                 href={allHref}
-                className="flex min-h-[64px] w-[180px] shrink-0 items-center justify-center gap-2.5 rounded-[var(--radius-card)] border border-white/16 text-sm text-ink-muted transition-colors hover:border-white hover:text-ink lg:w-auto"
+                className="flex min-h-[64px] w-[180px] shrink-0 items-center justify-center gap-2.5 rounded-[var(--radius-card)] border border-ink-dark/16 text-sm text-[#5C5C5A] transition-colors hover:border-ink-dark hover:text-ink-dark lg:w-auto"
               >
                 Ещё {rest} {rest === 1 ? 'работа' : rest < 5 ? 'работы' : 'работ'}{' '}
                 <span aria-hidden>→</span>
@@ -271,11 +286,11 @@ export function WorksGallery({
         <div className="mt-6 flex flex-wrap items-center gap-5">
           <Link
             href={allHref}
-            className="inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 text-[15px] font-medium transition-colors hover:border-white"
+            className="inline-flex items-center gap-3 rounded-full border border-ink-dark/20 px-6 py-3 text-[15px] font-medium transition-colors hover:border-ink-dark"
           >
             Все работы <span className="opacity-60" aria-hidden>→</span>
           </Link>
-          <span className="text-sm text-ink-dim">
+          <span className="text-sm text-[#5C5C5A]">
             Не нашли свою модель — позвоните, проверим по каталогу
           </span>
         </div>

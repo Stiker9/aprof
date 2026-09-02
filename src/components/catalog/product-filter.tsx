@@ -249,7 +249,7 @@ export function ProductFilter({
           {balls.length > 1 ? (
             <Field label="Тип шара">
               <select value={ball} onChange={(e) => setBall(e.target.value)} className={FIELD}>
-                <option value="">Любой</option>
+                <option value="">Не выбрано</option>
                 {balls.map(([key]) => (
                   <option key={key} value={key}>
                     {BALL_LABEL[key] ?? `Тип ${key}`}
@@ -265,7 +265,7 @@ export function ProductFilter({
               onChange={(e) => setNoCut(e.target.value === 'no')}
               className={FIELD}
             >
-              <option value="">Любой</option>
+              <option value="">Не выбрано</option>
               <option value="no">Не требуется</option>
             </select>
           </Field>
@@ -273,7 +273,7 @@ export function ProductFilter({
           {makers.length > 1 ? (
             <Field label="Производитель">
               <select value={maker} onChange={(e) => setMaker(e.target.value)} className={FIELD}>
-                <option value="">Любой</option>
+                <option value="">Не выбрано</option>
                 {makers.map(([key]) => (
                   <option key={key} value={key}>
                     {key}
@@ -313,7 +313,7 @@ export function ProductFilter({
 
           <Field label="Тяговая нагрузка, кг" hint={HINT_TOW}>
             <select value={minTow} onChange={(e) => setMinTow(e.target.value)} className={FIELD}>
-              <option value="">Любая</option>
+              <option value="">Не выбрано</option>
               {TOW_STEPS.map((kg) => (
                 <option key={kg} value={kg}>
                   от {kg}
@@ -324,7 +324,7 @@ export function ProductFilter({
 
           <Field label="Вертикальная нагрузка, кг" hint={HINT_VERT}>
             <select value={minVert} onChange={(e) => setMinVert(e.target.value)} className={FIELD}>
-              <option value="">Любая</option>
+              <option value="">Не выбрано</option>
               {VERT_STEPS.map((kg) => (
                 <option key={kg} value={kg}>
                   от {kg}
@@ -339,7 +339,7 @@ export function ProductFilter({
               onChange={(e) => setInStock(e.target.value === 'yes')}
               className={FIELD}
             >
-              <option value="">Любое</option>
+              <option value="">Не выбрано</option>
               <option value="yes">Только в наличии</option>
             </select>
           </Field>
