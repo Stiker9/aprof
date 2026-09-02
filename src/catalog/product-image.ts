@@ -1,5 +1,4 @@
 import { ballIconSrc } from '@/catalog/ball-icon'
-import { productPhotoSrc } from '@/catalog/product-photos'
 
 /**
  * Какой снимок показывать в карточке товара.
@@ -46,11 +45,22 @@ export interface ProductDisplayImage {
   kind: 'photo' | 'icon'
 }
 
+/**
+ * Список товаров с картинками сюда НЕ импортируется.
+ *
+ * Эта функция вызывается и в клиентских компонентах — плитки на
+ * странице подбора рисуются в браузере. Импорт списка утащил бы туда
+ * все четыре тысячи слагов: 47 КБ лишнего JavaScript на каждой
+ * странице каталога. Так и было ровно один деплой.
+ *
+ * Поэтому адрес приходит готовой строкой в ProductRow.photo: на сервере
+ * его подставляет queries.ts, на клиенте — catalog-filter.tsx по биту
+ * из подгружаемого файла.
+ */
 export function productDisplayImage(product: {
-  slug: string
+  photo: string | null
   ballType: string | null
 }): ProductDisplayImage {
-  const own = productPhotoSrc(product.slug)
-  if (own) return { src: own, kind: 'photo' }
+  if (product.photo) return { src: product.photo, kind: 'photo' }
   return { src: ballIconSrc(product.ballType), kind: 'icon' }
 }

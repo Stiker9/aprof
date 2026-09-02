@@ -2,6 +2,7 @@ import { and, asc, eq, ne } from 'drizzle-orm'
 import type { DrizzleDb } from '../db/client'
 import { brands, fitments, manufacturers, models, products, variants } from '../db/schema'
 import { formatVariantShort } from './format'
+import { productPhotoSrc } from './product-photos'
 
 export interface BrandRow {
   slug: string
@@ -29,6 +30,15 @@ export interface VariantRow {
 
 export interface ProductRow {
   slug: string
+  /**
+   * Адрес своей картинки этого артикула или null.
+   *
+   * Считается здесь, а не в компоненте карточки, намеренно. Список
+   * товаров с картинками — четыре тысячи слагов; если бы его читал
+   * компонент, он уехал бы в браузер целиком и добавил 47 КБ к каждой
+   * странице каталога. Сервер знает ответ и кладёт его строкой.
+   */
+  photo: string | null
   article: string
   manufacturer: string
   country: string | null
@@ -154,7 +164,7 @@ export async function listProductsForVariant(
   brandSlug: string,
   modelSlug: string,
 ): Promise<ProductRow[]> {
-  return db
+  const rows = await db
     .select({
       slug: products.slug,
       article: products.article,
@@ -187,6 +197,8 @@ export async function listProductsForVariant(
       ),
     )
     .orderBy(asc(products.sourcePrice))
+
+  return rows.map((r) => ({ ...r, photo: productPhotoSrc(r.slug) }))
 }
 
 export async function getProduct(db: DrizzleDb, articleSlug: string): Promise<ProductRow | null> {
@@ -213,7 +225,7 @@ export async function getProduct(db: DrizzleDb, articleSlug: string): Promise<Pr
     .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))
     .where(eq(products.slug, articleSlug))
     .limit(1)
-  return row ?? null
+  return row ? { ...row, photo: productPhotoSrc(row.slug) } : null
 }
 
 /** Машины, к которым подходит товар. Ключевой узел перелинковки. */
@@ -428,6 +440,7 @@ export async function listSimilarProducts(
 
   return rows.map((r) => ({
     slug: r.slug,
+    photo: productPhotoSrc(r.slug),
     article: r.article,
     manufacturer: r.manufacturer,
     country: r.country,
@@ -488,10 +501,15 @@ export async function minProductPrice(db: DrizzleDb): Promise<number> {
  * весили бы больше значений. Порядок полей зафиксирован здесь и читается
  * на той стороне — см. CompactProduct.
  *
- * Схема артикула кладётся одним именем файла, а не полным адресом:
- * начало у всех одинаковое, и повторять его 3 630 раз незачем. Кладётся
- * только у заводов, чьи чертежи проверены (см. product-image.ts), —
- * у остальных null, и подбор покажет обобщённый рисунок по типу шара.
+ * Наличие своей картинки кладётся одним битом, а не адресом: файл
+ * всегда лежит по адресу /images/products/<слаг>.webp, и слаг в записи
+ * уже есть. Повторять предсказуемую строку 4 114 раз незачем.
+ *
+ * Бит нужен именно здесь, в подгружаемом файле. Список товаров с
+ * картинками лежит в src/catalog/product-photos.ts, но читать его в
+ * компоненте карточки нельзя: карточка рисуется и на клиенте, и тогда
+ * все четыре тысячи слагов уезжают в браузер отдельным куском на 47 КБ.
+ * Так и было ровно один деплой.
  */
 export type CompactProduct = [
   slug: string,
@@ -504,18 +522,8 @@ export type CompactProduct = [
   towLoadKg: number | null,
   verticalLoadKg: number | null,
   bumperCut: 0 | 1 | 2,
-  schemaFile: string | null,
+  hasPhoto: 0 | 1,
 ]
-
-const CLEAN_SCHEMA_MANUFACTURERS = new Set([
-  'Steinhof',
-  'GALIA',
-  'Oris',
-  'ТСС',
-  'PT GROUP',
-  'Motodor',
-  'Berg',
-])
 
 export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProduct[]> {
   const rows = await db
@@ -530,19 +538,12 @@ export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProd
       towLoadKg: products.towLoadKg,
       verticalLoadKg: products.verticalLoadKg,
       bumperCut: products.bumperCut,
-      images: products.images,
     })
     .from(products)
     .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))
     .orderBy(asc(products.sourcePrice), asc(products.id))
 
   return rows.map((r) => {
-    let schemaFile: string | null = null
-    if (CLEAN_SCHEMA_MANUFACTURERS.has(r.manufacturer)) {
-      const schema = r.images.find((url) => url.includes('/shema/'))
-      if (schema) schemaFile = schema.split('/shema/')[1]
-    }
-
     return [
       r.slug,
       r.article,
@@ -554,7 +555,7 @@ export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProd
       r.towLoadKg,
       r.verticalLoadKg,
       r.bumperCut === 'not_required' ? 0 : r.bumperCut === 'required' ? 1 : 2,
-      schemaFile,
+      productPhotoSrc(r.slug) ? 1 : 0,
     ]
   })
 }

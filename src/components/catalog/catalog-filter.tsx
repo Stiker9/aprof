@@ -29,11 +29,14 @@ function toRow(p: CompactProduct): ProductRow {
     towLoadKg,
     verticalLoadKg,
     bumperCut,
-    schemaFile,
+    hasPhoto,
   ] = p
 
   return {
     slug,
+    // Адрес предсказуем: файл всегда /images/products/<слаг>.webp.
+    // Поэтому в подгружаемом файле лежит бит, а не строка.
+    photo: hasPhoto ? `/images/products/${slug}.webp` : null,
     article,
     manufacturer,
     country: null,
@@ -47,7 +50,7 @@ function toRow(p: CompactProduct): ProductRow {
     bumperCut: bumperCut === 0 ? 'not_required' : bumperCut === 1 ? 'required' : 'unknown',
     electricsIncluded: null,
     description: '',
-    images: schemaFile ? [`https://xn--80aumecw.xn--p1ai/shema/${schemaFile}`] : [],
+    images: [],
     documents: [],
   }
 }
