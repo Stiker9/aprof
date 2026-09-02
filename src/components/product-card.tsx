@@ -44,15 +44,20 @@ export function ProductCard({ product }: { product: ProductRow }) {
         карточки, а кадр вписывается целиком, а не обрезается: у детали
         важна форма, и срезанный кронштейн делает её неузнаваемой.
 
-        Фото поставщика сюда не попадают вовсе — только настоящая схема
-        артикула (kind: 'schema') или обобщённый рисунок по типу шара
-        (kind: 'icon'), см. product-image.ts.
+        Все картинки свои, из public/images/products: либо изображение
+        этого артикула от завода (kind: 'photo'), либо обобщённый
+        рисунок по типу шара (kind: 'icon'). Ссылок на чужие серверы
+        в карточках нет, см. product-image.ts.
       */}
       <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-paper-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={display.src}
-          alt={display.kind === 'schema' ? `Схема ${product.manufacturer} ${product.article}` : `Тип шара: ${product.ballType ?? 'не указан'}`}
+          alt={
+            display.kind === 'icon'
+              ? `Тип шара: ${product.ballType ?? 'не указан'}`
+              : `Фаркоп ${product.manufacturer} ${product.article}`
+          }
           loading="lazy"
           className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04] ${
             display.kind === 'icon' ? 'p-9 opacity-70' : 'p-4'

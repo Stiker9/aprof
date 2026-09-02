@@ -95,10 +95,11 @@ export default async function ProductPage({ params }: Params) {
   const first = fits[0]
   const display = productDisplayImage(product)
   const documents = publishableDocuments(product.documents)
-  const galleryCaption =
-    display.kind === 'schema'
-      ? 'Схема установки этого артикула от завода-изготовителя.'
-      : `Обобщённое изображение по типу шара${product.ballType ? ` (${product.ballType})` : ''} — точный снимок этой позиции пока не публикуем: карточки поставщика помечены знаком его конкурента.`
+  const CAPTION = {
+    photo: `Изображение этого артикула от завода-изготовителя (${product.manufacturer}).`,
+    icon: `Обобщённое изображение по типу шара${product.ballType ? ` (${product.ballType})` : ''} — точный снимок этой позиции пока не публикуем: карточки поставщика помечены знаком его конкурента.`,
+  }
+  const galleryCaption = CAPTION[display.kind]
 
   /*
     Третьим полем — пояснение к термину, если он покупателю не очевиден.

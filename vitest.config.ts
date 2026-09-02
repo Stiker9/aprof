@@ -4,7 +4,7 @@ import path from 'node:path'
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     // Часть тестов поднимает PGlite — настоящий PostgreSQL, скомпилированный
     // в WebAssembly. Запуск экземпляра и накат миграций занимают несколько
     // секунд, поэтому стандартных пяти не хватает.
