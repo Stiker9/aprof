@@ -44,10 +44,15 @@ export function ProductCard({ product }: { product: ProductRow }) {
         карточки, а кадр вписывается целиком, а не обрезается: у детали
         важна форма, и срезанный кронштейн делает её неузнаваемой.
 
-        Все картинки свои, из public/images/products: либо изображение
-        этого артикула от завода (kind: 'photo'), либо обобщённый
-        рисунок по типу шара (kind: 'icon'). Ссылок на чужие серверы
-        в карточках нет, см. product-image.ts.
+        Все картинки свои: либо изображение этого артикула от завода,
+        либо обобщённое по типу шара — фотография узла от заказчика или
+        рисунок. Ссылок на чужие серверы в карточках нет,
+        см. product-image.ts.
+
+        Рисунок приглушён и с большим полем: он схематичный, и рядом с
+        настоящими снимками в соседних плитках спорил бы с ними за
+        внимание. Фотографию узла глушить не надо — она такой же снимок,
+        как остальные.
       */}
       <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-paper-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -60,7 +65,7 @@ export function ProductCard({ product }: { product: ProductRow }) {
           }
           loading="lazy"
           className={`h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04] ${
-            display.kind === 'icon' ? 'p-9 opacity-70' : 'p-4'
+            display.generic === 'drawing' ? 'p-9 opacity-70' : 'p-4'
           }`}
         />
 

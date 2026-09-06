@@ -1,4 +1,4 @@
-import { ballIconSrc } from '@/catalog/ball-icon'
+import { ballIconSrc, ballIsPhoto } from '@/catalog/ball-icon'
 
 /**
  * Какой снимок показывать в карточке товара.
@@ -32,8 +32,10 @@ import { ballIconSrc } from '@/catalog/ball-icon'
  *    снимок изделия. Собран парсером с сайтов заводов и из выгрузки,
  *    просмотрен глазами, лежит у нас.
  *
- * 2. `icon` — обобщённый рисунок по типу шара. Ничего не утверждает
- *    про конкретный артикул и потому годится всегда.
+ * 2. `icon` — обобщённое изображение по типу шара: фотография узла,
+ *    если заказчик её прислал, иначе рисунок. Ничего не утверждает про
+ *    конкретный артикул и потому годится всегда — но именно поэтому
+ *    рядом обязана стоять подпись, что изображение обобщённое.
  *
  * Третьего не дано намеренно: если своего файла нет, лучше честный
  * общий рисунок, чем ссылка наружу.
@@ -41,8 +43,15 @@ import { ballIconSrc } from '@/catalog/ball-icon'
 
 export interface ProductDisplayImage {
   src: string
-  /** 'photo' — своё изображение этого артикула, 'icon' — рисунок по типу шара. */
+  /** 'photo' — своё изображение этого артикула, 'icon' — обобщённое по типу шара. */
   kind: 'photo' | 'icon'
+  /**
+   * Обобщённое изображение — фотография узла, а не рисунок.
+   *
+   * Рисунок показывают приглушённым и с большим полем, чтобы он не
+   * спорил с настоящими снимками в соседних плитках; фотографию — нет.
+   */
+  generic: 'none' | 'photo' | 'drawing'
 }
 
 /**
@@ -61,6 +70,10 @@ export function productDisplayImage(product: {
   photo: string | null
   ballType: string | null
 }): ProductDisplayImage {
-  if (product.photo) return { src: product.photo, kind: 'photo' }
-  return { src: ballIconSrc(product.ballType), kind: 'icon' }
+  if (product.photo) return { src: product.photo, kind: 'photo', generic: 'none' }
+  return {
+    src: ballIconSrc(product.ballType),
+    kind: 'icon',
+    generic: ballIsPhoto(product.ballType) ? 'photo' : 'drawing',
+  }
 }
