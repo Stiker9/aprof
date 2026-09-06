@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 /**
- * Галерея работ: крупный кадр слева, миниатюры справа.
+ * Галерея работ: ровная сетка кадров одного размера.
  *
- * Раскладка из присланного макета «Галерея — варианты 1а», перенесённая на
- * наши токены: цвета, скругления и шрифты берутся из дизайн-системы, а не
- * из чужого файла.
+ * В присланном макете «Галерея — варианты 1а» был крупный кадр слева и
+ * четыре миниатюры справа. Заказчик попросил переделать: одна большая
+ * фотография и остальные в четверть размера читались как «эти работы
+ * хуже», хотя выбраны они не по качеству, а по порядку в списке.
  *
  * Три вещи из макета не перенесены осознанно:
  *
@@ -22,18 +23,14 @@ import { useMemo, useState } from 'react'
  *    маркам.
  *
  * Точка обрезки берётся из данных, своя на каждый снимок. Снимки
- * вертикальные, 960 на 1280, а рамки широкие: у миниатюры пропорция
- * 6.8 к 1, и в неё попадает полоса всего в 141 пиксель из 1280 — одиннадцать
- * процентов снимка. Фаркопы при этом стоят на разной высоте, от 0.61 до
+ * вертикальные, 960 на 1280, а рамки широкие: при пропорции 4 к 3 в кадр
+ * попадает чуть больше половины высоты снимка. Фаркопы при этом стоят на разной высоте, от 0.61 до
  * 0.73, и одна общая точка неизбежно теряла половину из них.
  *
  * Считать под каждую рамку отдельно не нужно: object-position в процентах
  * совмещает точку снимка с той же точкой рамки. Достаточно указать, где на
  * фотографии фаркоп, — и он окажется в кадре при любой её пропорции.
  *
- * Высота ужата против макета: там крупный кадр 560 пикселей, и вместе с
- * заголовком, фильтрами и подвалом секция занимала весь экран целиком —
- * следующий блок не показывался вовсе, и страница читалась как обрубок.
  */
 export interface GalleryWork {
   car: string
@@ -76,7 +73,7 @@ export function WorksGallery({
   total: string
 }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('Все')
-  const [current, setCurrent] = useState(0)
+  const [expanded, setExpanded] = useState(false)
 
   const shown = useMemo(
     () => (filter === 'Все' ? works : works.filter((work) => work.body === filter)),
@@ -84,17 +81,13 @@ export function WorksGallery({
   )
 
   /*
-    Показываем четыре миниатюры: столько влезает в колонку рядом с крупным
-    кадром, не сплющиваясь. Остальные живут на странице работ.
+    Два ряда по пять. Больше сразу не показываем: двенадцать плиток
+    растягивают секцию на полтора экрана и отодвигают всё, что под ней.
   */
-  const thumbs = shown.slice(0, 4)
-  const rest = shown.length - thumbs.length
-  const hero = shown[Math.min(current, shown.length - 1)] ?? works[0]
+  const PAGE = 10
+  const visible = expanded ? shown : shown.slice(0, PAGE)
+  const hidden = shown.length - visible.length
 
-  const pick = (next: (typeof FILTERS)[number]) => {
-    setFilter(next)
-    setCurrent(0)
-  }
 
   /*
     Секция светлая, хотя соседние — тёмные.
@@ -147,7 +140,10 @@ export function WorksGallery({
               <button
                 key={name}
                 type="button"
-                onClick={() => pick(name)}
+                onClick={() => {
+                  setFilter(name)
+                  setExpanded(false)
+                }}
                 aria-pressed={active}
                 className={`cursor-pointer rounded-full border px-5 py-2.5 text-sm font-medium transition-colors ${
                   active
@@ -161,127 +157,90 @@ export function WorksGallery({
           })}
         </div>
 
-        <div className="mt-5 grid gap-3 lg:grid-cols-[1.9fr_minmax(0,1fr)] lg:items-stretch">
-          <figure className="relative m-0 min-h-[320px] overflow-hidden rounded-[var(--radius-card)] bg-surface-2 lg:min-h-[400px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={hero.photo}
-              alt={`Фаркоп на ${hero.car}`}
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{ objectPosition: `50% ${(hero.focus ?? 0.68) * 100}%` }}
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  'linear-gradient(0deg, rgba(11,11,12,.88) 0%, rgba(11,11,12,0) 52%)',
-              }}
-            />
+        {/*
+          Ровная сетка мелкими плитками — по присланному макету
+          «Галерея установок».
 
-            {/*
-              Подпись в два яруса: сверху зачем ставили, снизу на какую
-              машину. Так просил заказчик — по образцу, где строка целиком
-              звучит «Для перевозки прицепа на Renault Duster». Разбито на
-              две строки, потому что машина здесь ещё и заголовок кадра:
-              одной строкой она потеряла бы вес.
-            */}
-            <figcaption className="absolute inset-x-6 bottom-7 z-[1] flex flex-wrap text-white items-end justify-between gap-6 sm:inset-x-9">
-              <div>
+          Сначала здесь был крупный кадр слева и четыре миниатюры справа,
+          как в первом макете. Заказчик попросил переделать дважды: сперва
+          на равные плитки (одна большая фотография читалась как «эта
+          работа лучше», хотя выбрана она по порядку в списке), потом —
+          мельче, по пять в ряд.
+
+          Первыми показываем два ряда, остальное — по кнопке. Двенадцать
+          плиток сразу растягивали секцию на полтора экрана и отодвигали
+          всё, что под ней.
+        */}
+        <div className="mt-5 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          {visible.map((work) => {
+            const inner = (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={work.photo}
+                  alt={`Фаркоп на ${work.car}`}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  style={{ objectPosition: `50% ${(work.focus ?? 0.68) * 100}%` }}
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      'linear-gradient(0deg, rgba(11,11,12,.86) 0%, rgba(11,11,12,0) 58%)',
+                  }}
+                />
+
                 {/*
-                  Подпись белая, а не красная. Красным она сперва и была —
-                  фирменный цвет, — но на светлых кузовах пропадала: серый
-                  под ней и красный поверх дают слишком слабый контраст, а
-                  мелкий кегль с широкой разрядкой добивал остаток.
-
-                  Красное на кадре теперь одно — кнопка. Два красных пятна
-                  на одном снимке спорили бы между собой.
+                  «Фаркоп на» перед маркой — просьба заказчика. Плитка
+                  без этого слова читалась просто списком машин, а речь
+                  о фаркопах.
                 */}
-                {hero.use ? (
-                  <div className="mb-1.5 text-[13px] font-medium uppercase tracking-[0.14em] text-white/85">
-                    {hero.use}
-                  </div>
-                ) : null}
-                <div className="font-[family-name:var(--font-display)] text-[clamp(22px,2.2vw,30px)] leading-[1.1] tracking-[-0.02em]">
-                  {hero.car}
-                </div>
-                {hero.article ? (
-                  <div className="mt-2 text-[15px] text-white/70">Фаркоп {hero.article}</div>
-                ) : null}
-              </div>
-
-              {hero.href ? (
-                <Link
-                  href={hero.href}
-                  className="whitespace-nowrap rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-soft transition-[filter] hover:brightness-110"
-                >
-                  {hero.cta ?? `Фаркопы на ${hero.car}`}
-                </Link>
-              ) : null}
-            </figcaption>
-          </figure>
-
-          {/*
-            На узком экране миниатюры превращаются в горизонтальную ленту:
-            столбцом они там растянулись бы на два экрана.
-          */}
-          <div className="flex gap-3 overflow-x-auto lg:flex-col lg:overflow-visible [&::-webkit-scrollbar]:hidden">
-            {thumbs.map((work, index) => {
-              const active = work === hero
-              return (
-                <button
-                  key={work.photo}
-                  type="button"
-                  onClick={() => setCurrent(index)}
-                  aria-current={active}
-                  className={`relative min-h-[140px] w-[190px] shrink-0 cursor-pointer overflow-hidden rounded-[var(--radius-card)] bg-surface-2 outline-2 -outline-offset-2 transition-[outline-color] lg:min-h-[104px] lg:w-auto lg:flex-1 ${
-                    active ? 'outline-accent' : 'outline-transparent hover:outline-ink-dark/45'
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={work.photo}
-                    alt=""
-                    loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover"
-                    style={{ objectPosition: `50% ${(work.focus ?? 0.68) * 100}%` }}
-                  />
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      background:
-                        'linear-gradient(0deg, rgba(11,11,12,.82) 0%, rgba(11,11,12,.05) 65%)',
-                    }}
-                  />
-                  {/*
-                    Назначение над названием машины — тем же порядком, что
-                    и на крупном кадре. Кегль мелкий: миниатюра высотой
-                    88 пикселей, и две строки в полный размер её забьют.
-                  */}
-                  <span className="absolute inset-x-4 bottom-3 z-[1] flex flex-col gap-0.5 text-left">
-                    {work.use ? (
-                      <span className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.12em] text-white/80">
-                        {work.use}
-                      </span>
-                    ) : null}
-                    <span className="text-sm font-medium leading-[1.2] text-white">{work.car}</span>
+                <span className="absolute inset-x-4 bottom-3.5 z-[1] flex flex-col gap-[3px] text-left text-white">
+                  {work.use ? (
+                    <span className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-white/80">
+                      {work.use}
+                    </span>
+                  ) : null}
+                  <span className="font-[family-name:var(--font-display)] text-[16px] leading-[1.15] tracking-[-0.02em]">
+                    Фаркоп на {work.car}
                   </span>
-                </button>
-              )
-            })}
+                  {work.href && work.cta ? (
+                    <span className="mt-0.5 flex items-center gap-2 text-[12px] font-medium text-accent-bright">
+                      {work.cta} <span aria-hidden>→</span>
+                    </span>
+                  ) : null}
+                </span>
+              </>
+            )
 
-            {rest > 0 ? (
-              <Link
-                href={allHref}
-                className="flex min-h-[64px] w-[180px] shrink-0 items-center justify-center gap-2.5 rounded-[var(--radius-card)] border border-ink-dark/16 text-sm text-[#5C5C5A] transition-colors hover:border-ink-dark hover:text-ink-dark lg:w-auto"
-              >
-                Ещё {rest} {rest === 1 ? 'работа' : rest < 5 ? 'работы' : 'работ'}{' '}
-                <span aria-hidden>→</span>
+            const shell =
+              'group relative block aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-surface-2'
+
+            return work.href ? (
+              <Link key={work.photo} href={work.href} className={shell}>
+                {inner}
               </Link>
-            ) : null}
-          </div>
+            ) : (
+              <div key={work.photo} className={shell}>
+                {inner}
+              </div>
+            )
+          })}
         </div>
+
+        {hidden > 0 ? (
+          <div className="mt-5 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="cursor-pointer rounded-full border border-ink-dark/20 px-7 py-3 text-[15px] font-medium transition-colors hover:border-ink-dark"
+            >
+              Показать ещё {hidden}
+            </button>
+          </div>
+        ) : null}
 
         <div className="mt-6 flex flex-wrap items-center gap-5">
           <Link

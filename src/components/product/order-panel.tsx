@@ -88,7 +88,7 @@ export function OrderPanel({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          <div className="text-xs font-medium text-[#8A8A88]">Электрика</div>
+          <div className="text-[13px] font-medium text-[#8A8A88]">Электрика</div>
           <div className="flex flex-col gap-1.5">
             {ELECTRICS.map((option) => {
               const active = option.id === electrics
@@ -98,17 +98,17 @@ export function OrderPanel({
                   type="button"
                   onClick={() => setElectrics(option.id)}
                   aria-pressed={active}
-                  className={`flex cursor-pointer items-start justify-between gap-3 rounded-[10px] border px-3.5 py-2.5 text-left transition-colors ${
+                  className={`flex cursor-pointer items-start justify-between gap-3 rounded-[10px] border px-4 py-3 text-left transition-colors ${
                     active
                       ? 'border-accent bg-accent-soft'
                       : 'border-ink-dark/12 hover:border-ink-dark/30'
                   }`}
                 >
                   <span className="flex flex-col gap-0.5">
-                    <span className="text-[13px] font-medium leading-tight">{option.label}</span>
-                    <span className="text-[11px] leading-tight text-[#8A8A88]">{option.note}</span>
+                    <span className="text-[15px] font-medium leading-tight">{option.label}</span>
+                    <span className="text-[13px] leading-snug text-[#8A8A88]">{option.note}</span>
                   </span>
-                  <span className="shrink-0 text-[13px] font-medium">
+                  <span className="shrink-0 text-[15px] font-medium">
                     {option.price === 0 ? '—' : `+${formatPrice(option.price)}`}
                   </span>
                 </button>
@@ -123,7 +123,7 @@ export function OrderPanel({
           */}
           {chosen.price > 0 ? (
             <div className="mt-1 flex items-baseline justify-between border-t border-ink-dark/10 pt-2.5">
-              <span className="text-sm">Комплект без установки</span>
+              <span className="text-[15px]">Комплект без установки</span>
               <span className="text-[19px] font-semibold text-accent">{formatPrice(total)}</span>
             </div>
           ) : null}

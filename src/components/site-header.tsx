@@ -209,6 +209,14 @@ export function SiteHeader() {
           transition: 'height 300ms ease',
         }}
       >
+        {/*
+          Боковые группы обе на flex-1, меню между ними — shrink-0.
+          Это и есть центровка: свободное место делится поровну, и
+          середина меню совпадает с серединой полосы независимо от того,
+          что группы разной ширины (слева бургер с названием, справа
+          поиск с телефоном).
+        */}
+        <div className="flex flex-1 items-center gap-7">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -233,14 +241,21 @@ export function SiteHeader() {
         >
           AUTOPROFI
         </Link>
+        </div>
 
         {/*
-          Меню занимает всё свободное место между названием и телефоном
-          и прижато вправо. По центру ставить его больше нельзя: у полосы
-          боковые отступы шире, чем были у пилюли, и центрированное меню
-          заметно съезжало от середины экрана.
+          Меню по центру полосы. Раньше оно было прижато вправо и стояло
+          вплотную к телефону — заказчик попросил симметрии.
+
+          Центровка не флексом «между двумя соседями»: группы слева и
+          справа разной ширины, и меню от середины экрана уезжало. Обе
+          группы взяты на flex-1, меню shrink-0 — свободное место
+          делится поровну, и середина сходится с серединой полосы.
+
+          Просвет между пунктами на lg чуть уже: при 1024 пикселях меню
+          с зазором 28 упиралось бы в телефон.
         */}
-        <nav className="hidden flex-1 items-center justify-end gap-7 lg:flex">
+        <nav className="hidden shrink-0 items-center gap-5 lg:flex xl:gap-7">
           {NAV.map((item) => (
             <Link
               key={item.label}
@@ -252,7 +267,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-4 lg:ml-7">
+        <div className="flex flex-1 items-center justify-end gap-4">
           <Link
             href={urls.catalog()}
             aria-label="Поиск"
