@@ -9,11 +9,27 @@ import { urls } from '@/catalog/urls'
  * Единое поле «текст акции» такой список не удержит, поэтому типы
  * разделены здесь и в таком же виде уйдут в админку.
  *
- * Тексты — заглушки до согласования с заказчиком.
+ * Список пуст, и это рабочее состояние. Здесь были три придуманные
+ * акции: «−20% в августе», «приведи друга −10%» и «−15% на RAV4,
+ * Sportage и Tucson». Скидка, которой нет, — недостоверная реклама, и
+ * приехавший за ней человек прав, а мы нет.
+ *
+ * Заполняется через админку. Пока пусто, блок акций на главной и
+ * страница «Акции» показывают, что предложений сейчас нет, — сами,
+ * без правки кода.
  */
 
-/** Срок действия: до даты или бессрочно. */
-export type PromoPeriod = { kind: 'until'; label: string } | { kind: 'permanent' }
+/**
+ * Срок действия: до даты или бессрочно.
+ *
+ * У срочной акции дата хранится отдельно от подписи, а не только
+ * словами. Иначе повторяется то, что уже случилось: «До 31 августа»
+ * провисело на главной до октября, потому что строка — это текст, и
+ * истечь он сам не может.
+ */
+export type PromoPeriod =
+  | { kind: 'until'; label: string; until: `${number}-${number}-${number}` }
+  | { kind: 'permanent' }
 
 /** Строка списка акционных позиций. */
 export interface PromoItem {
@@ -33,38 +49,21 @@ export type Promo =
   | (PromoBase & { kind: 'text'; discount: string; discountNote: string })
   | (PromoBase & { kind: 'list'; items: PromoItem[] })
 
-export const PROMOS: Promo[] = [
-  {
-    kind: 'text',
-    slug: 'akciya-avgusta',
-    title: 'Акция августа',
-    lead: 'Установка на автомобили моложе 3 лет',
-    period: { kind: 'until', label: 'До 31 августа' },
-    discount: '−20%',
-    discountNote: 'на установку',
-    action: { label: 'Записаться', href: '/zapis' },
-  },
-  {
-    kind: 'text',
-    slug: 'privedi-druga',
-    title: 'Приведи друга',
-    lead: 'Скидка вам и другу',
-    period: { kind: 'permanent' },
-    discount: '−10%',
-    discountNote: 'обоим',
-    action: { label: 'Как это работает', href: '/akcii' },
-  },
-  {
-    kind: 'list',
-    slug: 'akcionnye-pozicii',
-    title: 'Акционные модели',
-    lead: 'Установка со скидкой в августе',
-    period: { kind: 'permanent' },
-    items: [
-      { model: 'Toyota RAV4', discount: 'скидка 15%' },
-      { model: 'Kia Sportage', discount: 'скидка 15%' },
-      { model: 'Hyundai Tucson', discount: 'скидка 15%' },
-    ],
-    action: { label: 'Проверить свою модель', href: urls.catalog() },
-  },
-]
+const ALL: Promo[] = []
+
+/**
+ * Акции, которые показываем.
+ *
+ * Истёкшие отсеиваются сами. Показывать скидку, которой уже нет, —
+ * недостоверная реклама, и повод для претензии от человека, который на
+ * неё приехал.
+ *
+ * Срок считается на сборке, а не у посетителя: страницы статические,
+ * «сегодня» для них — момент сборки. Значит акция исчезнет с сайта не в
+ * полночь, а при ближайшей пересборке. Для скидок это допустимо, и это
+ * всё равно несравнимо лучше текста, который не истекает никогда.
+ */
+export const PROMOS: Promo[] = ALL.filter((promo) => {
+  if (promo.period.kind !== 'until') return true
+  return new Date(promo.period.until) >= new Date(new Date().toISOString().slice(0, 10))
+})

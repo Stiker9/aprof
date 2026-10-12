@@ -13,6 +13,7 @@ import {
   DURATION_NOTE,
   INCLUDED,
   PRICES,
+  HAS_PRICES,
   PRICE_NOTE,
   STEPS,
 } from '@/content/ustanovka'
@@ -142,6 +143,13 @@ export default async function InstallPage() {
             дороже, и человек должен увидеть это до приезда, а не узнать
             при расчёте.
           */}
+          {/*
+            Пока цены не названы, таблица из трёх колонок с прочерками
+            выглядела бы поломкой. Показываем то же содержание списком:
+            человек видит, что именно здесь делают, и что цену назовут
+            по телефону. Когда цены появятся — вернётся таблица.
+          */}
+          {HAS_PRICES ? (
           <div className="overflow-x-auto">
             <div className="min-w-[560px]">
               <div
@@ -164,6 +172,24 @@ export default async function InstallPage() {
               ))}
             </div>
           </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <p className="max-w-[640px] text-[15px] leading-[1.6] text-[#4A4A4C]">
+                Стоимость называем по телефону: она зависит от машины, выбранной электрики и
+                того, чей фаркоп ставим — наш или ваш.
+              </p>
+              <ul className="flex flex-col">
+                {PRICES.map((row) => (
+                  <li
+                    key={row.work}
+                    className="border-b border-ink-dark/8 py-[13px] text-[15px] last:border-b-0"
+                  >
+                    {row.work}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <p className="max-w-[720px] text-[13px] leading-[1.6] text-[#8A8A88]">{PRICE_NOTE}</p>
         </section>

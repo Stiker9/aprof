@@ -9,8 +9,8 @@ import { Eyebrow, Section, SectionLead, SectionTitle } from '@/components/ui/sec
  * превращается в набор утверждений о себе, а отзывы — в блок без
  * контекста. Вместе цифры получают подтверждение прямо под собой.
  *
- * Разметки AggregateRating здесь нет и не будет, пока отзывы
- * придуманные — см. src/content/reviews.ts.
+ * Разметки AggregateRating здесь нет и не будет, пока отзывы не
+ * настоящие. Сейчас их нет вовсе — см. src/content/reviews.ts.
  */
 function Stars() {
   return (
@@ -43,18 +43,26 @@ export function About() {
           </div>
           <div className="text-[13px] opacity-60">установок</div>
         </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-baseline gap-3">
-            <span className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
-              {RATING.score}
-            </span>
-            <Stars />
+        {/*
+          Рейтинг и звёзды показываются, только когда оценка настоящая.
+          Пять звёзд рядом с выдуманной цифрой — это ровно та реклама, за
+          которую штрафуют, поэтому блок выпадает целиком, а не рисуется
+          пустым.
+        */}
+        {RATING ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-baseline gap-3">
+              <span className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
+                {RATING.score}
+              </span>
+              <Stars />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <div className="text-[13px] opacity-60">рейтинг</div>
+              <div className="text-xs opacity-45">{RATING.count} отзывов</div>
+            </div>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <div className="text-[13px] opacity-60">рейтинг</div>
-            <div className="text-xs opacity-45">{RATING.count} отзывов</div>
-          </div>
-        </div>
+        ) : null}
         <div className="flex flex-col gap-2">
           <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
             2 года
@@ -69,6 +77,13 @@ export function About() {
         в макете читаются как журнальный разворот, а не как список
         карточек, и крупный заголовочный шрифт держит этот тон.
       */}
+      {/*
+        Пока отзывов нет, вся нижняя часть секции не выводится: пустая
+        полоса на 72 пикселя и ссылка «Все отзывы», ведущая в пустоту,
+        выглядят поломкой, а не ожиданием данных.
+      */}
+      {REVIEWS.length > 0 ? (
+        <>
       <div className="mt-[72px] flex flex-col gap-[72px] lg:flex-row lg:gap-14">
         {REVIEWS.slice(0, 3).map((review) => (
           <figure key={review.author} className="flex flex-1 gap-6">
@@ -96,6 +111,8 @@ export function About() {
           Сертификат СТО · ГОСТ Р · Допуск на электромонтажные работы
         </p>
       </div>
+        </>
+      ) : null}
     </Section>
   )
 }
