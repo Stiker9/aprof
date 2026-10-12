@@ -88,7 +88,7 @@ export function Contacts() {
       <div className="mt-12 overflow-hidden rounded-[var(--radius-card)] border border-line-light">
         <iframe
           src={CONTACTS.mapEmbedUrl}
-          title={`Сервис AUTOPROFI на карте: ${CONTACTS.address}`}
+          title={`Сервис VASHFARKOP на карте: ${CONTACTS.address}`}
           loading="lazy"
           allowFullScreen
           className="h-[380px] w-full border-0"

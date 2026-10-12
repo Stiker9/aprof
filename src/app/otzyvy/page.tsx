@@ -4,7 +4,7 @@ import { CatalogShell } from '@/components/catalog/shell'
 import { RATING, REVIEWS } from '@/content/reviews'
 
 export const metadata: Metadata = {
-  title: 'Отзывы об установке фаркопов — AUTOPROFI',
+  title: 'Отзывы об установке фаркопов — VASHFARKOP',
   description:
     'Что пишут после установки фаркопа: сроки, работа с электрикой, документы для ТО, доставка в другие города.',
   alternates: { canonical: absolute('/otzyvy') },
@@ -24,7 +24,11 @@ export default function ReviewsPage() {
       picker={false}
       crumbs={[{ label: 'Главная', href: urls.home() }, { label: 'Отзывы' }]}
       title="Отзывы"
-      summary={`${RATING.score} — средняя оценка по ${RATING.count} отзывам`}
+      summary={
+        RATING
+          ? `${RATING.score} — средняя оценка по ${RATING.count} отзывам`
+          : 'Собираем отзывы клиентов — скоро они появятся здесь'
+      }
     >
       <div className="mt-12 grid gap-x-12 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
         {REVIEWS.map((review) => (

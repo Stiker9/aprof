@@ -26,7 +26,7 @@ export type DrizzleDb = PgDatabase<PgQueryResultHKT, typeof schema>
  * до того, как первое успело открыться, иначе создали бы два экземпляра.
  */
 const globalForDb = globalThis as typeof globalThis & {
-  __autoprofiDb?: Promise<DrizzleDb>
+  __vashfarkopDb?: Promise<DrizzleDb>
 }
 
 /**
@@ -35,15 +35,15 @@ const globalForDb = globalThis as typeof globalThis & {
  * В режиме remote подключается к управляемому PostgreSQL.
  */
 export function getDb(): Promise<DrizzleDb> {
-  if (!globalForDb.__autoprofiDb) {
-    globalForDb.__autoprofiDb = connect().catch((error: unknown) => {
+  if (!globalForDb.__vashfarkopDb) {
+    globalForDb.__vashfarkopDb = connect().catch((error: unknown) => {
       // Неудачу не кешируем: иначе одна ошибка при старте отравит
       // все последующие запросы до перезапуска процесса
-      globalForDb.__autoprofiDb = undefined
+      globalForDb.__vashfarkopDb = undefined
       throw error
     })
   }
-  return globalForDb.__autoprofiDb
+  return globalForDb.__vashfarkopDb
 }
 
 async function connect(): Promise<DrizzleDb> {

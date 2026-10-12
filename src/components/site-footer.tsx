@@ -46,7 +46,7 @@ export function SiteFooter() {
         <div className="grid gap-10 md:grid-cols-4">
           <div>
             <div className="font-[family-name:var(--font-display)] text-sm tracking-[0.22em] text-ink">
-              AUTOPROFI
+              VASHFARKOP
             </div>
             <p className="mt-3 text-sm text-ink-muted">
               Фаркопы с установкой в Петербурге и доставкой по России
@@ -109,7 +109,7 @@ export function SiteFooter() {
 
         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-6 text-[13px] text-ink-dim">
           <span>
-            © 2026 AUTOPROFI · ИНН {LEGAL_ENTITY.inn} · ОГРН {LEGAL_ENTITY.ogrn}
+            © 2026 VASHFARKOP · ИНН {LEGAL_ENTITY.inn} · ОГРН {LEGAL_ENTITY.ogrn}
           </span>
           {LEGAL.map((l) => (
             <Link key={l.href} href={l.href} className="hover:text-ink-muted">

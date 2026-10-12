@@ -239,7 +239,7 @@ export function SiteHeader() {
           onClick={scrollTopOnHome}
           className="shrink-0 font-[family-name:var(--font-display)] text-[15px] tracking-[0.24em] text-ink"
         >
-          AUTOPROFI
+          VASHFARKOP
         </Link>
         </div>
 

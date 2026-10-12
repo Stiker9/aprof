@@ -6,7 +6,7 @@ import { CONTACTS } from '@/content/contacts'
 import { RATING } from '@/content/reviews'
 
 export const metadata: Metadata = {
-  title: 'О компании AUTOPROFI — сервис по установке фаркопов в Петербурге',
+  title: 'О компании VASHFARKOP — сервис по установке фаркопов в Петербурге',
   description:
     'Сервис на 1-й Жерновской улице с 2014 года: свои мастера, свой склад, больше 3 800 установок. Гарантия два года на работы.',
   alternates: { canonical: absolute('/o-nas') },
@@ -19,7 +19,9 @@ export const metadata: Metadata = {
 const NUMBERS = [
   { value: '12 лет', caption: 'опыта в установке' },
   { value: '3 800+', caption: 'установок' },
-  { value: RATING.score, caption: `средняя оценка · ${RATING.count} отзывов` },
+  // Рейтинг показывается, только когда он настоящий. Пока заказчик не
+  // назвал оценку, строка просто выпадает, и остаётся три цифры.
+  ...(RATING ? [{ value: RATING.score, caption: `средняя оценка · ${RATING.count} отзывов` }] : []),
   { value: '2 года', caption: 'гарантии на работы' },
 ]
 

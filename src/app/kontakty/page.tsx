@@ -5,7 +5,7 @@ import { RequestForm } from '@/components/request-form'
 import { CONTACTS, LEGAL_ENTITY } from '@/content/contacts'
 
 export const metadata: Metadata = {
-  title: 'Контакты — AUTOPROFI, Санкт-Петербург',
+  title: 'Контакты — VASHFARKOP, Санкт-Петербург',
   description:
     'Адрес сервиса на 1-й Жерновской улице, телефон, часы работы и форма заявки. Перезваниваем в течение 15 минут в рабочие часы.',
   alternates: { canonical: absolute('/kontakty') },
@@ -85,7 +85,7 @@ export default function ContactsPage() {
       <div className="mt-14 overflow-hidden rounded-[var(--radius-card)] border border-line-light">
         <iframe
           src={CONTACTS.mapEmbedUrl}
-          title={`Сервис AUTOPROFI на карте: ${CONTACTS.address}`}
+          title={`Сервис VASHFARKOP на карте: ${CONTACTS.address}`}
           loading="lazy"
           allowFullScreen
           className="h-[420px] w-full border-0"
