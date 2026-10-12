@@ -3,6 +3,15 @@ import { listAllProductSlugs, listAllVariantPaths, listBrands, listModels } from
 import { absolute, urls } from '@/catalog/urls'
 import { getDb } from '@/db/client'
 
+/*
+  Обязательно для статической выгрузки: без этой строки Next считает
+  маршрут динамическим и отказывается собирать сайт в папку с файлами
+  («export const dynamic not configured on route»). Содержимое здесь и
+  так не зависит от запроса — оно одинаково для всех.
+*/
+export const dynamic = 'force-static'
+
+
 /**
  * Страницы вне каталога.
  *

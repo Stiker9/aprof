@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "node scripts/build-static.mjs",
     "prebuild": "tsx scripts/restore-data.ts",
     "start": "next start",
     "test": "vitest run",
