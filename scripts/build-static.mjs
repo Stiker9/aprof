@@ -19,6 +19,9 @@
  * скриптом с именем `build`. Разворачивание дампа базы нужно и здесь,
  * иначе на чистой машине сборка не найдёт товаров.
  *
+ * Перед сборкой правки владельца из админки выкладываются в файл: сайт
+ * читает их оттуда, а не из базы (см. scripts/apply-overrides.ts).
+ *
  * После сборки идут два шага, без которых выгрузка неполна:
  * переименование файлов предзагрузки (см. flatten-prefetch.mjs) и
  * укладка .htaccess в корень. Оба легко забыть, если делать руками, а
@@ -27,7 +30,12 @@
 import { spawnSync } from 'node:child_process'
 import { copyFileSync } from 'node:fs'
 
-const env = { ...process.env, STATIC_EXPORT: '1' }
+/*
+  Отдельная папка сборки: на сервере рядом работает админка со своей
+  сборкой в .next, и класть выгрузку туда же значит затереть файлы
+  работающего приложения прямо во время запроса. См. next.config.ts.
+*/
+const env = { ...process.env, STATIC_EXPORT: '1', NEXT_DIST_DIR: '.next-export' }
 
 function run(command, args) {
   const result = spawnSync(command, args, { stdio: 'inherit', env, shell: true })
@@ -36,6 +44,9 @@ function run(command, args) {
 
 console.log('→ Разворачиваю базу, если её нет')
 run('npx', ['tsx', 'scripts/restore-data.ts'])
+
+console.log('→ Выкладываю правки владельца в data/content-overrides.json')
+run('npx', ['tsx', 'scripts/apply-overrides.ts'])
 
 console.log('→ Собираю статическую выгрузку')
 run('npx', ['next', 'build'])

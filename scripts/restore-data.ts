@@ -59,22 +59,14 @@ async function main() {
   const db = drizzle(client, { schema })
 
   /*
-    Миграции применяются, только если таблиц ещё нет. applyMigrations
-    не идемпотентна — `CREATE TYPE` в ней падает, если тип уже
-    существует, — а на машине разработчика .pgdata/ приходит уже
-    наполненной из npm run import. Без этой проверки обычный
-    `npm run build` у любого, кто уже импортировал каталог, стал бы
-    падать на первом же шаге.
+    Миграции накатываются всегда: applyMigrations ведёт учёт применённых
+    и на уже обновлённой базе не делает ничего. Прежде вызов стоял под
+    проверкой «таблиц ещё нет» — тогда на наполненной базе новые
+    миграции не применялись вовсе и код падал на отсутствующей таблице
+    посреди сборки.
   */
-  const [{ exists: hasTables }] = (
-    await db.execute(
-      sql`select exists(select 1 from information_schema.tables where table_name = 'products') as exists`,
-    )
-  ).rows as { exists: boolean }[]
-
-  if (!hasTables) {
-    await applyMigrations(client)
-  }
+  const fresh = await applyMigrations(client)
+  if (fresh.length > 0) console.log(`Применены миграции: ${fresh.join(', ')}`)
 
   const [{ count }] = (
     await db.execute(sql`select count(*)::int as count from products`)

@@ -2,6 +2,7 @@ import { and, asc, eq, ne } from 'drizzle-orm'
 import type { DrizzleDb } from '../db/client'
 import { brands, fitments, manufacturers, models, products, variants } from '../db/schema'
 import { formatVariantShort } from './format'
+import { applyToList, applyProductOverride, getProductOverrides, isHidden } from './overrides'
 import { productPhotoSrc } from './product-photos'
 
 export interface BrandRow {
@@ -198,7 +199,10 @@ export async function listProductsForVariant(
     )
     .orderBy(asc(products.sourcePrice))
 
-  return rows.map((r) => ({ ...r, photo: productPhotoSrc(r.slug) }))
+  return applyToList(
+    rows.map((r) => ({ ...r, photo: productPhotoSrc(r.slug) })),
+    await getProductOverrides(db),
+  )
 }
 
 export async function getProduct(db: DrizzleDb, articleSlug: string): Promise<ProductRow | null> {
@@ -225,7 +229,15 @@ export async function getProduct(db: DrizzleDb, articleSlug: string): Promise<Pr
     .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))
     .where(eq(products.slug, articleSlug))
     .limit(1)
-  return row ? { ...row, photo: productPhotoSrc(row.slug) } : null
+  if (!row) return null
+
+  // Скрытый товар — это «нет такой страницы», а не пустая карточка:
+  // иначе покупатель по старой ссылке увидел бы товар без цены и решил,
+  // что сайт сломан.
+  const override = (await getProductOverrides(db))[row.slug]
+  if (isHidden(override)) return null
+
+  return applyProductOverride({ ...row, photo: productPhotoSrc(row.slug) }, override)
 }
 
 /** Машины, к которым подходит товар. Ключевой узел перелинковки. */
@@ -288,7 +300,12 @@ export async function listAllVariantPaths(
 
 export async function listAllProductSlugs(db: DrizzleDb): Promise<string[]> {
   const rows = await db.select({ slug: products.slug }).from(products)
-  return rows.map((r) => r.slug)
+  const overrides = await getProductOverrides(db)
+
+  // Скрытому товару страница не собирается вовсе. Собрать и не дать
+  // ссылок было бы хуже: страница осталась бы в поиске и открывалась
+  // бы по прямому адресу.
+  return rows.map((r) => r.slug).filter((slug) => !isHidden(overrides[slug]))
 }
 
 /**
@@ -299,8 +316,9 @@ export async function listAllProductSlugs(db: DrizzleDb): Promise<string[]> {
  * это давало 7 339 вместо 5 808.
  */
 export async function countProducts(db: DrizzleDb): Promise<number> {
-  const rows = await db.select({ id: products.id }).from(products)
-  return rows.length
+  const rows = await db.select({ slug: products.slug }).from(products)
+  const overrides = await getProductOverrides(db)
+  return rows.filter((row) => !isHidden(overrides[row.slug])).length
 }
 
 /**
@@ -436,9 +454,14 @@ export async function listSimilarProducts(
     .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))
     .where(and(eq(fitments.variantId, own.variantId), ne(products.slug, articleSlug)))
     .orderBy(asc(products.sourcePrice))
-    .limit(limit)
+    /*
+      Берём с запасом: скрытые владельцем отсеиваются уже здесь, в коде,
+      и при лимите ровно в limit блок «похожие» на иных страницах
+      оказался бы короче, чем надо, — а то и пустым.
+    */
+    .limit(limit * 3)
 
-  return rows.map((r) => ({
+  const similar: ProductRow[] = rows.map((r) => ({
     slug: r.slug,
     photo: productPhotoSrc(r.slug),
     article: r.article,
@@ -457,6 +480,8 @@ export async function listSimilarProducts(
     images: r.images,
     documents: [],
   }))
+
+  return applyToList(similar, await getProductOverrides(db)).slice(0, limit)
 }
 
 /**
@@ -486,11 +511,26 @@ export async function shareWithoutBumperCut(db: DrizzleDb): Promise<number | nul
  * разошлась бы с карточками товаров уже на первом импорте.
  */
 export async function minProductPrice(db: DrizzleDb): Promise<number> {
-  const rows = await db.select({ price: products.sourcePrice }).from(products)
-  if (rows.length === 0) {
+  const rows = await db.select({ slug: products.slug, price: products.sourcePrice }).from(products)
+  const overrides = await getProductOverrides(db)
+
+  /*
+    Цена считается по тем же правилам, что и в карточке: своя цена
+    владельца вместо цены поставщика, скрытые товары не в счёт. Иначе
+    на главной стояло бы «цены от 3 900», а товара за 3 900 на сайте
+    нет — он либо скрыт, либо стоит дороже.
+  */
+  const visible = rows
+    .filter((row) => !isHidden(overrides[row.slug]))
+    .map((row) => {
+      const own = Number(overrides[row.slug]?.price)
+      return Number.isFinite(own) && own > 0 ? own : row.price
+    })
+
+  if (visible.length === 0) {
     throw new Error('В каталоге нет товаров — не от чего считать минимальную цену')
   }
-  return rows.reduce((min, row) => (row.price < min ? row.price : min), rows[0].price)
+  return visible.reduce((min, price) => (price < min ? price : min), visible[0])
 }
 
 /**
@@ -543,7 +583,22 @@ export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProd
     .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))
     .orderBy(asc(products.sourcePrice), asc(products.id))
 
-  return rows.map((r) => {
+  /*
+    Правки накладываются и здесь: этот файл читает страница подбора, и
+    цена в её плитках обязана совпадать с ценой в карточке товара.
+    Разойдись они — человек увидел бы одну цену в списке и другую после
+    перехода.
+
+    Пересортировка по цене идёт внутри applyToList: порядок из базы —
+    по цене поставщика, а в подборе список показывается «сначала
+    дешёвые», уже со своими ценами.
+  */
+  const visible = applyToList(
+    rows.map((r) => ({ ...r, description: '', photo: productPhotoSrc(r.slug) })),
+    await getProductOverrides(db),
+  )
+
+  return visible.map((r) => {
     return [
       r.slug,
       r.article,
@@ -555,7 +610,7 @@ export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProd
       r.towLoadKg,
       r.verticalLoadKg,
       r.bumperCut === 'not_required' ? 0 : r.bumperCut === 'required' ? 1 : 2,
-      productPhotoSrc(r.slug) ? 1 : 0,
+      r.photo ? 1 : 0,
     ]
   })
 }

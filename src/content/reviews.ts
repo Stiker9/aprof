@@ -11,10 +11,17 @@
  * Заполняется через админку: заказчик вносит настоящие отзывы и
  * реальную оценку. Структура и вёрстка на месте, ждут данных.
  *
+ * Отзывы и оценка приходят из data/content-lists.json и
+ * data/content-overrides.json — их собирает scripts/apply-overrides.ts
+ * перед сборкой. Ничего придуманного в коде не осталось.
+ *
  * Пока список пуст, все места, где он показывался, пропадают сами —
  * раздел на главной, страница отзывов, цифра в блоке «С 2014 года».
  * Ничего не ломается и нигде не остаётся пустой рамки.
  */
+import { ownReviews } from './lists'
+import { contentValue } from './overrides'
+
 export interface Review {
   text: string
   author: string
@@ -29,6 +36,21 @@ export interface Review {
  * намеренно: так забыть проверить его нельзя — компилятор не даст
  * обратиться к `.score`, не разобрав случай «данных нет».
  */
-export const RATING: { score: string; count: number } | null = null
+const SCORE = contentValue('review', 'self', 'score')
+const COUNT = Number(contentValue('review', 'self', 'count'))
 
-export const REVIEWS: Review[] = []
+/*
+  Оценка показывается, только если названы обе величины и обе
+  осмысленны. Одна без другой читается хуже, чем ничего: «4,8» без
+  числа отзывов не говорит, по скольким она посчитана, а «127 отзывов»
+  без оценки непонятно что хвалит.
+*/
+export const RATING: { score: string; count: number } | null =
+  SCORE && Number.isFinite(COUNT) && COUNT > 0 ? { score: SCORE, count: COUNT } : null
+
+export const REVIEWS: Review[] = ownReviews().map((review) => ({
+  text: review.text,
+  author: review.author,
+  car: review.car,
+  date: review.date,
+}))

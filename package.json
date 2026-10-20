@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:static": "node scripts/build-static.mjs",
-    "prebuild": "tsx scripts/restore-data.ts",
+    "prebuild": "tsx scripts/restore-data.ts && tsx scripts/apply-overrides.ts",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -17,7 +17,11 @@
     "export-data": "tsx scripts/export-data.ts",
     "restore-data": "tsx scripts/restore-data.ts",
     "check": "tsx scripts/check-build.ts",
-    "build:design": "node scripts/build-design.mjs"
+    "build:design": "node scripts/build-design.mjs",
+    "migrate": "tsx scripts/migrate.ts",
+    "admin:user": "tsx scripts/admin-user.ts",
+    "apply-overrides": "tsx scripts/apply-overrides.ts",
+    "publish": "node scripts/publish.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

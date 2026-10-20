@@ -8,6 +8,27 @@
       "when": 1786457105249,
       "tag": "0000_nosy_texas_twister",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792010290945,
+      "tag": "0001_sturdy_electro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792083195456,
+      "tag": "0002_vladelec_lists",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792132212549,
+      "tag": "0003_vladelec_faq",
+      "breakpoints": true
     }
   ]
 }

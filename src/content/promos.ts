@@ -1,4 +1,5 @@
 import { urls } from '@/catalog/urls'
+import { ownPromos } from './lists'
 
 /**
  * Акции.
@@ -49,7 +50,46 @@ export type Promo =
   | (PromoBase & { kind: 'text'; discount: string; discountNote: string })
   | (PromoBase & { kind: 'list'; items: PromoItem[] })
 
-const ALL: Promo[] = []
+/**
+ * Акции, заведённые владельцем.
+ *
+ * Собираются из data/content-lists.json. Кнопка у всех одна и та же —
+ * «Подобрать фаркоп» на страницу подбора: акция ведёт в каталог, и
+ * отдельное поле под адрес кнопки дало бы владельцу возможность
+ * однажды увести её в никуда.
+ */
+const ALL: Promo[] = ownPromos().map((promo): Promo => {
+  const base = {
+    slug: promo.slug,
+    title: promo.title,
+    lead: promo.lead,
+    period: (promo.until
+      ? { kind: 'until' as const, label: `До ${formatUntil(promo.until)}`, until: promo.until as `${number}-${number}-${number}` }
+      : { kind: 'permanent' as const }),
+    action: { label: 'Подобрать фаркоп', href: '/podbor' },
+  }
+
+  return promo.kind === 'list'
+    ? { ...base, kind: 'list', items: promo.items }
+    : { ...base, kind: 'text', discount: promo.discount, discountNote: promo.discountNote }
+})
+
+/**
+ * Дата словами для подписи «До 31 августа».
+ *
+ * Падеж родительный — подпись всегда начинается с «До». Своей
+ * таблицей, а не через toLocaleString: там месяц выходит именительным
+ * («До август»), и исправлять его пришлось бы всё равно.
+ */
+function formatUntil(iso: string): string {
+  const MONTHS = [
+    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
+  ]
+  const [, month, day] = iso.split('-').map(Number)
+  if (!month || !day || month < 1 || month > 12) return iso
+  return `${day} ${MONTHS[month - 1]}`
+}
 
 /**
  * Акции, которые показываем.

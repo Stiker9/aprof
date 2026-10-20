@@ -18,7 +18,17 @@
  * это уже обязательство, за которое отвечает заказчик.
  */
 
+import { contentGroup, contentValue } from './overrides'
+
 export interface PriceRow {
+  /**
+   * Постоянный ключ строки.
+   *
+   * По нему к строке привязывается цена, названная владельцем в
+   * админке. Нумеровать по порядку нельзя: добавится работа в
+   * середину — и все цены ниже съедут на строку.
+   */
+  id: string
   work: string
   /** Цена со своим фаркопом. `null` — пока не названа заказчиком. */
   own: string | null
@@ -26,17 +36,28 @@ export interface PriceRow {
   client: string | null
 }
 
-export const PRICES: PriceRow[] = [
-  { work: 'Установка без электрики', own: null, client: null },
-  { work: 'Установка с электрикой', own: null, client: null },
-  { work: 'Установка с блоком согласования', own: null, client: null },
-  { work: 'Подключение электрики отдельно', own: null, client: null },
-  { work: 'Блок согласования отдельно', own: null, client: null },
-  { work: 'Снятие и установка бампера', own: null, client: null },
-  { work: 'Демонтаж старого фаркопа', own: null, client: null },
+/** Перечень работ. Цены к нему подставляет владелец через админку. */
+export const PRICE_WORKS: { id: string; work: string }[] = [
+  { id: 'bez-elektriki', work: 'Установка без электрики' },
+  { id: 's-elektrikoy', work: 'Установка с электрикой' },
+  { id: 's-blokom', work: 'Установка с блоком согласования' },
+  { id: 'elektrika-otdelno', work: 'Подключение электрики отдельно' },
+  { id: 'blok-otdelno', work: 'Блок согласования отдельно' },
+  { id: 'bamper', work: 'Снятие и установка бампера' },
+  { id: 'demontazh', work: 'Демонтаж старого фаркопа' },
 ]
 
+const PRICE_EDITS = contentGroup('install_price')
+
+export const PRICES: PriceRow[] = PRICE_WORKS.map((row) => ({
+  id: row.id,
+  work: PRICE_EDITS[row.id]?.work ?? row.work,
+  own: PRICE_EDITS[row.id]?.own ?? null,
+  client: PRICE_EDITS[row.id]?.client ?? null,
+}))
+
 export const PRICE_NOTE =
+  contentValue('install_price', 'self', 'note') ??
   'Сложные работы — подрез глушителя, снятие бака, сверление рамы — считаем индивидуально после осмотра.'
 
 /** Названы ли цены. Пока нет — страница показывает перечень работ без цифр. */
@@ -136,7 +157,7 @@ export interface ElectricsOption {
   price: number
 }
 
-export const ELECTRICS: ElectricsOption[] = [
+const ELECTRICS_BASE: ElectricsOption[] = [
   {
     id: 'none',
     label: 'Без электрики',
@@ -156,3 +177,27 @@ export const ELECTRICS: ElectricsOption[] = [
     price: 3000,
   },
 ]
+
+const ELECTRICS_EDITS = contentGroup('electrics')
+
+/**
+ * Цена и подписи правятся владельцем, набор позиций — нет.
+ *
+ * Позиции трогать нельзя: на них завязан расчёт в карточке товара, и
+ * `id` уходит в адрес. Добавление четвёртой — это правка кода, а не
+ * содержимого.
+ *
+ * Битую цену из базы не берём: «NaN ₽» в карточке товара хуже прежней
+ * цены. Та же причина, что и у цен товаров (src/catalog/overrides.ts).
+ */
+export const ELECTRICS: ElectricsOption[] = ELECTRICS_BASE.map((option) => {
+  const edit = ELECTRICS_EDITS[option.id]
+  const price = Number(edit?.price)
+
+  return {
+    ...option,
+    label: edit?.label ?? option.label,
+    note: edit?.note ?? option.note,
+    price: Number.isFinite(price) && price >= 0 ? price : option.price,
+  }
+})

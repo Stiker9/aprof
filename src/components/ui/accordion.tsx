@@ -1,4 +1,13 @@
 export interface FaqItem {
+  /**
+   * Постоянный ключ вопроса.
+   *
+   * По нему к вопросу привязывается правка владельца. Нумеровать по
+   * порядку нельзя: вставят вопрос в середину — и все правки ниже
+   * съедут на соседний. По тексту вопроса тоже нельзя: правка текста
+   * оторвала бы правку ответа.
+   */
+  id: string
   question: string
   answer: string
 }
@@ -17,7 +26,7 @@ export function Accordion({ items, openFirst = true }: { items: FaqItem[]; openF
   return (
     <div className="border-t border-current/12">
       {items.map((item, index) => (
-        <details key={item.question} open={openFirst && index === 0} className="group border-b border-current/12">
+        <details key={item.id} open={openFirst && index === 0} className="group border-b border-current/12">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-[clamp(16px,2vw,19px)] marker:hidden [&::-webkit-details-marker]:hidden">
             {item.question}
             {/*
