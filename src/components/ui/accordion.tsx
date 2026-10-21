@@ -35,7 +35,7 @@ export function Accordion({ items, openFirst = true }: { items: FaqItem[]; openF
             */}
             <span
               aria-hidden
-              className="shrink-0 text-2xl font-light opacity-45 transition-transform duration-200 group-open:rotate-45"
+              className="shrink-0 text-2xl font-light opacity-75 transition-transform duration-200 group-open:rotate-45"
             >
               +
             </span>

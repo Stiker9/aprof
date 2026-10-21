@@ -35,13 +35,13 @@ export function About() {
           <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
             12
           </div>
-          <div className="text-[13px] opacity-60">лет</div>
+          <div className="text-[13px] opacity-75">лет</div>
         </div>
         <div className="flex flex-col gap-2">
           <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
             3 800+
           </div>
-          <div className="text-[13px] opacity-60">установок</div>
+          <div className="text-[13px] opacity-75">установок</div>
         </div>
         {/*
           Рейтинг и звёзды показываются, только когда оценка настоящая.
@@ -58,8 +58,8 @@ export function About() {
               <Stars />
             </div>
             <div className="flex flex-col gap-0.5">
-              <div className="text-[13px] opacity-60">рейтинг</div>
-              <div className="text-xs opacity-45">{RATING.count} отзывов</div>
+              <div className="text-[13px] opacity-75">рейтинг</div>
+              <div className="text-xs opacity-75">{RATING.count} отзывов</div>
             </div>
           </div>
         ) : null}
@@ -67,7 +67,7 @@ export function About() {
           <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
             2 года
           </div>
-          <div className="text-[13px] opacity-60">гарантии</div>
+          <div className="text-[13px] opacity-75">гарантии</div>
         </div>
       </div>
 
@@ -97,7 +97,7 @@ export function About() {
               <blockquote className="font-[family-name:var(--font-display)] text-[26px] leading-[1.3] tracking-[-0.01em]">
                 {review.text}
               </blockquote>
-              <figcaption className="text-[13px] opacity-55">
+              <figcaption className="text-[13px] opacity-75">
                 {review.author} · {review.car} · {review.date}
               </figcaption>
             </div>
@@ -107,7 +107,7 @@ export function About() {
 
       <div className="mt-14 flex flex-wrap items-baseline justify-between gap-6">
         <ArrowLink href="/otzyvy">Все отзывы</ArrowLink>
-        <p className="text-sm opacity-55">
+        <p className="text-sm opacity-75">
           Сертификат СТО · ГОСТ Р · Допуск на электромонтажные работы
         </p>
       </div>

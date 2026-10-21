@@ -18,6 +18,8 @@ import {
   STEPS,
 } from '@/content/ustanovka'
 import { getDb } from '@/db/client'
+import { JsonLd } from '@/seo/json-ld'
+import { faqSchema } from '@/seo/schema'
 
 export const metadata: Metadata = {
   title: 'Установка фаркопа в Санкт-Петербурге — цены и сроки',
@@ -135,7 +137,7 @@ export default async function InstallPage() {
         <section className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <h2 className={SECTION_TITLE}>Прайс на установку</h2>
-            <p className="text-[13px] text-[#8A8A88]">Цены указаны без стоимости фаркопа</p>
+            <p className="text-[13px] text-[#555553]">Цены указаны без стоимости фаркопа</p>
           </div>
 
           {/*
@@ -153,7 +155,7 @@ export default async function InstallPage() {
           <div className="overflow-x-auto">
             <div className="min-w-[560px]">
               <div
-                className={`${PRICE_ROW} border-b border-ink-dark/[.18] py-3.5 text-xs uppercase tracking-[0.1em] text-[#8A8A88]`}
+                className={`${PRICE_ROW} border-b border-ink-dark/[.18] py-3.5 text-xs uppercase tracking-[0.1em] text-[#555553]`}
               >
                 <span>Вид работы</span>
                 <span className="text-right">Наш фаркоп</span>
@@ -167,7 +169,7 @@ export default async function InstallPage() {
                 >
                   <span>{row.work}</span>
                   <span className="text-right font-medium">{row.own}</span>
-                  <span className="text-right text-[#6E6E6C]">{row.client}</span>
+                  <span className="text-right text-[#444442]">{row.client}</span>
                 </div>
               ))}
             </div>
@@ -191,7 +193,7 @@ export default async function InstallPage() {
             </div>
           )}
 
-          <p className="max-w-[720px] text-[13px] leading-[1.6] text-[#8A8A88]">{PRICE_NOTE}</p>
+          <p className="max-w-[720px] text-[13px] leading-[1.6] text-[#555553]">{PRICE_NOTE}</p>
         </section>
 
         <section className="flex flex-col gap-5">
@@ -201,7 +203,7 @@ export default async function InstallPage() {
             {INCLUDED.map((item) => (
               <div key={item.title} className="flex flex-col gap-2 bg-white px-6 py-[26px]">
                 <h3 className="text-[18px] font-medium">{item.title}</h3>
-                <p className="text-sm leading-[1.55] text-[#6E6E6C]">{item.text}</p>
+                <p className="text-sm leading-[1.55] text-[#444442]">{item.text}</p>
               </div>
             ))}
           </div>
@@ -227,7 +229,7 @@ export default async function InstallPage() {
               она относится ко всем четырём срокам, и человек должен
               прочитать её раньше, чем запомнит одно число из столбца.
             */}
-            <p className="max-w-[60ch] text-sm leading-[1.6] text-[#6E6E6C]">{DURATION_NOTE}</p>
+            <p className="max-w-[60ch] text-sm leading-[1.6] text-[#444442]">{DURATION_NOTE}</p>
 
             {/*
               Доля считается по базе. В макете стояло «84%» — число с
@@ -235,7 +237,7 @@ export default async function InstallPage() {
               расчётом, что бампер резать не будут.
             */}
             {withoutCut !== null && (
-              <p className="max-w-[60ch] text-sm leading-[1.6] text-[#6E6E6C]">
+              <p className="max-w-[60ch] text-sm leading-[1.6] text-[#444442]">
                 {withoutCut}% фаркопов в каталоге ставятся по штатным точкам без выреза бампера. Для
                 вашей машины скажем точно до записи — это видно в карточке фаркопа.
               </p>
@@ -281,7 +283,7 @@ export default async function InstallPage() {
                       className="object-cover object-[50%_65%] transition-transform duration-500 group-hover:scale-[1.06]"
                     />
                   </div>
-                  <figcaption className="text-xs text-[#6E6E6C] transition-colors group-hover:text-ink">
+                  <figcaption className="text-xs text-[#444442] transition-colors group-hover:text-ink">
                     {work.car}
                   </figcaption>
                 </Link>
@@ -310,7 +312,7 @@ export default async function InstallPage() {
                   ) : null}
                   <span className="flex flex-col gap-1">
                     <span className="text-[19px] font-medium">{doc.title}</span>
-                    <span className="text-[13px] text-[#8A8A88]">{doc.note}</span>
+                    <span className="text-[13px] text-[#555553]">{doc.note}</span>
                   </span>
                 </>
               )
@@ -335,13 +337,15 @@ export default async function InstallPage() {
             })}
           </div>
           {DOCUMENTS.every((doc) => !doc.file) ? (
-            <p className="text-sm text-[#8A8A88]">
+            <p className="text-sm text-[#555553]">
               Сканы покажем на месте — приложим сюда, когда оцифруем.
             </p>
           ) : null}
         </section>
 
         <section className="flex flex-col">
+          {/* Разметка вопросов живёт здесь, а не на главной: см. faqSchema. */}
+          <JsonLd data={faqSchema(FAQ)} />
           <h2 className={`${SECTION_TITLE} mb-2`}>Частые вопросы</h2>
           {FAQ.map((item, index) => (
             <details
@@ -353,12 +357,12 @@ export default async function InstallPage() {
                 {item.question}
                 <span
                   aria-hidden
-                  className="text-base text-[#8A8A88] transition-transform group-open:rotate-45"
+                  className="text-base text-[#555553] transition-transform group-open:rotate-45"
                 >
                   +
                 </span>
               </summary>
-              <p className="mt-2.5 max-w-[760px] text-[15px] leading-[1.65] text-[#6E6E6C]">
+              <p className="mt-2.5 max-w-[760px] text-[15px] leading-[1.65] text-[#444442]">
                 {item.answer}
               </p>
             </details>
@@ -376,7 +380,7 @@ export default async function InstallPage() {
         className="flex scroll-mt-20 flex-col gap-16 bg-surface-2 px-5 py-10 text-ink sm:px-8 lg:flex-row lg:px-14 lg:py-16 lg:gap-20"
       >
         <div className="flex flex-1 flex-col gap-3.5">
-          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#8A8A88]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#9A9A98]">
             Запись
           </p>
           <h2 className="font-[family-name:var(--font-display)] text-[32px] leading-[1.05] tracking-[-0.02em]">
@@ -388,7 +392,7 @@ export default async function InstallPage() {
           <a href={CONTACTS.phoneHref} className="mt-3 text-[24px] font-medium">
             {CONTACTS.phone}
           </a>
-          <p className="text-sm text-[#8A8A88]">
+          <p className="text-sm text-[#9A9A98]">
             {CONTACTS.address} · {CONTACTS.hours}
           </p>
         </div>

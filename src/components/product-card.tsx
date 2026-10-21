@@ -70,7 +70,7 @@ export function ProductCard({ product }: { product: ProductRow }) {
         />
 
         {display.kind === 'icon' ? (
-          <span className="absolute inset-x-0 bottom-0 bg-white/85 px-3 py-1 text-center text-[11px] leading-[1.3] text-ink-muted">
+          <span className="absolute inset-x-0 bottom-0 bg-white/85 px-3 py-1 text-center text-[11px] leading-[1.3] text-[#444442]">
             изображение обобщённое
           </span>
         ) : null}
@@ -93,7 +93,7 @@ export function ProductCard({ product }: { product: ProductRow }) {
         </Link>
 
         {bumper || product.towLoadKg ? (
-          <div className="mt-2 text-[13px] leading-[1.5] opacity-55">
+          <div className="mt-2 text-[13px] leading-[1.5] opacity-75">
             {[bumper, product.towLoadKg ? `${formatNumber(product.towLoadKg)} кг` : null]
               .filter(Boolean)
               .join(' · ')}

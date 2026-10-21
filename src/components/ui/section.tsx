@@ -5,12 +5,13 @@ import type { ReactNode } from 'react'
  * замысел: две тёмные секции подряд не сливаются в одно полотно, но и
  * не спорят друг с другом. Светлый тон один.
  */
-type Tone = 'dark' | 'dark-2' | 'light'
+type Tone = 'dark' | 'dark-2' | 'light' | 'white'
 
 const TONES: Record<Tone, string> = {
   dark: 'bg-bg text-ink',
   'dark-2': 'bg-surface text-ink',
   light: 'bg-paper-3 text-ink-dark',
+  white: 'bg-white text-ink-dark',
 }
 
 /**
@@ -31,13 +32,16 @@ export function Section({
   tone = 'dark',
   children,
   className = '',
+  id,
 }: {
   tone?: Tone
   children: ReactNode
   className?: string
+  id?: string
 }) {
   return (
     <section
+      id={id}
       className={`overflow-hidden ${TONES[tone]} ${className}`}
     >
       <div className="w-full px-5 py-14 sm:px-8 sm:py-20 lg:px-14 lg:py-20 xl:py-28">
@@ -55,7 +59,7 @@ export function Section({
  */
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[11px] font-medium uppercase tracking-[0.24em] opacity-55">{children}</p>
+    <p className="text-[11px] font-medium uppercase tracking-[0.24em] opacity-75">{children}</p>
   )
 }
 
@@ -91,7 +95,7 @@ export function BigNumber({ value, caption }: { value: string; caption: string }
       <div className="font-[family-name:var(--font-display)] text-[clamp(30px,3.1vw,42px)] leading-none tracking-[-0.02em]">
         {value}
       </div>
-      <div className="mt-2 text-[13px] opacity-60">{caption}</div>
+      <div className="mt-2 text-[13px] opacity-75">{caption}</div>
     </div>
   )
 }

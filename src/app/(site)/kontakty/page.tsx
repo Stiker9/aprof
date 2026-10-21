@@ -24,15 +24,15 @@ export default function ContactsPage() {
 
         <div className="grid content-start gap-8">
           <div>
-            <div className="text-sm opacity-55">Адрес</div>
+            <div className="text-sm opacity-75">Адрес</div>
             <div className="mt-2 text-[19px]">{CONTACTS.address}</div>
             {CONTACTS.addressNote ? (
-              <div className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</div>
+              <div className="mt-1 text-sm opacity-75">{CONTACTS.addressNote}</div>
             ) : null}
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Телефон</div>
+            <div className="text-sm opacity-75">Телефон</div>
             <a
               href={CONTACTS.phoneHref}
               className="mt-2 block font-[family-name:var(--font-display)] text-[clamp(24px,3vw,32px)] leading-none tracking-[-0.02em] transition-colors hover:text-accent"
@@ -42,19 +42,19 @@ export default function ContactsPage() {
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Почта</div>
+            <div className="text-sm opacity-75">Почта</div>
             <a href={CONTACTS.emailHref} className="mt-2 block text-[19px] hover:text-accent">
               {CONTACTS.email}
             </a>
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Часы работы</div>
+            <div className="text-sm opacity-75">Часы работы</div>
             <div className="mt-2 text-[19px]">{CONTACTS.hours}</div>
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Как добраться</div>
+            <div className="text-sm opacity-75">Как добраться</div>
             <a
               href={CONTACTS.routeUrl}
               target="_blank"
@@ -66,7 +66,7 @@ export default function ContactsPage() {
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Реквизиты</div>
+            <div className="text-sm opacity-75">Реквизиты</div>
             <div className="mt-2 text-sm opacity-75">
               {LEGAL_ENTITY.name}
               <br />

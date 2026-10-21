@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { absolute } from '@/catalog/urls'
+import { JsonLd } from '@/seo/json-ld'
 
 export interface Crumb {
   label: string
@@ -27,10 +28,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       {/*
         Цвета заданы прозрачностью от текущего цвета текста, а не
         отдельными токенами: крошки стоят и на тёмных страницах, и на
@@ -39,12 +37,12 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
       */}
       <nav
         aria-label="Хлебные крошки"
-        className="flex flex-wrap items-center gap-2 text-[13px] opacity-55"
+        className="flex flex-wrap items-center gap-2 text-[13px] opacity-75"
       >
         {items.map((item, index) => (
           <span key={item.label} className="flex items-center gap-2">
             {index > 0 && (
-              <span aria-hidden className="opacity-60">
+              <span aria-hidden className="opacity-75">
                 →
               </span>
             )}

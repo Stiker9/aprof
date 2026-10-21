@@ -76,7 +76,7 @@ export default async function PodborPage() {
               className="rounded-full border border-ink-dark/15 px-4 py-2 text-sm transition-colors hover:border-ink-dark"
             >
               {brand.name}{' '}
-              <span className="text-ink-muted">{brand.productCount}</span>
+              <span className="text-[#444442]">{brand.productCount}</span>
             </Link>
           ))}
           <Link
@@ -91,7 +91,7 @@ export default async function PodborPage() {
       <section className="flex flex-wrap items-center justify-between gap-8 rounded-[var(--radius-card)] bg-[#F2F1EF] px-7 py-6">
         <div className="flex flex-col gap-1.5">
           <h2 className="text-[19px] font-medium">Не знаете, что выбрать?</h2>
-          <p className="text-sm text-[#6E6E6C]">
+          <p className="text-sm text-[#444442]">
             Назовите машину и что возите — подскажем, какой шар и какая нагрузка нужны.
           </p>
         </div>

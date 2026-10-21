@@ -22,7 +22,7 @@ export function ArrowLink({
       <Link href={href} className="text-accent transition-colors hover:text-accent-hover">
         {children} <span aria-hidden>→</span>
       </Link>
-      {muted ? <span className="text-sm opacity-50">{muted}</span> : null}
+      {muted ? <span className="text-sm opacity-75">{muted}</span> : null}
     </span>
   )
 }

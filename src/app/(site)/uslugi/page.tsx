@@ -76,7 +76,7 @@ export default function ServicesPage() {
       <div className="mt-12 flex flex-wrap items-center gap-5 rounded-[var(--radius-card)] border border-line-light bg-white px-8 py-7">
         <div className="flex-1">
           <h2 className="text-[19px] font-medium">Не нашли нужную работу?</h2>
-          <p className="mt-2 max-w-[52ch] text-sm opacity-60">
+          <p className="mt-2 max-w-[52ch] text-sm opacity-75">
             Позвоните — скажем, беремся ли, и сколько это займёт.
           </p>
         </div>

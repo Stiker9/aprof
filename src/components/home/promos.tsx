@@ -82,7 +82,7 @@ function FeaturedPromo({ promo }: { promo: Promo }) {
               <div className="font-[family-name:var(--font-display)] text-[clamp(52px,6vw,76px)] leading-[.85] tracking-[-0.05em] text-accent-bright">
                 {promo.discount}
               </div>
-              <div className="mt-1.5 text-[13px] text-white/50">{promo.discountNote}</div>
+              <div className="mt-1.5 text-[13px] text-white/65">{promo.discountNote}</div>
             </div>
           )}
         </div>
@@ -145,7 +145,7 @@ function ListPromo({ promo }: { promo: Promo }) {
     <article className="flex flex-col gap-3.5 rounded-[var(--radius-block)] border border-white/8 bg-[#16161A] px-[26px] py-6">
       <div className="flex flex-col gap-1">
         <h3 className="text-[19px] font-bold leading-[1.2] tracking-[-0.01em]">{promo.title}</h3>
-        <p className="text-[13px] leading-[1.4] text-white/45">{promo.lead}</p>
+        <p className="text-[13px] leading-[1.4] text-white/65">{promo.lead}</p>
       </div>
 
       <div className="flex flex-col">
@@ -185,7 +185,7 @@ export function Promos() {
       */}
       <div className="flex flex-wrap items-end justify-between gap-8">
         <div className="flex flex-col gap-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">Акции</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">Акции</p>
           <h2 className="font-[family-name:var(--font-display)] text-[clamp(32px,3.3vw,44px)] leading-[1.02] tracking-[-0.03em]">
             Выгоднее сейчас
           </h2>

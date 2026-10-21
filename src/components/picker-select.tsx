@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import Image from 'next/image'
 import { formatNumber } from '@/catalog/format'
 
 export interface PickerOption {
@@ -8,6 +9,8 @@ export interface PickerOption {
   n: string
   c: number
 }
+
+const POPULAR_SLUGS = ['toyota', 'kia', 'hyundai', 'volkswagen', 'chery', 'geely', 'bmw', 'mazda']
 
 /**
  * Список выбора с поиском.
@@ -29,6 +32,9 @@ export function PickerSelect({
   loading = false,
   onChange,
   searchHint,
+  brandTiles = false,
+  expanded,
+  onExpandedChange,
 }: {
   label: string
   value: string
@@ -38,8 +44,16 @@ export function PickerSelect({
   onChange: (slug: string) => void
   /** Подсказка в поле поиска: «Поиск по 106 маркам». */
   searchHint: string
+  brandTiles?: boolean
+  expanded?: boolean
+  onExpandedChange?: (value: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
+  const [localOpen, setLocalOpen] = useState(false)
+  const open = expanded ?? localOpen
+  const setOpen = (value: boolean) => { setLocalOpen(value); onExpandedChange?.(value) }
+  const [showAll, setShowAll] = useState(false)
+  const id = useId()
+  const trigger = useRef<HTMLButtonElement>(null)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const root = useRef<HTMLDivElement>(null)
@@ -47,12 +61,14 @@ export function PickerSelect({
   const list = useRef<HTMLUListElement>(null)
 
   const selected = options.find((o) => o.s === value)
+  const tiles = brandTiles && !showAll && !query.trim()
 
   const found = useMemo(() => {
     const q = query.trim().toLowerCase()
+    if (!q && tiles) return POPULAR_SLUGS.flatMap(slug => options.filter(option => option.s === slug))
     if (!q) return options
     return options.filter((o) => o.n.toLowerCase().includes(q))
-  }, [options, query])
+  }, [options, query, tiles])
 
   // Закрытие по клику мимо и по Escape — иначе список остаётся висеть
   // поверх страницы и перехватывает нажатия.
@@ -62,7 +78,7 @@ export function PickerSelect({
       if (root.current && !root.current.contains(e.target as Node)) setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') { setOpen(false); trigger.current?.focus() }
     }
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
@@ -77,6 +93,7 @@ export function PickerSelect({
     else {
       setQuery('')
       setActive(0)
+      setShowAll(false)
     }
   }, [open])
 
@@ -87,14 +104,14 @@ export function PickerSelect({
   }, [active, open])
 
   const pick = (slug: string) => {
-    onChange(slug)
     setOpen(false)
+    onChange(slug)
   }
 
   const onSearchKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setActive((i) => Math.min(i + 1, found.length - 1))
+      setActive((i) => Math.max(0, Math.min(i + 1, found.length - 1)))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setActive((i) => Math.max(i - 1, 0))
@@ -106,13 +123,16 @@ export function PickerSelect({
   }
 
   return (
-    <div ref={root} className="relative flex-1">
+    <div ref={root} className={`relative min-w-0 flex-1 ${open ? 'z-50' : ''}`}
+      onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false) }}>
       <button
+        ref={trigger}
         type="button"
         disabled={disabled || loading}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(!open)}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={open ? id : undefined}
         /*
           Надпись белая во всех состояниях. Раньше у невыбранного поля
           она была серой (ink-muted) и лежала на тёмной подложке — на
@@ -141,9 +161,9 @@ export function PickerSelect({
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-xl border border-white/10 bg-[rgba(18,18,20,0.96)] shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-[26px]">
+        <div className={`absolute left-0 top-[calc(100%+8px)] z-50 w-full max-w-[calc(100vw-40px)] overflow-hidden rounded-xl border border-[#393b40] bg-[#141517] shadow-[0_20px_50px_rgba(0,0,0,0.45)] ${brandTiles ? 'lg:min-w-[430px]' : ''}`}>
           <div className="flex items-center gap-2.5 border-b border-white/8 px-4 py-3">
-            <span aria-hidden className="text-sm text-ink-dim">
+            <span aria-hidden className="text-sm text-ink-muted">
               ⌕
             </span>
             <input
@@ -155,37 +175,47 @@ export function PickerSelect({
               }}
               onKeyDown={onSearchKey}
               placeholder={searchHint}
-              className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-dim"
+              aria-label={searchHint}
+              role="combobox"
+              aria-expanded={open}
+              aria-controls={id}
+              aria-activedescendant={found[active] ? `${id}-${active}` : undefined}
+              className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-muted"
             />
           </div>
 
+          {tiles && <p className="px-4 pt-3 text-[11px] uppercase tracking-[0.12em] text-[#a4a6ad]">Популярные марки</p>}
           {found.length === 0 ? (
             <p className="px-4 py-6 text-sm text-ink-muted">
               Ничего не нашлось. Позвоните — подберём под редкую модель.
             </p>
           ) : (
-            <ul ref={list} role="listbox" className="max-h-[320px] overflow-y-auto py-1">
+            <ul ref={list} id={id} role="listbox" aria-label={label}
+              className={tiles ? 'grid max-h-[min(320px,45dvh)] grid-cols-2 gap-2 overflow-y-auto p-3 min-[400px]:grid-cols-4' : 'max-h-[min(320px,45dvh)] overflow-y-auto p-2'}>
               {found.map((option, index) => (
                 <li key={option.s}>
                   <button
                     type="button"
                     role="option"
+                    id={`${id}-${index}`}
                     aria-selected={option.s === value}
                     onMouseEnter={() => setActive(index)}
                     onClick={() => pick(option.s)}
-                    className={`flex w-full items-baseline justify-between gap-4 px-4 py-2.5 text-left text-sm transition-colors ${
-                      index === active ? 'bg-white/8 text-ink' : 'text-ink-muted'
+                    className={`${tiles ? 'flex min-h-[112px] w-full flex-col items-center justify-center gap-2 rounded-[10px] border p-2' : 'flex min-h-12 w-full items-center justify-between gap-4 rounded-md px-3 py-3 text-left'} text-sm transition-colors ${
+                      index === active || option.s === value ? 'border-accent/50 bg-[#30201f] text-white' : 'border-white/10 bg-[#1b1c1f] text-[#e8e8eb]'
                     }`}
                   >
+                    {tiles && <Image src={`/images/logos/${option.s}.webp`} alt="" width={48} height={36} className="h-9 w-12 object-contain opacity-90 [filter:brightness(0)_invert(1)]" />}
                     <span className="truncate">{option.n}</span>
+                    {option.s === value && <span aria-hidden="true" className="text-accent">✓</span>}
                     {/*
                       Счётчик может не приехать: браузер способен отдать
                       справочник от прошлой выкладки. Тогда строка просто
                       без числа — это лучше, чем уронить страницу целиком.
                     */}
                     {typeof option.c === 'number' ? (
-                      <span className="shrink-0 text-xs text-ink-dim">
-                        ({formatNumber(option.c)})
+                      <span className="shrink-0 text-xs text-[#a4a6ad]">
+                        {formatNumber(option.c)}
                       </span>
                     ) : null}
                   </button>
@@ -193,6 +223,11 @@ export function PickerSelect({
               ))}
             </ul>
           )}
+          {brandTiles && !query.trim() && <button type="button"
+            onClick={() => { setShowAll(!showAll); setActive(0); search.current?.focus() }}
+            className="min-h-12 px-4 text-sm text-[#ff7969] hover:text-white">
+            {showAll ? 'Популярные марки' : `Все ${options.length} марок`} →
+          </button>}
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { formatCount, formatYears } from '@/catalog/format'
+import { formatCount, formatPrice, formatYears } from '@/catalog/format'
 import {
   getBrand,
   getModel,
@@ -8,12 +8,14 @@ import {
   listModels,
   listProductsForVariant,
   listVariants,
+  minPriceFor,
 } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
 import { ProductFilter } from '@/components/catalog/product-filter'
 import { getDb } from '@/db/client'
 import { limitParams } from '@/catalog/build-scope'
+import { fitTitle, modelDescription } from '@/seo/meta'
 
 interface Params {
   params: Promise<{ brand: string; model: string }>
@@ -40,10 +42,16 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     getModel(db, brand, model),
   ])
   if (!foundBrand || !foundModel) return {}
+  const price = await minPriceFor(db, brand, model)
+  const name = `${foundBrand.name} ${foundModel.name}`
 
   return {
-    title: `Фаркопы на ${foundBrand.name} ${foundModel.name} — купить с установкой`,
-    description: `${formatCount(foundModel.productCount, 'фаркоп', 'фаркопа', 'фаркопов')} на ${foundBrand.name} ${foundModel.name}. Подбор по поколению и году выпуска.`,
+    title: fitTitle(`Фаркопы на ${name}`),
+    description: modelDescription(
+      formatCount(foundModel.productCount, 'фаркоп', 'фаркопа', 'фаркопов'),
+      name,
+      price ? formatPrice(price) : null,
+    ),
     alternates: { canonical: absolute(urls.model(brand, model)) },
   }
 }

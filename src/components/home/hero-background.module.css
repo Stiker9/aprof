@@ -1,0 +1,50 @@
+/*
+  --fade и --drift задаёт hero-background.tsx: затухание между кадрами
+  и длительность движения кадра. Движение длится весь показ плюс
+  затухание, чтобы кадр не замирал, пока уходит.
+
+  Движение — «оседание», а не наезд: новый кадр появляется чуть
+  приближенным и медленно приходит к своему размеру. Наезд к концу
+  показа упирается в самую крупную точку как раз тогда, когда кадр
+  гаснет, и смена выглядит рывком вперёд. Оседание наоборот гаснет на
+  самом спокойном месте — переход читается мягче.
+
+  Кривые с плавным разгоном и торможением (ease-in-out для затухания,
+  ease-out для движения): ровный ход заметен глазу как механика,
+  мягкие края — нет.
+*/
+.slide {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity var(--fade) cubic-bezier(.65, 0, .35, 1);
+}
+.photo {
+  object-fit: cover;
+  transform: scale(1.06);
+  /* Возврат к исходному приближению — уже после того, как кадр погас. */
+  transition: transform 0s var(--fade);
+}
+.prado {
+  object-position: 85% 12%;
+  transform-origin: 80% 60%;
+}
+@media (max-width: 1023px) {
+  .prado {
+    object-position: 90% 50%;
+    transform-origin: 85% 60%;
+  }
+}
+.slide[data-active='true'] .photo {
+  transform: scale(1);
+  transition: transform var(--drift) cubic-bezier(.22, .61, .36, 1);
+}
+/* На телефоне кадр и так обрезан по бокам — приближение вдвое меньше. */
+@media (max-width: 640px) {
+  .photo { transform: scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition: opacity var(--fade) ease-in-out; }
+  .photo, .slide[data-active='true'] .photo { transform: none; transition: none; }
+}

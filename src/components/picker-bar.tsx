@@ -46,6 +46,7 @@ export function PickerBar({
   const [brandSlug, setBrandSlug] = useState('')
   const [modelSlug, setModelSlug] = useState('')
   const [variantSlug, setVariantSlug] = useState('')
+  const [openField, setOpenField] = useState<string | null>(null)
 
   /*
     Справочник тянется сразу после отрисовки, а не по касанию списка.
@@ -138,6 +139,9 @@ export function PickerBar({
       >
         <PickerSelect
           label="Марка"
+          brandTiles
+          expanded={openField === 'brand'}
+          onExpandedChange={open => setOpenField(current => open ? 'brand' : current === 'brand' ? null : current)}
           value={brandSlug}
           options={index}
           loading={state === 'loading'}
@@ -149,11 +153,14 @@ export function PickerBar({
             setBrandSlug(slug)
             setModelSlug('')
             setVariantSlug('')
+            setOpenField('model')
           }}
         />
 
         <PickerSelect
           label="Модель"
+          expanded={openField === 'model'}
+          onExpandedChange={open => setOpenField(current => open ? 'model' : current === 'model' ? null : current)}
           value={modelSlug}
           options={currentBrand?.m ?? []}
           disabled={!currentBrand}
@@ -165,11 +172,14 @@ export function PickerBar({
           onChange={(slug) => {
             setModelSlug(slug)
             setVariantSlug('')
+            setOpenField('variant')
           }}
         />
 
         <PickerSelect
           label="Кузов и годы"
+          expanded={openField === 'variant'}
+          onExpandedChange={open => setOpenField(current => open ? 'variant' : current === 'variant' ? null : current)}
           value={variantSlug}
           options={currentModel?.v ?? []}
           disabled={!currentModel}

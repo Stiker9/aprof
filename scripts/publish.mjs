@@ -62,6 +62,8 @@ const LOCAL_TARGET = toIndex === -1 ? null : process.argv[toIndex + 1]
 
 const SSH = process.env.PUBLISH_SSH ?? ''
 const REMOTE_DIR = process.env.PUBLISH_PATH ?? ''
+/** Файл закрытого ключа, если он лежит не там, где ssh ищет сам. */
+const KEY = process.env.PUBLISH_KEY ? ['-i', process.env.PUBLISH_KEY] : []
 
 const OUT = 'out'
 const MANIFEST = '.cache/published-manifest.json'
@@ -235,18 +237,27 @@ function uploadOverSsh(changed, removed) {
   console.log(`   архив ${human(statSync(archive).size)}`)
 
   console.log(`\n→ Отправляю на ${SSH}`)
-  run('scp', [archive, `${SSH}:~/publish.tar.gz`])
+  run('scp', [...KEY, archive, `${SSH}:~/publish.tar.gz`])
 
   console.log('\n→ Распаковываю на сервере')
   // Распаковка поверх: tar заменяет совпавшие файлы и добавляет новые,
   // остального не трогает. Поэтому прежний сайт не стирается — иначе
   // между стиранием и распаковкой посетители видели бы пустоту.
-  run('ssh', [SSH, `"cd ${REMOTE_DIR} && tar -xzf ~/publish.tar.gz && rm ~/publish.tar.gz"`])
+  run('ssh', [...KEY, SSH, `"cd ${REMOTE_DIR} && tar -xzf ~/publish.tar.gz && rm ~/publish.tar.gz"`])
 
   if (removed.length > 0) {
     console.log(`\n→ Удаляю на сервере ${removed.length} файлов`)
-    const quoted = removed.map((path) => `'${path}'`).join(' ')
-    run('ssh', [SSH, `"cd ${REMOTE_DIR} && rm -f ${quoted}"`])
+    /*
+      Список идёт через входной поток, а не аргументами: после смены
+      сборки удалять приходится десятки тысяч файлов, и в командную
+      строку Windows (около 32 тысяч знаков) они не входят.
+    */
+    const rm = spawnSync(
+      'ssh',
+      [...KEY, SSH, `"cd ${REMOTE_DIR} && tr '\\n' '\\0' | xargs -0 rm -f"`],
+      { input: removed.join('\n'), stdio: ['pipe', 'inherit', 'inherit'], shell: true },
+    )
+    if (rm.status !== 0) process.exit(rm.status ?? 1)
   }
 
   rmSync(archive, { force: true })

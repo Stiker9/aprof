@@ -40,7 +40,7 @@ export default function ReviewsPage() {
               «
             </span>
             <blockquote className="mt-3 text-[18px] leading-[1.5]">{review.text}</blockquote>
-            <figcaption className="mt-5 text-sm opacity-55">
+            <figcaption className="mt-5 text-sm opacity-75">
               {review.author} · {review.car} · {review.date}
             </figcaption>
           </figure>

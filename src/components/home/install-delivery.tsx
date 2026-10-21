@@ -35,7 +35,7 @@ function BigStat({ value, unit, caption }: { value: string; unit: string; captio
       </span>
       <span className="flex flex-col gap-0.5">
         <span className="text-[17px]">{unit}</span>
-        <span className="text-xs text-[#8A8A88]">{caption}</span>
+        <span className="text-xs text-[#555553]">{caption}</span>
       </span>
     </div>
   )
@@ -74,9 +74,11 @@ function Spb() {
       <div className="flex flex-wrap items-center gap-x-[34px] gap-y-6">
         <BigStat value="3" unit="часа" caption="средняя установка" />
         <Divider />
+        <BigStat value="2" unit="года" caption="гарантии на работы" />
+        <Divider />
         <div className="flex flex-col gap-1">
           <span className="text-[19px] font-semibold">{CONTACTS.addressShort}</span>
-          <span className="text-xs text-[#8A8A88]">{CONTACTS.hours}</span>
+          <span className="text-xs text-[#555553]">{CONTACTS.hours}</span>
         </div>
       </div>
 
@@ -112,7 +114,7 @@ function Delivery() {
         <Divider />
         <div className="flex flex-col gap-1">
           <span className="text-[19px] font-semibold">1–7 дней</span>
-          <span className="text-xs text-[#8A8A88]">срок в пути</span>
+          <span className="text-xs text-[#555553]">срок в пути</span>
         </div>
       </div>
 

@@ -50,7 +50,7 @@ function Cdek() {
             key={key}
             className="flex items-baseline justify-between gap-6 border-b border-line-light py-3 text-sm"
           >
-            <dt className="opacity-55">{key}</dt>
+            <dt className="opacity-75">{key}</dt>
             <dd className="text-right font-medium">{value}</dd>
           </div>
         ))}
@@ -62,7 +62,7 @@ function Cdek() {
         Написать «доставка от 500 ₽» значило бы назвать цену, которой
         никто не подтверждал.
       */}
-      <p className="mt-8 text-sm opacity-55">
+      <p className="mt-8 text-sm opacity-75">
         Стоимость зависит от веса, габаритов и города — считаем при оформлении заказа. Фаркоп
         тяжёлый, поэтому тариф заметно отличается от обычной посылки.
       </p>
@@ -91,7 +91,7 @@ export default function DeliveryPage() {
       <div className="mt-16 flex flex-wrap items-center gap-5 rounded-[var(--radius-card)] border border-line-light bg-white px-8 py-7">
         <div className="flex-1">
           <h2 className="text-[19px] font-medium">Рассчитать доставку</h2>
-          <p className="mt-2 max-w-[52ch] text-sm opacity-60">
+          <p className="mt-2 max-w-[52ch] text-sm opacity-75">
             Назовите город и модель — посчитаем стоимость и срок.
           </p>
         </div>

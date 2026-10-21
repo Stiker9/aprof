@@ -64,7 +64,7 @@ const VERT_STEPS = [50, 75, 100, 150]
 
 const FIELD =
   'h-11 w-full rounded-[10px] border border-ink-dark/15 bg-white px-3.5 text-[14px] text-ink-dark outline-none transition-colors hover:border-ink-dark/35 focus:border-accent'
-const LABEL = 'mb-1.5 block text-[12px] font-medium text-ink-muted'
+const LABEL = 'mb-1.5 block text-[12px] font-medium text-[#444442]'
 
 /** Поле с подписью — как у них: видно назначение, не открывая список. */
 function Field({
@@ -370,7 +370,7 @@ export function ProductFilter({
               : `${formatCount(shown.length, 'фаркоп', 'фаркопа', 'фаркопов')} из ${products.length}`}
           </span>
           {shown.length > 0 ? (
-            <span className="text-ink-muted">
+            <span className="text-[#444442]">
               от {formatPrice(Math.min(...shown.map((p) => p.price)))} до{' '}
               {formatPrice(Math.max(...shown.map((p) => p.price)))}
             </span>
@@ -408,7 +408,7 @@ export function ProductFilter({
       ) : (
         <div className="flex flex-col items-start gap-3 rounded-[var(--radius-card)] border border-line-light bg-white px-7 py-8">
           <p className="text-[17px]">Под эти условия ничего не подошло.</p>
-          <p className="max-w-[52ch] text-sm leading-[1.6] text-ink-dim">
+          <p className="max-w-[52ch] text-sm leading-[1.6] text-[#444442]">
             Снимите часть условий — или позвоните, подскажем, что взять из того, что есть.
           </p>
           <button

@@ -18,7 +18,7 @@ import type { PickerBrand } from '@/catalog/queries'
  */
 
 const FIELD =
-  'h-11 w-full rounded-[10px] border border-ink-dark/15 bg-white px-3.5 text-[14px] text-ink-dark outline-none transition-colors hover:border-ink-dark/35 focus:border-accent disabled:cursor-not-allowed disabled:bg-paper-2 disabled:text-ink-muted'
+  'h-11 w-full rounded-[10px] border border-ink-dark/15 bg-white px-3.5 text-[14px] text-ink-dark outline-none transition-colors hover:border-ink-dark/35 focus:border-accent disabled:cursor-not-allowed disabled:bg-paper-2 disabled:text-[#444442]'
 
 export interface CarChoice {
   brand: string
@@ -41,7 +41,7 @@ export function CarSelect({
   return (
     <>
       <label className="block">
-        <span className="mb-1.5 block text-[12px] font-medium text-ink-muted">Марка</span>
+        <span className="mb-1.5 block text-[12px] font-medium text-[#444442]">Марка</span>
         <select
           value={value.brand}
           onChange={(e) => onChange({ brand: e.target.value, model: '', variant: '' })}
@@ -57,7 +57,7 @@ export function CarSelect({
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-[12px] font-medium text-ink-muted">Модель</span>
+        <span className="mb-1.5 block text-[12px] font-medium text-[#444442]">Модель</span>
         <select
           value={value.model}
           disabled={!brand}
@@ -80,7 +80,7 @@ export function CarSelect({
         Поэтому пока поколение не выбрано, машина не сужает список.
       */}
       <label className="block">
-        <span className="mb-1.5 block text-[12px] font-medium text-ink-muted">
+        <span className="mb-1.5 block text-[12px] font-medium text-[#444442]">
           Поколение и годы
         </span>
         <select

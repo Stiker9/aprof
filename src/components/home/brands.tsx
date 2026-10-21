@@ -1,127 +1,73 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 import { formatCount } from '@/catalog/format'
 import { logoFor } from '@/catalog/logos'
 import type { BrandRow } from '@/catalog/queries'
 import { urls } from '@/catalog/urls'
+import styles from './brands.module.css'
 
-/**
- * Каталог по маркам на главной.
- *
- * Не только витрина: это главный узел перелинковки. Отсюда вес главной
- * растекается на 106 страниц марок, а с них вглубь на модели и кузова.
- *
- * Поиск и фильтры пока не работают — им нужно состояние на клиенте, и
- * они идут одной задачей с живым подбором. Разметка стоит, потому что
- * без неё секция читается иначе: шесть рядов плиток без единого способа
- * сузить выбор выглядят тупиком.
- *
- * Логотип есть не у каждой марки: в макете их 25 на 106. Плитка без
- * логотипа — обычное состояние, а не поломка.
- */
-const FILTERS = ['Все марки', 'Китайские', 'Европейские', 'Японские и корейские', 'Российские']
+const FILTERS = [
+  { label: 'Все марки', slugs: null },
+  { label: 'Китайские', slugs: new Set('baic byd changan chery cheryexeed dongfeng exeed faw foton geely great-wall haval hongqi jac jaecoo jetour jetta kaiyi knewstar li-auto lifan lixiang lynk-co omoda oting polar-stone rox soueast tank voyah wey zotye forthing gac jmc swm'.split(' ')) },
+  { label: 'Европейские', slugs: new Set('alfa-romeo audi bmw citroen cupra dacia ds fiat iveco jaguar lancia land-rover ldv maserati mercedes mg mini opel peugeot porsche renault rover saab seat skoda volkswagen volvo'.split(' ')) },
+  { label: 'Японские и корейские', slugs: new Set('acura daewoo daihatsu datsun genesis honda hyundai infiniti isuzu kgm kia lexus mazda mitsubishi nissan ssang-yong subaru suzuki toyota'.split(' ')) },
+  { label: 'Российские', slugs: new Set('ambertruck gaz izh lada moskvich solaris sollers tagaz uaz vortex xcite'.split(' ')) },
+]
+const WIDE_LOGOS = new Set(['haval', 'kia', 'ford', 'hyundai', 'lexus', 'subaru', 'chevrolet', 'exeed', 'cheryexeed', 'geely'])
 
-export function Brands({
-  brands,
-  totalBrands,
-}: {
-  /** Марки, показанные в сетке, — не все, а первые по числу товаров. */
-  brands: BrandRow[]
-  totalBrands: number
-}) {
-  const rest = totalBrands - brands.length
+export function Brands({ brands, totalBrands }: { brands: BrandRow[]; totalBrands: number }) {
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState(0)
+  const term = query.trim().toLocaleLowerCase('ru')
+  const searching = term.length > 0 || filter !== 0
+  const filtered = brands.filter(brand =>
+    (!FILTERS[filter].slugs || FILTERS[filter].slugs?.has(brand.slug)) &&
+    (!term || `${brand.name} ${brand.slug}`.toLocaleLowerCase('ru').includes(term)))
+  const visible = searching ? filtered : [...brands].sort((a, b) => b.productCount - a.productCount).slice(0, 12)
 
   return (
-    /*
-      Размеры внутри заданы обычной шкалой, а не долями высоты окна, как
-      в исходнике макета. Там они схлопывались к нижней границе на любом
-      невысоком экране: на ноутбуке 1920×980 название марки выходило
-      14,7 пикселя вместо 16, и сетка читалась мелкой. Секция всё так же
-      занимает экран, но текст от его высоты больше не зависит.
-    */
-    <section className="flex min-h-[var(--screen-h)] flex-col gap-10 overflow-hidden bg-paper-3 px-5 pb-10 pt-12 sm:px-8 lg:px-14 lg:pb-16 lg:pt-20 text-ink-dark">
-      <div className="flex items-start justify-between gap-12">
-        <div className="flex max-w-[560px] flex-col gap-3.5">
-          <div className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#8A8A88]">
-            Каталог
-          </div>
-          {/*
-            В заголовке была пара чисел — «106 марок, 956 моделей».
-            Заказчик попросил их убрать: цифрами хвалятся, а заголовок
-            секции должен говорить, что тут делать. Сами числа никуда не
-            делись — они под каждой плиткой марки и в ссылке внизу.
-          */}
-          <h2 className="font-[family-name:var(--font-display)] text-[clamp(30px,3.2vw,46px)] leading-[1.04] tracking-[-0.03em]">
-            Выберите марку
-          </h2>
+    <section className={styles.section} aria-labelledby="brands-title">
+      <div className={styles.header}>
+        <div>
+          <p className={styles.eyebrow}>Каталог</p>
+          <h2 id="brands-title" className={styles.title}>Выберите марку</h2>
         </div>
-
-        <div className="flex flex-[0_0_320px] items-center gap-3 rounded-xl border border-ink-dark/10 bg-white px-[18px] py-[15px]">
-          <span aria-hidden className="text-[15px] text-[#8A8A88]">
-            ⌕
-          </span>
-          <span className="text-[15px] text-[#8A8A88]">Марка или модель</span>
-        </div>
+        <label className={styles.search}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
+          <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Найти марку автомобиля" aria-label="Найти марку автомобиля" />
+        </label>
       </div>
-
-      <div className="flex flex-wrap items-center gap-2.5">
-        {FILTERS.map((label, index) => (
-          <span
-            key={label}
-            className={`rounded-full px-4 py-2.5 text-sm ${
-              index === 0
-                ? 'bg-ink-dark text-paper'
-                : 'border border-ink-dark/10 bg-white text-ink-dark/70'
-            }`}
-          >
-            {label}
-          </span>
+      <div className={styles.filters} role="group" aria-label="Регион марки">
+        {FILTERS.map((item, index) => (
+          <button key={item.label} type="button" aria-pressed={filter === index} className={styles.filter} onClick={() => setFilter(index)}>
+            {filter === index && <span className={styles.dot} aria-hidden="true" />}{item.label}
+          </button>
         ))}
       </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {brands.map((brand) => {
+      <div className={styles.grid}>
+        {visible.map(brand => {
           const logo = logoFor(brand.slug)
           return (
-            <Link
-              key={brand.slug}
-              href={urls.brand(brand.slug)}
-              className="flex flex-col items-center justify-center gap-2.5 rounded-[var(--radius-card)] border border-ink-dark/8 bg-white/72 px-3 py-7 backdrop-blur-[14px] backdrop-saturate-[1.2] transition-colors hover:border-accent hover:bg-white"
-            >
-              {logo ? (
-                <span className="relative block h-9 w-14">
-                  <Image src={logo} alt="" fill sizes="56px" className="object-contain" />
-                </span>
-              ) : null}
-
-              <span className="text-center font-[family-name:var(--font-display)] text-[18px] leading-[1.1] text-[#2E2E30]">
-                {brand.name}
+            <Link key={brand.slug} href={urls.brand(brand.slug)} className={styles.card}>
+              <span className={`${styles.logo} ${WIDE_LOGOS.has(brand.slug) ? styles.wideLogo : ''}`}>
+                {logo ? <Image src={logo} alt="" fill sizes="72px" className="object-contain" /> : <span aria-hidden="true" className={styles.monogram}>{brand.name.slice(0, 2)}</span>}
               </span>
-
-              <span className="text-[11px] uppercase tracking-[0.08em] text-[#8A8A88]">
-                {formatCount(brand.modelCount, 'модель', 'модели', 'моделей')}
+              <span className={styles.details}>
+                <span className={styles.name}>{brand.name}</span>
+                <span className={styles.count}>{formatCount(brand.modelCount, 'модель', 'модели', 'моделей')}</span>
               </span>
+              <span aria-hidden="true" className={styles.arrow}>↗</span>
             </Link>
           )
         })}
       </div>
-
-      <div className="mt-auto flex items-center gap-[18px] pt-3">
-        {/* «Весь каталог» — это продолжение сетки марок, ведём прямо в неё */}
-        <Link href={urls.catalog()} className="flex items-center gap-3 text-[16px]">
-          <span
-            aria-hidden
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-ink-dark/30 text-sm"
-          >
-            ↗
-          </span>
-          Весь каталог
-        </Link>
-        {rest > 0 ? (
-          <span className="text-[13px] text-[#8A8A88]">
-            ещё {formatCount(rest, 'марка', 'марки', 'марок')}
-          </span>
-        ) : null}
+      {visible.length === 0 && <div className={styles.empty}>Марки не найдены. Попробуйте другое название или выберите «Все марки».</div>}
+      <div className={styles.footer}>
+        <Link href={urls.catalog()} className={styles.all}>Все {formatCount(totalBrands, 'марка', 'марки', 'марок')}<span aria-hidden="true">↗</span></Link>
+        <span className={styles.result} role="status">{searching ? `Найдено: ${visible.length}` : '12 популярных марок'}</span>
       </div>
     </section>
   )

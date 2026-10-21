@@ -54,7 +54,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <div className="mb-4 text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dim">Каталог</div>
+            <div className="mb-4 text-[11px] font-medium uppercase tracking-[0.24em] text-ink-muted">Каталог</div>
             <ul className="space-y-2 text-sm text-ink-muted">
               {POPULAR.map((b) => (
                 <li key={b.slug}>
@@ -73,7 +73,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <div className="mb-4 text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dim">Услуги</div>
+            <div className="mb-4 text-[11px] font-medium uppercase tracking-[0.24em] text-ink-muted">Услуги</div>
             <ul className="space-y-2 text-sm text-ink-muted">
               {SERVICES.map((s) => (
                 <li key={s.href}>
@@ -86,7 +86,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <div className="mb-4 text-[11px] font-medium uppercase tracking-[0.24em] text-ink-dim">Компания</div>
+            <div className="mb-4 text-[11px] font-medium uppercase tracking-[0.24em] text-ink-muted">Компания</div>
             <ul className="space-y-2 text-sm text-ink-muted">
               {COMPANY.map((c) => (
                 <li key={c.href}>
@@ -107,7 +107,7 @@ export function SiteFooter() {
           <span className="text-sm text-ink-muted">{CONTACTS.address}</span>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-6 text-[13px] text-ink-dim">
+        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-6 text-[13px] text-ink-muted">
           <span>
             © 2026 VASHFARKOP · ИНН {LEGAL_ENTITY.inn} · ОГРН {LEGAL_ENTITY.ogrn}
           </span>

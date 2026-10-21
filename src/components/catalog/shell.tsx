@@ -96,7 +96,7 @@ export function CatalogShell({
           >
             {title}
           </h1>
-          {summary ? <p className="text-sm text-[#6E6E6C]">{summary}</p> : null}
+          {summary ? <p className="text-sm text-[#444442]">{summary}</p> : null}
         </div>
 
         {children}
@@ -129,9 +129,9 @@ export function CatalogTile({
     >
       <span>
         <span className="block text-[15px] transition-colors group-hover:text-accent">{title}</span>
-        {note ? <span className="mt-1 block text-[13px] opacity-55">{note}</span> : null}
+        {note ? <span className="mt-1 block text-[13px] opacity-75">{note}</span> : null}
       </span>
-      <span className="text-[11px] opacity-50">{count}</span>
+      <span className="text-[11px] opacity-75">{count}</span>
     </Link>
   )
 }

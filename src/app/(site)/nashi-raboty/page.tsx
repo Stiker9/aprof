@@ -57,7 +57,7 @@ export default function WorksPage() {
       <div className="mt-14 flex flex-wrap items-center gap-5 rounded-[var(--radius-card)] border border-line-light bg-white px-8 py-7">
         <div className="flex-1">
           <h2 className="text-[19px] font-medium">Не нашли свою модель?</h2>
-          <p className="mt-2 max-w-[52ch] text-sm opacity-60">
+          <p className="mt-2 max-w-[52ch] text-sm opacity-75">
             Здесь не все работы — машин через нас прошло больше 3 800. Позвоните,
             скажем сразу, делали ли вашу.
           </p>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { formatNumber, formatPrice, formatVariantLabel, formatVariantShort } from '@/catalog/format'
+import { formatCount, formatNumber, formatPrice, formatVariantLabel, formatVariantShort } from '@/catalog/format'
 import {
   getProduct,
   listAllProductSlugs,
@@ -18,6 +18,9 @@ import { OrderPanel } from '@/components/product/order-panel'
 import { CONTACTS } from '@/content/contacts'
 import { HINT_TOW, HINT_VERT } from '@/content/terms'
 import { getDb } from '@/db/client'
+import { JsonLd } from '@/seo/json-ld'
+import { fitTitle, productDescription } from '@/seo/meta'
+import { productSchema } from '@/seo/schema'
 import { limitParams } from '@/catalog/build-scope'
 
 interface Params {
@@ -77,10 +80,24 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const data = await load(article)
   if (!data) return {}
 
-  const title = buildTitle(data.product.article, data.product.manufacturer, data.fits)
+  const { product, fits } = data
+  const title = buildTitle(product.article, product.manufacturer, fits)
+  const only = fits.length === 1 ? fits[0] : null
   return {
-    title: `${title} — купить с установкой`,
-    description: data.product.description.slice(0, 300),
+    title: fitTitle(title),
+    description: productDescription({
+      manufacturer: product.manufacturer,
+      article: product.article,
+      car: only
+        ? formatVariantLabel(only.brand, only.model, only.variant.generation, only.variant.yearFrom, only.variant.yearTo)
+        : null,
+      carsLabel: fits.length > 1 ? formatCount(fits.length, 'автомобилю', 'автомобилям', 'автомобилям') : null,
+      price: formatPrice(product.price),
+      inStock: product.inStock,
+      ballType: product.ballType,
+      towLoadKg: product.towLoadKg,
+      verticalLoadKg: product.verticalLoadKg,
+    }),
     alternates: { canonical: absolute(urls.product(article)) },
   }
 }
@@ -159,6 +176,22 @@ export default async function ProductPage({ params }: Params) {
       title={title}
       titleFont="body"
     >
+      {/*
+        Снимок в разметку — только свой снимок артикула. Обобщённый
+        рисунок по типу шара выдавал бы чужую картинку за этот товар.
+      */}
+      <JsonLd
+        data={productSchema({
+          name: title,
+          article: product.article,
+          manufacturer: product.manufacturer,
+          description: product.description,
+          price: product.price,
+          inStock: product.inStock,
+          path: urls.product(article),
+          image: display.kind === 'photo' ? display.src : undefined,
+        })}
+      />
       <div className="flex flex-col items-start gap-8 lg:flex-row">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <ProductGallery src={display.src} article={product.article} caption={galleryCaption} />
@@ -184,7 +217,7 @@ export default async function ProductPage({ params }: Params) {
               key={key}
               className="grid grid-cols-2 gap-6 border-b border-ink-dark/8 py-3 text-sm"
             >
-              <dt className="flex items-center gap-1.5 text-[#6E6E6C]">
+              <dt className="flex items-center gap-1.5 text-[#444442]">
                 {key}
                 {hint ? <Hint text={hint} /> : null}
               </dt>
@@ -216,7 +249,7 @@ export default async function ProductPage({ params }: Params) {
                 </span>
                 <span className="flex flex-col gap-[3px]">
                   <span className="text-[15px] font-medium">{doc.label}</span>
-                  <span className="text-xs text-[#8A8A88]">PDF</span>
+                  <span className="text-xs text-[#555553]">PDF</span>
                 </span>
               </a>
             ))}
@@ -246,7 +279,7 @@ export default async function ProductPage({ params }: Params) {
                 <span className="text-sm font-medium">
                   {fit.brand} {fit.model}
                 </span>
-                <span className="text-xs text-[#8A8A88]">
+                <span className="text-xs text-[#555553]">
                   {formatVariantShort(
                     fit.variant.generation,
                     fit.variant.yearFrom,
@@ -262,7 +295,7 @@ export default async function ProductPage({ params }: Params) {
       <div className="grid gap-3 md:grid-cols-2">
         <div className="flex flex-col gap-2.5 rounded-[14px] bg-[#F2F1EF] p-6">
           <h2 className={heading}>Установка в Петербурге</h2>
-          <p className="text-sm leading-[1.5] text-[#6E6E6C]">
+          <p className="text-sm leading-[1.5] text-[#444442]">
             3 часа работы, гарантия 2 года, документы для ТО. {CONTACTS.address}.
           </p>
           <Link href="/ustanovka-farkopa" className="mt-1 text-sm text-accent hover:underline">
@@ -271,7 +304,7 @@ export default async function ProductPage({ params }: Params) {
         </div>
         <div className="flex flex-col gap-2.5 rounded-[14px] bg-[#F2F1EF] p-6">
           <h2 className={heading}>Доставка по России</h2>
-          <p className="text-sm leading-[1.5] text-[#6E6E6C]">
+          <p className="text-sm leading-[1.5] text-[#444442]">
             СДЭК в 1 100 городов, до двери или в пункт выдачи, с отслеживанием.
           </p>
           <Link href="/dostavka" className="mt-1 text-sm text-accent hover:underline">
@@ -303,7 +336,7 @@ export default async function ProductPage({ params }: Params) {
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[17px] font-medium">{item.article}</span>
-                  <span className="text-[11px] text-[#8A8A88]">{item.manufacturer}</span>
+                  <span className="text-[11px] text-[#555553]">{item.manufacturer}</span>
                 </div>
                 <span className="text-[18px] font-semibold text-accent">
                   {formatPrice(item.price)}

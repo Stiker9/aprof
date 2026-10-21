@@ -37,7 +37,7 @@ export default function BookingPage() {
                   key={step}
                   className="flex items-baseline gap-5 border-b border-line-light py-4 text-sm"
                 >
-                  <span className="font-[family-name:var(--font-display)] text-[13px] opacity-35">
+                  <span className="font-[family-name:var(--font-display)] text-[13px] opacity-75">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <span className="opacity-75">{step}</span>
@@ -47,19 +47,19 @@ export default function BookingPage() {
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Или просто позвоните</div>
+            <div className="text-sm opacity-75">Или просто позвоните</div>
             <a
               href={CONTACTS.phoneHref}
               className="mt-2 block font-[family-name:var(--font-display)] text-[clamp(24px,3vw,32px)] leading-none tracking-[-0.02em] transition-colors hover:text-accent"
             >
               {CONTACTS.phone}
             </a>
-            <div className="mt-4 text-sm opacity-55">{CONTACTS.hours}</div>
-            <div className="mt-1 text-sm opacity-55">{CONTACTS.address}</div>
+            <div className="mt-4 text-sm opacity-75">{CONTACTS.hours}</div>
+            <div className="mt-1 text-sm opacity-75">{CONTACTS.address}</div>
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Уже знаете, что нужно?</div>
+            <div className="text-sm opacity-75">Уже знаете, что нужно?</div>
             <Link href={urls.catalog()} className="mt-2 inline-block text-accent hover:underline">
               Подобрать фаркоп в каталоге →
             </Link>

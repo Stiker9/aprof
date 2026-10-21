@@ -15,6 +15,7 @@ import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
 import { ProductFilter } from '@/components/catalog/product-filter'
 import { getDb } from '@/db/client'
 import { limitParams } from '@/catalog/build-scope'
+import { fitTitle, variantDescription } from '@/seo/meta'
 
 interface Params {
   params: Promise<{ brand: string; model: string; variant: string }>
@@ -56,10 +57,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const cheapest = data.products[0]
 
   return {
-    title: `Фаркопы на ${label} — купить с установкой`,
-    description: `${formatCount(data.products.length, 'фаркоп', 'фаркопа', 'фаркопов')} на ${label}${
-      cheapest ? `, цены от ${formatPrice(cheapest.price)}` : ''
-    }. Установка за один визит, доставка по России.`,
+    title: fitTitle(`Фаркопы на ${label}`),
+    description: variantDescription(
+      formatCount(data.products.length, 'фаркоп', 'фаркопа', 'фаркопов'),
+      label,
+      cheapest ? formatPrice(cheapest.price) : null,
+    ),
     alternates: { canonical: absolute(urls.variant(brand, model, variant)) },
   }
 }
@@ -112,7 +115,7 @@ export default async function VariantPage({ params }: Params) {
       <section className="mt-12 grid gap-4 md:grid-cols-2">
         <div className="rounded-[var(--radius-block)] border border-line-light bg-white p-7">
           <h2 className="text-[19px] font-medium">Установка в Петербурге</h2>
-          <p className="mt-2 text-sm opacity-60">
+          <p className="mt-2 text-sm opacity-75">
             3 часа работы, гарантия 2 года, документы для ТО. 1-я Жерновская ул., 5.
           </p>
           <Link href="/ustanovka-farkopa" className="mt-4 inline-block text-accent hover:underline">
@@ -121,7 +124,7 @@ export default async function VariantPage({ params }: Params) {
         </div>
         <div className="rounded-[var(--radius-block)] border border-line-light bg-white p-7">
           <h2 className="text-[19px] font-medium">Доставка по России</h2>
-          <p className="mt-2 text-sm opacity-60">
+          <p className="mt-2 text-sm opacity-75">
             СДЭК в 1 100 городов, до двери или в пункт выдачи, с отслеживанием.
           </p>
           <Link href="/dostavka" className="mt-4 inline-block text-accent hover:underline">

@@ -23,7 +23,7 @@ import { ELECTRICS } from '@/content/ustanovka'
  */
 const TAB = 'rounded-lg py-2.5 text-center text-sm transition-colors'
 const TAB_ON = 'bg-white font-medium shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
-const TAB_OFF = 'text-[#6E6E6C] hover:text-ink-dark'
+const TAB_OFF = 'text-[#444442] hover:text-ink-dark'
 
 export function OrderPanel({
   manufacturer,
@@ -54,7 +54,7 @@ export function OrderPanel({
 
   return (
     <aside className="flex w-full flex-col gap-4 rounded-[14px] border border-ink-dark/12 bg-white p-6 shadow-[0_8px_28px_rgba(0,0,0,0.05)] lg:sticky lg:top-[150px] lg:w-[380px] lg:shrink-0">
-      <div className="text-xs text-[#8A8A88]">
+      <div className="text-xs text-[#555553]">
         {manufacturer}
         {country ? ` · ${country}` : ''} · артикул {article}
       </div>
@@ -83,12 +83,12 @@ export function OrderPanel({
         позиций у нас нет, и рисовать пустые рамки под них незачем.
       */}
       {electricsIncluded ? (
-        <div className="rounded-[10px] bg-[#F2F1EF] px-4 py-3 text-sm text-[#6E6E6C]">
+        <div className="rounded-[10px] bg-[#F2F1EF] px-4 py-3 text-sm text-[#444442]">
           Электрика входит в комплект — докупать ничего не нужно.
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          <div className="text-[13px] font-medium text-[#8A8A88]">Электрика</div>
+          <div className="text-[13px] font-medium text-[#555553]">Электрика</div>
           <div className="flex flex-col gap-1.5">
             {ELECTRICS.map((option) => {
               const active = option.id === electrics
@@ -106,7 +106,7 @@ export function OrderPanel({
                 >
                   <span className="flex flex-col gap-0.5">
                     <span className="text-[15px] font-medium leading-tight">{option.label}</span>
-                    <span className="text-[13px] leading-snug text-[#8A8A88]">{option.note}</span>
+                    <span className="text-[13px] leading-snug text-[#555553]">{option.note}</span>
                   </span>
                   <span className="shrink-0 text-[15px] font-medium">
                     {option.price === 0 ? '—' : `+${formatPrice(option.price)}`}
@@ -150,11 +150,11 @@ export function OrderPanel({
       {pickup ? (
         <div className="flex flex-col gap-1.5 text-sm">
           <div>{CONTACTS.address}</div>
-          <div className="text-[#6E6E6C]">Установка за 3 часа, без записи в приёмные часы</div>
+          <div className="text-[#444442]">Установка за 3 часа, без записи в приёмные часы</div>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5 text-sm">
-          <div className="text-[#6E6E6C]">
+          <div className="text-[#444442]">
             До двери или в пункт выдачи, с отслеживанием. 1 100 городов.
           </div>
           {/*
@@ -163,7 +163,7 @@ export function OrderPanel({
             как в макете, значит пообещать цену, которой никто не
             подтверждал.
           */}
-          <div className="text-[#6E6E6C]">Стоимость и срок считаем при оформлении.</div>
+          <div className="text-[#444442]">Стоимость и срок считаем при оформлении.</div>
         </div>
       )}
 
@@ -186,7 +186,7 @@ export function OrderPanel({
       <a href={CONTACTS.phoneHref} className="mt-1 text-[22px] font-medium hover:text-accent">
         {CONTACTS.phone}
       </a>
-      <div className="text-xs text-[#8A8A88]">Гарантия 2 года · документы для ТО</div>
+      <div className="text-xs text-[#555553]">Гарантия 2 года · документы для ТО</div>
     </aside>
   )
 }

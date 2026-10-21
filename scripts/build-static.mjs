@@ -28,13 +28,14 @@
  * последствия тихие: сайт работает, но сыплет 404 или теряет адреса.
  */
 import { spawnSync } from 'node:child_process'
-import { copyFileSync } from 'node:fs'
+import { copyFileSync, renameSync, rmSync } from 'node:fs'
 
 /*
   Отдельная папка сборки: на сервере рядом работает админка со своей
   сборкой в .next, и класть выгрузку туда же значит затереть файлы
   работающего приложения прямо во время запроса. См. next.config.ts.
 */
+const EXPORT_DIR = '.next-export'
 const env = { ...process.env, STATIC_EXPORT: '1', NEXT_DIST_DIR: '.next-export' }
 
 function run(command, args) {
@@ -52,10 +53,20 @@ console.log('→ Собираю статическую выгрузку')
 run('npx', ['next', 'build'])
 
 console.log('→ Чиню имена файлов предзагрузки')
-run('node', ['scripts/flatten-prefetch.mjs', 'out'])
+run('node', ['scripts/flatten-prefetch.mjs', EXPORT_DIR])
 
 console.log('→ Кладу .htaccess в корень выгрузки')
-copyFileSync('deploy/.htaccess', 'out/.htaccess')
+copyFileSync('deploy/.htaccess', `${EXPORT_DIR}/.htaccess`)
+
+/*
+  Готовая выгрузка переезжает в out/ — оттуда её берёт публикация. Next
+  при своей папке сборки кладёт статику в неё, а не в out: пока шаги
+  выше шли по out, они работали с прошлой выгрузкой, а новая оставалась
+  без выровненных имён и без .htaccess.
+*/
+console.log('→ Переношу выгрузку в out/')
+rmSync('out', { recursive: true, force: true })
+renameSync(EXPORT_DIR, 'out')
 
 console.log('')
 console.log('Готово. Файлы сайта — в папке out/')

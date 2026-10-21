@@ -1,13 +1,39 @@
 import type { Metadata } from 'next'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
+import { SmoothScroll } from '@/components/smooth-scroll'
 import { fontVariables } from '@/lib/fonts'
+import { SITE_URL } from '@/catalog/urls'
+import { JsonLd } from '@/seo/json-ld'
+import { businessSchema, SITE_NAME, websiteSchema } from '@/seo/schema'
 import '../globals.css'
 
+/*
+  Превью ссылки в мессенджерах и соцсетях.
+
+  Здесь только общее для всех страниц: название сайта, язык и картинка.
+  Заголовка и описания в openGraph намеренно нет. Next сливает метаданные
+  поверхностно: openGraph страницы целиком заменяет макетный, а если
+  страница его не задаёт — наследует как есть. Задай здесь og:title, и
+  любая ссылка на товар в Telegram показала бы заголовок главной.
+  Без og:title мессенджеры берут обычный <title> страницы — свой у каждой.
+
+  Картинка — JPEG, не WebP: WebP в превью понимают не все клиенты.
+  1200×630 и 129 КБ — в пределах, после которых WhatsApp ужимает или
+  не показывает превью.
+*/
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'Фаркопы с установкой в Санкт-Петербурге — VASHFARKOP',
   description:
     'Подберём фаркоп по марке, модели и году. Установка за один визит с документами для ТО, доставка по России.',
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    locale: 'ru_RU',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Автомобиль с фаркопом и велосипедами' }],
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 /**
@@ -35,6 +61,9 @@ export default function SiteLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="ru" className={`${fontVariables} h-full antialiased`}>
       <body className="min-h-full bg-white font-[family-name:var(--font-body)] text-ink">
+        {/* На каждой странице: товары ссылаются на продавца по его @id. */}
+        <JsonLd data={[businessSchema(), websiteSchema()]} />
+        <SmoothScroll />
         <div className="relative flex min-h-screen flex-col">
           <SiteHeader />
           {children}

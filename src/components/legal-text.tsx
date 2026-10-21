@@ -14,7 +14,7 @@ export function LegalSection({ number, title, children }: { number: number; titl
   return (
     <section className="mt-10 first:mt-0">
       <h2 className="text-[17px] font-medium">
-        <span className="mr-3 opacity-40">{number}.</span>
+        <span className="mr-3 opacity-75">{number}.</span>
         {title}
       </h2>
       <div className="mt-4 space-y-3 text-[15px] leading-relaxed opacity-75">{children}</div>

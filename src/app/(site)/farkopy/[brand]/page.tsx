@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { formatCount } from '@/catalog/format'
-import { getBrand, listBrands, listModels } from '@/catalog/queries'
+import { formatCount, formatPrice } from '@/catalog/format'
+import { getBrand, listBrands, listModels, minPriceFor } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell, CatalogTile } from '@/components/catalog/shell'
 import { getDb } from '@/db/client'
 import { limitParams } from '@/catalog/build-scope'
+import { brandDescription, fitTitle } from '@/seo/meta'
 
 interface Params {
   params: Promise<{ brand: string }>
@@ -22,10 +23,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const db = await getDb()
   const found = await getBrand(db, brand)
   if (!found) return {}
+  const price = await minPriceFor(db, brand)
 
   return {
-    title: `Фаркопы на ${found.name} — купить с установкой`,
-    description: `${formatCount(found.productCount, 'фаркоп', 'фаркопа', 'фаркопов')} на ${found.name} для ${formatCount(found.modelCount, 'модели', 'моделей', 'моделей')}. Подбор по кузову и году выпуска.`,
+    title: fitTitle(`Фаркопы на ${found.name}`),
+    description: brandDescription(
+      formatCount(found.productCount, 'фаркоп', 'фаркопа', 'фаркопов'),
+      found.name,
+      price ? formatPrice(price) : null,
+    ),
     alternates: { canonical: absolute(urls.brand(brand)) },
   }
 }

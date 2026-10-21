@@ -20,7 +20,7 @@ function Period({ promo }: { promo: Promo }) {
     )
   }
   return (
-    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] opacity-55">
+    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] opacity-75">
       <span aria-hidden className="block h-1.5 w-1.5 rounded-full bg-in-stock" />
       Действует постоянно
     </span>
@@ -36,7 +36,7 @@ export default function PromosPage() {
       summary="Скидки действуют на работы. Стоимость самого фаркопа берётся из каталога."
     >
       {PROMOS.length === 0 ? (
-        <p className="mt-10 opacity-60">Сейчас действующих акций нет.</p>
+        <p className="mt-10 opacity-75">Сейчас действующих акций нет.</p>
       ) : (
         <div className="mt-10 grid items-start gap-4 md:grid-cols-3">
           {PROMOS.map((promo) => (
@@ -50,7 +50,7 @@ export default function PromosPage() {
                 {promo.title}
               </h2>
 
-              <p className="mt-3 text-[15px] opacity-65">{promo.lead}</p>
+              <p className="mt-3 text-[15px] opacity-75">{promo.lead}</p>
 
               {promo.kind === 'list' ? (
                 <ul className="mt-7 border-t border-line-light">
@@ -69,7 +69,7 @@ export default function PromosPage() {
                   <div className="font-[family-name:var(--font-display)] text-[clamp(34px,5vw,44px)] leading-none tracking-[-0.02em] text-accent">
                     {promo.discount}
                   </div>
-                  <div className="mt-2 text-sm opacity-60">{promo.discountNote}</div>
+                  <div className="mt-2 text-sm opacity-75">{promo.discountNote}</div>
                 </div>
               )}
 
@@ -83,7 +83,7 @@ export default function PromosPage() {
         </div>
       )}
 
-      <p className="mt-12 max-w-[70ch] text-sm opacity-55">
+      <p className="mt-12 max-w-[70ch] text-sm opacity-75">
         Скидки не суммируются между собой. Условия каждой уточняйте при записи — на редких моделях
         объём работ отличается.
       </p>

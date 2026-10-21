@@ -22,7 +22,7 @@ export function Hint({ text }: { text: string }) {
       <button
         type="button"
         aria-label={text}
-        className="flex h-[15px] w-[15px] cursor-help items-center justify-center rounded-full border border-current text-[10px] leading-none text-ink-muted transition-colors hover:text-ink-dark focus:text-ink-dark focus:outline-none"
+        className="flex h-[15px] w-[15px] cursor-help items-center justify-center rounded-full border border-current text-[10px] leading-none text-[#444442] transition-colors hover:text-ink-dark focus:text-ink-dark focus:outline-none"
       >
         ?
       </button>

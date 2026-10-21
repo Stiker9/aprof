@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { listAllProductSlugs, listAllVariantPaths, listBrands, listModels } from '@/catalog/queries'
 import { absolute, urls } from '@/catalog/urls'
+import { blogUrl, POSTS } from '@/content/blog/posts'
 import { getDb } from '@/db/client'
 
 /*
@@ -51,6 +52,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absolute(urls.home()), priority: 1 },
     { url: absolute(urls.catalog()), priority: 0.9 },
     ...STATIC_PAGES.map((path) => ({ url: absolute(path), priority: 0.5 })),
+    ...POSTS.map((post) => ({
+      url: absolute(blogUrl(post.slug)),
+      lastModified: post.published,
+      priority: 0.6,
+    })),
   ]
 
   for (const brand of brands) {

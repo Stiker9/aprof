@@ -39,15 +39,15 @@ export function Contacts() {
 
         <div className="grid w-full content-start gap-7 lg:w-[380px] lg:shrink-0">
           <div>
-            <div className="text-sm opacity-55">Адрес</div>
+            <div className="text-sm opacity-75">Адрес</div>
             <div className="mt-2 text-[19px]">{CONTACTS.address}</div>
             {CONTACTS.addressNote ? (
-              <div className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</div>
+              <div className="mt-1 text-sm opacity-75">{CONTACTS.addressNote}</div>
             ) : null}
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Телефон</div>
+            <div className="text-sm opacity-75">Телефон</div>
             <a
               href={CONTACTS.phoneHref}
               className="mt-2 block font-[family-name:var(--font-display)] text-[24px] leading-none transition-colors hover:text-accent"
@@ -57,14 +57,14 @@ export function Contacts() {
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Почта</div>
+            <div className="text-sm opacity-75">Почта</div>
             <a href={CONTACTS.emailHref} className="mt-2 block text-[19px] hover:text-accent">
               {CONTACTS.email}
             </a>
           </div>
 
           <div>
-            <div className="text-sm opacity-55">Часы работы</div>
+            <div className="text-sm opacity-75">Часы работы</div>
             <div className="mt-2 text-[19px]">{CONTACTS.hours}</div>
           </div>
 

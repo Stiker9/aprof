@@ -69,7 +69,7 @@ export function ProductGallery({
           </span>
         </button>
 
-        {caption ? <p className="px-1 text-[13px] leading-[1.4] text-ink-muted">{caption}</p> : null}
+        {caption ? <p className="px-1 text-[13px] leading-[1.4] text-[#444442]">{caption}</p> : null}
       </div>
 
       {zoomed && (

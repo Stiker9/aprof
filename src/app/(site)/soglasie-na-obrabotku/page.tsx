@@ -65,7 +65,7 @@ export default function ConsentPage() {
         </LegalSection>
       </LegalBody>
 
-      <p className="mt-12 text-sm opacity-55">
+      <p className="mt-12 text-sm opacity-75">
         Порядок обработки описан в{' '}
         <Link href="/politika-konfidencialnosti" className="text-accent underline">
           политике конфиденциальности

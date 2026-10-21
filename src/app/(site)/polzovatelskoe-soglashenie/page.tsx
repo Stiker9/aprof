@@ -73,7 +73,7 @@ export default function TermsPage() {
         </LegalSection>
       </LegalBody>
 
-      <p className="mt-12 text-sm opacity-55">
+      <p className="mt-12 text-sm opacity-75">
         Обработка персональных данных описана в{' '}
         <Link href="/politika-konfidencialnosti" className="text-accent underline">
           политике конфиденциальности

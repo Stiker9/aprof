@@ -54,7 +54,7 @@ export default function WarrantyPage() {
             className="rounded-[var(--radius-block)] border border-line-light bg-white p-7"
           >
             <h2 className="text-[17px] font-medium">{term.title}</h2>
-            <p className="mt-3 text-sm leading-relaxed opacity-65">{term.text}</p>
+            <p className="mt-3 text-sm leading-relaxed opacity-75">{term.text}</p>
           </div>
         ))}
       </div>
@@ -83,7 +83,7 @@ export default function WarrantyPage() {
             </li>
           ))}
         </ul>
-        <p className="mt-6 text-sm opacity-55">
+        <p className="mt-6 text-sm opacity-75">
           Спорные случаи разбираем осмотром, а не перепиской: причину повреждения почти всегда видно
           на месте.
         </p>

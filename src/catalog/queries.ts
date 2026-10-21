@@ -663,3 +663,41 @@ export async function buildFitmentIndex(db: DrizzleDb): Promise<FitmentIndex> {
   for (const key of Object.keys(index)) index[key].sort((a, b) => a - b)
   return index
 }
+
+/**
+ * Самая низкая цена фаркопа для марки или модели — для «цены от …» в
+ * описании страницы в выдаче.
+ *
+ * Считается по тем же правилам, что minProductPrice: своя цена
+ * владельца вместо цены поставщика, скрытые товары не в счёт. Иначе в
+ * сниппете стояла бы цена, которой на странице нет.
+ *
+ * Null, если у марки или модели нет ни одного видимого товара — тогда
+ * описание обходится без цены, а не пишет «от 0 ₽».
+ */
+export async function minPriceFor(
+  db: DrizzleDb,
+  brandSlug: string,
+  modelSlug?: string,
+): Promise<number | null> {
+  const rows = await db
+    .selectDistinct({ slug: products.slug, price: products.sourcePrice })
+    .from(products)
+    .innerJoin(fitments, eq(fitments.productId, products.id))
+    .innerJoin(variants, eq(variants.id, fitments.variantId))
+    .innerJoin(models, eq(models.id, variants.modelId))
+    .innerJoin(brands, eq(brands.id, models.brandId))
+    .where(
+      modelSlug
+        ? and(eq(brands.slug, brandSlug), eq(models.slug, modelSlug))
+        : eq(brands.slug, brandSlug),
+    )
+  const overrides = await getProductOverrides(db)
+  const prices = rows
+    .filter((row) => !isHidden(overrides[row.slug]))
+    .map((row) => {
+      const own = Number(overrides[row.slug]?.price)
+      return Number.isFinite(own) && own > 0 ? own : row.price
+    })
+  return prices.length === 0 ? null : Math.min(...prices)
+}

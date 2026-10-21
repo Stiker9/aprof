@@ -1,399 +1,235 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState, type MouseEvent } from 'react'
+import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import { urls } from '@/catalog/urls'
 import { CONTACTS } from '@/content/contacts'
+import { scrollToTop } from '@/components/smooth-scroll'
 import { useScrolled } from '@/components/use-scrolled'
 
-/*
-  «Подбор» и «Каталог» — разные страницы, потому что отвечают на разные
-  вопросы. Каталог: «что есть на мою машину» — марка, модель, поколение.
-  Подбор: «что есть с такими свойствами» — тип шара, нагрузка, цена,
-  наличие; марка там ни при чём.
-
-  Сначала оба пункта вели на один адрес, потом на разные якоря одной
-  страницы — заказчик оба раза говорил, что разницы не видит. Он был
-  прав: пока за пунктами стояло одно и то же содержимое, разводить их
-  было нечем.
-*/
 const NAV = [
-  { label: 'Подбор', href: '/podbor' },
-  { label: 'Каталог', href: urls.catalog() },
-  { label: 'Установка', href: '/ustanovka-farkopa' },
-  { label: 'Услуги', href: '/uslugi' },
-  { label: 'Акции', href: '/akcii' },
-  { label: 'Контакты', href: '/kontakty' },
+  { label: 'Подбор', href: '/podbor', icon: 'M17 10A7 7 0 1 1 3 10A7 7 0 1 1 17 10M15 15L21 21' },
+  { label: 'Каталог', href: urls.catalog(), icon: 'M3 3H10V10H3ZM14 3H21V10H14ZM3 14H10V21H3ZM14 14H21V21H14Z' },
+  { label: 'Установка', href: '/ustanovka-farkopa', icon: 'M14 6L18 10L21 7A6 6 0 0 1 13 14L6 21A2.1 2.1 0 0 1 3 18L10 11A6 6 0 0 1 17 3Z' },
+  { label: 'Услуги', href: '/uslugi', icon: 'M7 3V8M17 3V8M5 8H19V11A7 7 0 0 1 5 11ZM12 18V22' },
+  { label: 'Акции', href: '/akcii', icon: 'M19 5L5 19M9 6A3 3 0 1 1 3 6A3 3 0 1 1 9 6ZM21 18A3 3 0 1 1 15 18A3 3 0 1 1 21 18Z' },
+  { label: 'Контакты', href: '/kontakty', icon: 'M20 10C20 16 12 22 12 22S4 16 4 10A8 8 0 1 1 20 10ZM15 10A3 3 0 1 1 9 10A3 3 0 1 1 15 10Z' },
 ]
 
-/** Быстрые действия в меню — три вещи, ради которых сюда заходят. */
-const ACTIONS = [
-  { num: '01', label: 'Подобрать фаркоп', href: '/podbor' },
-  { num: '02', label: 'Записаться на установку', href: '/zapis' },
-  { num: '03', label: 'Рассчитать доставку', href: '/dostavka' },
-]
-
-const COLUMNS = [
-  {
-    head: 'Каталог и услуги',
-    links: [
-      { label: 'Подбор по параметрам', href: '/podbor' },
-      { label: 'Каталог по маркам', href: urls.catalog() },
-      { label: 'Электрика и розетка', href: '/uslugi#elektrika' },
-      { label: 'Подбор и консультация', href: '/uslugi#podbor' },
-    ],
-  },
-  {
-    head: 'О компании',
-    links: [
-      { label: 'О нас', href: '/o-nas' },
-      { label: 'Наши работы', href: '/nashi-raboty' },
-      { label: 'Отзывы', href: '/otzyvy' },
-      { label: 'Акции', href: '/akcii' },
-      { label: 'Блог', href: '/blog' },
-    ],
-  },
-  {
-    head: 'Покупателю',
-    links: [
-      { label: 'Доставка и оплата', href: '/dostavka' },
-      { label: 'Гарантия', href: '/garantiya' },
-      { label: 'Контакты', href: '/kontakty' },
-      { label: 'Частые вопросы', href: '/ustanovka-farkopa' },
-    ],
-  },
-]
-
-const EASE = 'cubic-bezier(.16,1,.3,1)'
-
-/*
-  Раскрытие меню. Ширина и скругление отсюда убраны вместе с пилюлей:
-  у полосы во всю ширину меняется только высота панели под ней.
-*/
-const SHELL_TRANSITION = `height 620ms ${EASE}, border-top-width 200ms ease`
-
-/**
- * Появление строки меню.
- *
- * Строки не возникают разом, а выплывают по очереди с задержкой и
- * лёгким размытием. Задержки взяты из исходника макета: карточки
- * действий с 300 мс через 70, ссылки столбцов с 430 через 50 —
- * порядок появления повторяет порядок чтения.
- *
- * При закрытии задержек нет: меню должно исчезать сразу, а не
- * досматриваться в обратном порядке.
- */
-function reveal(open: boolean, delay: number, distance: number) {
-  return {
-    opacity: open ? 1 : 0,
-    transform: open ? 'translateY(0)' : `translateY(${distance}px)`,
-    filter: open ? 'blur(0px)' : 'blur(6px)',
-    transition: `opacity 620ms ease ${open ? delay : 0}ms, transform 900ms ${EASE} ${
-      open ? delay : 0
-    }ms, filter 620ms ease ${open ? delay : 0}ms`,
-    pointerEvents: open ? ('auto' as const) : ('none' as const),
-  }
+const SUBLINKS: Record<string, { label: string; href: string }[]> = {
+  Установка: [
+    { label: 'Записаться на установку', href: '/zapis' },
+    { label: 'Наши работы', href: '/nashi-raboty' },
+    { label: 'Гарантия', href: '/garantiya' },
+    { label: 'Частые вопросы', href: '/#faq' },
+  ],
+  Услуги: [{ label: 'Электрика и розетка', href: '/uslugi#elektrika' }],
+  Контакты: [
+    { label: 'Блог', href: '/blog' },
+    { label: 'О нас', href: '/o-nas' },
+    { label: 'Отзывы', href: '/otzyvy' },
+  ],
 }
 
-/**
- * Шапка сайта — полоса во всю ширину, липнет к верху окна.
- *
- * Раньше это была плавающая пилюля: она висела поверх первого экрана,
- * на прокрутке сжималась до 660 пикселей и меняла скругление. Заказчику
- * такой вид не подошёл, и вместе с «оконной» вёрсткой страницы пилюля
- * ушла — теперь обычная полоса в потоке, как на большинстве сайтов.
- *
- * Из этого следуют две вещи. Строка состояний больше не нужна: она
- * была одна и та же коробка в трёх размерах, а у полосы размер один.
- * И меню раскрывается панелью под полосой, а не растягиванием самой
- * шапки — растягивать теперь нечего.
- *
- * Фон полосы непрозрачный. У пилюли он был полупрозрачным со стеклом,
- * потому что под ней проходила фотография; под полосой в потоке ничего
- * не проходит, и стекло превратилось бы в серую муть.
- */
+const SUBLINK_ICONS: Record<string, string> = {
+  '/uslugi#podbor': 'M21 11A9 9 0 0 1 12 20H5L3 22V11A9 9 0 0 1 21 11ZM8 10H16M8 14H13',
+  '/blog': 'M4 3H15L20 8V21H4ZM14 3V9H20M8 13H16M8 17H14',
+  '/dostavka': 'M3 6H14V17H3ZM14 10H18L21 14V17H14M8 18A2 2 0 1 1 4 18A2 2 0 1 1 8 18M20 18A2 2 0 1 1 16 18A2 2 0 1 1 20 18',
+  '/zapis': 'M4 5H20V21H4ZM8 3V7M16 3V7M4 10H20M8 15L11 18L16 13',
+  '/nashi-raboty': 'M3 6H21V21H3ZM8 6V3H16V6M3 12H21M10 12V15H14V12',
+  '/garantiya': 'M12 3L20 6V12C20 17 12 22 12 22S4 17 4 12V6ZM8 12L11 15L16 10',
+  '/#faq': 'M21 12A9 9 0 1 1 3 12A9 9 0 1 1 21 12M9 9A3 3 0 0 1 15 9C15 11 12 11 12 14M12 17H12.01',
+  '/uslugi#elektrika': 'M7 3V8M17 3V8M5 8H19V11A7 7 0 0 1 5 11ZM12 18V22',
+  '/o-nas': 'M16 7A4 4 0 1 1 8 7A4 4 0 1 1 16 7M4 21V19A8 8 0 0 1 20 19V21',
+  '/otzyvy': 'M12 3L15 9L22 10L17 15L18 22L12 19L6 22L7 15L2 10L9 9Z',
+}
+
+function NavIcon({ path }: { path: string }) {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+      className="h-[18px] w-[18px] shrink-0">
+      <path d={path} />
+    </svg>
+  )
+}
+
+function DesktopItem({ item }: { item: (typeof NAV)[number] }) {
+  const [expanded, setExpanded] = useState(false)
+  const container = useRef<HTMLDivElement>(null)
+  const trigger = useRef<HTMLAnchorElement>(null)
+  const links = SUBLINKS[item.label]
+  const id = `submenu-${item.href.replaceAll('/', '')}`
+
+  useEffect(() => {
+    if (!expanded) return
+    const closeOutside = (event: PointerEvent) => {
+      if (!container.current?.contains(event.target as Node)) setExpanded(false)
+    }
+    document.addEventListener('pointerdown', closeOutside)
+    return () => document.removeEventListener('pointerdown', closeOutside)
+  }, [expanded])
+
+  return (
+    <div ref={container}
+      className={`group relative flex items-stretch ${expanded ? 'bg-accent text-white' : 'text-ink hover:bg-accent hover:text-white'}`}
+      onMouseEnter={() => setExpanded(true)}
+      onMouseLeave={() => setExpanded(false)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setExpanded(false)
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && expanded) {
+          event.preventDefault()
+          trigger.current?.focus()
+          setExpanded(false)
+        }
+      }}>
+      <Link ref={trigger} href={item.href}
+        onFocus={() => { if (links) setExpanded(true) }}
+        aria-expanded={links ? expanded : undefined}
+        aria-controls={links && expanded ? id : undefined}
+        className="inline-flex items-center gap-2 whitespace-nowrap px-2.5 text-[16px] font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-white">
+        <span className={`${expanded ? 'text-white' : 'text-accent'} group-hover:text-white [&>svg]:h-5 [&>svg]:w-5`}>
+          <NavIcon path={item.icon} />
+        </span>
+        {item.label}
+        {links && (
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 16 16"
+            fill="none" stroke="currentColor" strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round"
+            className={`h-3.5 w-3.5 shrink-0 transition-transform duration-150 motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`}>
+            <path d="M3 6L8 11L13 6" />
+          </svg>
+        )}
+      </Link>
+      {links && (
+        <>
+          {expanded && (
+            <ul id={id} className="nav-submenu absolute left-0 top-full z-50 w-max min-w-full max-w-[300px] overflow-hidden rounded-b-lg border-x border-b border-white/10 bg-[#20252b] py-1.5 text-white shadow-[0_16px_36px_rgba(0,0,0,0.28)]">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} onClick={() => setExpanded(false)}
+                    className="flex min-h-12 items-center gap-2 whitespace-nowrap py-3 pl-[9px] pr-6 text-sm text-white/85 transition-colors duration-150 hover:bg-accent/15 hover:text-white focus-visible:bg-accent/15 focus-visible:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
+                    <span className="text-accent [&>svg]:h-5 [&>svg]:w-5"><NavIcon path={SUBLINK_ICONS[link.href] ?? item.icon} /></span>
+                    <span>{link.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 export function SiteHeader() {
-  /*
-    Признак прокрутки берётся из общего хука, а не считается здесь: на
-    него же опирается строка подбора, и от одного источника они ужимаются
-    вместе. Пока признак жил внутри шапки, подбор о нём не знал, и между
-    ними открывалась полоса.
-  */
   const scrolled = useScrolled()
   const [open, setOpen] = useState(false)
+  const menuButton = useRef<HTMLButtonElement>(null)
+  const onHome = usePathname() === urls.home()
 
-  // Прокрутка закрывает меню: держать его раскрытым над уезжающей
-  // страницей незачем, а закрывать вручную — лишнее действие.
   useEffect(() => {
     if (scrolled) setOpen(false)
   }, [scrolled])
 
   useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open])
-
-  /*
-    Логотип всегда ведёт на главную. Если мы уже на ней, переход
-    никуда не ведёт — поэтому там он вместо перехода поднимает
-    страницу к первому экрану. Это и ожидают от названия в шапке.
-  */
-  const onHome = usePathname() === urls.home()
+    const desktop = window.matchMedia('(min-width: 1280px)')
+    const closeOnDesktop = () => { if (desktop.matches) setOpen(false) }
+    desktop.addEventListener('change', closeOnDesktop)
+    return () => desktop.removeEventListener('change', closeOnDesktop)
+  }, [])
 
   const scrollTopOnHome = (event: MouseEvent) => {
     if (!onHome) return
     event.preventDefault()
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollToTop()
     setOpen(false)
   }
 
-  const burger =
-    'absolute left-px h-[1.5px] w-[21px] rounded-sm bg-ink transition-[transform,top] duration-[620ms]'
-  const burgerStyle = (rotate: string, top: string) => ({
-    top,
-    transform: rotate,
-    transitionTimingFunction: EASE,
-  })
-
   return (
-    /*
-      Обёртка нулевой высоты — шапка не занимает места в потоке и лежит
-      поверх того, что идёт следом. Так фотография первого экрана
-      доходит до верхнего края окна и просвечивает сквозь стекло.
-
-      Сначала при переходе на классическую вёрстку шапка встала в поток
-      обычной полосой, и стекло пропало: под полосой в потоке ничего не
-      проходит, размывать ей было нечего. Заказчик это заметил сразу.
-      Ширина во всю страницу осталась — от пилюли отказались, а вот
-      наложение вернули.
-    */
     <div className="sticky top-0 z-40 h-0">
-    <header
-      className="border-b backdrop-blur-[26px] backdrop-saturate-[1.35]"
-      style={{
-        /*
-          Прокрученная страница уводит фотографию из-под шапки, и
-          прозрачной ей больше не на чем держаться — фон уплотняется.
-          Раскрытое меню тоже: сквозь него читать ссылки нельзя.
-        */
-        background: open
-          ? 'rgba(14,14,16,.94)'
-          : scrolled
-            ? 'rgba(16,16,20,.88)'
-            : 'rgba(18,18,20,.44)',
-        borderColor: scrolled || open ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.08)',
-        boxShadow: scrolled && !open ? '0 8px 24px rgba(0,0,0,.28)' : 'none',
-        transition: 'background 420ms ease, border-color 300ms ease, box-shadow 300ms ease',
-      }}
-    >
-      {/*
-        Прокрученная страница ужимает шапку. Приём с farkop.ru: там при
-        прокрутке сплющивается служебная полоска с городом и телефоном,
-        а основная строка с логотипом и меню остаётся прежней высоты —
-        уходит второстепенное, главное на месте.
-
-        У нас ярус один, и второстепенное в нём — подпись с часами
-        работы под телефоном. Она прячется, и шапка садится на её
-        высоту: с 72 до 56 пикселей. Переход плавный, 300 мс, как и у
-        них — резкий скачок при прокрутке дёргает глаз.
-      */}
-      <div
-        className="relative flex items-center gap-7 px-5 sm:px-8 lg:px-14"
-        style={{
-          height: scrolled && !open ? 'var(--header-h-min)' : 'var(--header-h)',
-          transition: 'height 300ms ease',
+      <header className="border-b backdrop-blur-[26px] backdrop-saturate-[1.35]"
+        onKeyDown={(event) => {
+          if (event.key === 'Escape' && open) {
+            setOpen(false)
+            menuButton.current?.focus()
+          }
         }}
-      >
-        {/*
-          Боковые группы обе на flex-1, меню между ними — shrink-0.
-          Это и есть центровка: свободное место делится поровну, и
-          середина меню совпадает с серединой полосы независимо от того,
-          что группы разной ширины (слева бургер с названием, справа
-          поиск с телефоном).
-        */}
-        <div className="flex flex-1 items-center gap-7">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? 'Закрыть меню' : 'Меню'}
-          aria-expanded={open}
-          className="relative block h-6 w-6 shrink-0"
-        >
-          <span
-            className={burger}
-            style={burgerStyle(open ? 'rotate(45deg)' : 'rotate(0deg)', open ? '12px' : '8px')}
-          />
-          <span
-            className={burger}
-            style={burgerStyle(open ? 'rotate(-45deg)' : 'rotate(0deg)', open ? '12px' : '16px')}
-          />
-        </button>
-
-        <Link
-          href={urls.home()}
-          onClick={scrollTopOnHome}
-          className="shrink-0 font-[family-name:var(--font-display)] text-[15px] tracking-[0.24em] text-ink"
-        >
-          VASHFARKOP
-        </Link>
-        </div>
-
-        {/*
-          Меню по центру полосы. Раньше оно было прижато вправо и стояло
-          вплотную к телефону — заказчик попросил симметрии.
-
-          Центровка не флексом «между двумя соседями»: группы слева и
-          справа разной ширины, и меню от середины экрана уезжало. Обе
-          группы взяты на flex-1, меню shrink-0 — свободное место
-          делится поровну, и середина сходится с серединой полосы.
-
-          Просвет между пунктами на lg чуть уже: при 1024 пикселях меню
-          с зазором 28 упиралось бы в телефон.
-        */}
-        <nav className="hidden shrink-0 items-center gap-5 lg:flex xl:gap-7">
-          {NAV.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="whitespace-nowrap text-sm text-ink transition-opacity hover:opacity-65"
-            >
-              {item.label}
+        style={{
+          background: open ? 'rgba(14,14,16,.98)' : scrolled ? 'rgba(16,16,20,.88)' : 'rgba(18,18,20,.44)',
+          borderColor: scrolled || open ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.08)',
+          boxShadow: scrolled && !open ? '0 8px 24px rgba(0,0,0,.28)' : 'none',
+          transition: 'background 200ms ease, border-color 200ms ease',
+        }}>
+        <div className="relative flex items-center gap-3 px-5 sm:gap-5 sm:px-8 lg:px-14"
+          style={{ height: scrolled && !open ? 'var(--header-h-min)' : 'var(--header-h)', transition: 'height 300ms ease' }}>
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+            <button ref={menuButton} type="button" onClick={() => setOpen((value) => !value)}
+              aria-label={open ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={open} aria-controls="mobile-navigation"
+              className="flex h-12 w-10 shrink-0 items-center justify-center text-ink xl:hidden">
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d={open ? 'M5 5L19 19M5 19L19 5' : 'M3 7H21M3 17H21'} />
+              </svg>
+            </button>
+            <Link href={urls.home()} onClick={scrollTopOnHome}
+              aria-label="VASHFARKOP — главная"
+              className="shrink-0 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
+              <Image src="/images/redesign/vashfarkop-logo.webp" alt="VASHFARKOP"
+                width={570} height={190} sizes="(min-width: 640px) 190px, 145px"
+                className="h-auto w-[145px] sm:w-[190px]" />
             </Link>
-          ))}
-        </nav>
-
-        <div className="flex flex-1 items-center justify-end gap-4">
-          <Link
-            href={urls.catalog()}
-            aria-label="Поиск"
-            className="hidden h-[34px] w-[34px] items-center justify-center rounded-full border border-white/22 text-sm text-ink transition-colors hover:border-white/50 sm:flex"
-          >
-            <span aria-hidden>⌕</span>
-          </Link>
-          <div className="flex flex-col items-end gap-px">
-            <a
-              href={CONTACTS.phoneHref}
-              className="whitespace-nowrap text-[15px] font-semibold text-ink"
-            >
-              {CONTACTS.phone}
-            </a>
-            {/*
-              Часы работы прячутся при прокрутке — это и есть то
-              второстепенное, за счёт которого шапка садится. Убираем не
-              display'ем, а высотой и прозрачностью: display рвёт переход,
-              и строка исчезала бы рывком, пока шапка едет плавно.
-            */}
-            <span
-              aria-hidden={scrolled && !open}
-              className="block overflow-hidden whitespace-nowrap text-[11px] text-ink-muted"
-              style={{
-                maxHeight: scrolled && !open ? '0px' : '16px',
-                opacity: scrolled && !open ? 0 : 1,
-                transition: 'max-height 300ms ease, opacity 200ms ease',
-              }}
-            >
-              {CONTACTS.hours}
-            </span>
+          </div>
+          <nav aria-label="Основная навигация" className="hidden h-full shrink-0 items-stretch xl:flex">
+            {NAV.map((item) => <DesktopItem key={item.label} item={item} />)}
+          </nav>
+          <div className="flex items-center justify-end gap-3 sm:flex-1">
+            <div className="flex flex-col items-end gap-px">
+              <a href={CONTACTS.phoneHref} className="flex min-h-10 items-center whitespace-nowrap text-sm font-semibold text-ink">
+                <span className="hidden sm:inline">{CONTACTS.phone}</span>
+                <span className="sm:hidden">Позвонить</span>
+              </a>
+              <span className="hidden overflow-hidden whitespace-nowrap text-[11px] text-ink-muted sm:block"
+                style={{ maxHeight: scrolled && !open ? '0px' : '16px', opacity: scrolled && !open ? 0 : 1 }}>
+                {CONTACTS.hours}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/*
-        Меню раскрывается панелью под полосой. Высота анимируется на
-        обёртке, а не на содержимом: содержимое переменной длины, и
-        анимировать его собственную высоту нечем.
-      */}
-      <div
-        className="overflow-hidden border-white/10"
-        style={{
-          height: open ? 'var(--menu-open-height)' : '0px',
-          borderTopWidth: open ? '1px' : '0px',
-          transition: SHELL_TRANSITION,
-        }}
-      >
-        <div
-          className="flex h-full flex-col overflow-y-auto px-5 pt-5 text-ink sm:px-8 lg:px-14"
-          aria-hidden={!open}
-        >
-          {/*
-            Во всю ширину, без колонки в 1100 пикселей по центру: у
-            пилюли содержимое было уже самой шапки, и колонка держала
-            его собранным. Полоса идёт до краёв окна, и меню внутри неё
-            выравнивается по тем же боковым отступам, что и секции.
-          */}
-          <div className="flex w-full flex-1 flex-col">
-            <div className="grid gap-[18px] sm:grid-cols-3">
-              {ACTIONS.map((action, index) => (
-                <div key={action.num} style={reveal(open, 300 + index * 70, 18)}>
-                  <Link
-                    href={action.href}
-                    onClick={() => setOpen(false)}
-                    tabIndex={open ? undefined : -1}
-                    className="flex flex-col gap-8 border-y border-white/30 px-1 pb-3.5 pt-5 transition-colors hover:border-white/60"
-                  >
-                    <span className="text-xs text-[#8D8D8B]">{action.num}</span>
-                    <span className="text-base leading-[1.25]">{action.label}</span>
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-9 grid gap-8 sm:grid-cols-3">
-              {COLUMNS.map((column) => (
-                <div key={column.head} className="flex flex-col gap-0.5">
-                  <div className="mb-2 text-xs uppercase tracking-[0.14em] text-[#75757A]">
-                    {column.head}
-                  </div>
-                  {column.links.map((link, index) => (
-                    <div key={link.label} style={reveal(open, 430 + index * 50, 20)}>
-                      <Link
-                        href={link.href}
-                        onClick={() => setOpen(false)}
-                        tabIndex={open ? undefined : -1}
-                        className="inline-block text-[18px] leading-[1.7] tracking-[-0.01em] transition-opacity hover:opacity-65"
-                      >
-                        {link.label}
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            <div
-              className="mt-auto flex items-end justify-between gap-6 border-t border-white/20 pb-5 pt-[18px] text-sm text-[#C6C6C3]"
-              style={{
-                opacity: open ? 1 : 0,
-                transform: open ? 'translateY(0)' : 'translateY(14px)',
-                transition: open
-                  ? `opacity 600ms ease 800ms, transform 800ms ${EASE} 800ms`
-                  : 'opacity 260ms ease, transform 260ms ease',
-              }}
-            >
-              <div className="flex flex-col gap-1">
-                <span>
-                  {CONTACTS.phone} · {CONTACTS.hours}
-                </span>
-                <span>{CONTACTS.address}</span>
+        {open && (
+          <nav id="mobile-navigation" aria-label="Мобильная навигация"
+            className="max-h-[calc(100dvh-var(--header-h))] overflow-y-auto border-t border-white/15 px-5 pb-6 text-ink sm:px-8 xl:hidden">
+            {NAV.map((item) => (
+              <div key={item.label} className="border-b border-white/10 py-2">
+                <Link href={item.href} onClick={() => setOpen(false)}
+                  className="flex min-h-12 items-center gap-3 font-medium hover:text-accent">
+                  <span className="text-accent"><NavIcon path={item.icon} /></span>
+                  {item.label}
+                </Link>
+                {SUBLINKS[item.label] && (
+                  <ul className="pl-8">
+                    {SUBLINKS[item.label].map((link) => (
+                      <li key={link.href}>
+                        <Link href={link.href} onClick={() => setOpen(false)}
+                          className="flex min-h-12 items-center text-sm text-ink-muted hover:text-white focus-visible:text-white">
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <Link
-                href="/politika-konfidencialnosti"
-                onClick={() => setOpen(false)}
-                tabIndex={open ? undefined : -1}
-                className="whitespace-nowrap text-[13px] text-[#9C9C9A] underline"
-              >
-                Политика конфиденциальности
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+            ))}
+            <a href={CONTACTS.phoneHref} className="mt-5 block text-lg">{CONTACTS.phone}</a>
+            <p className="mt-2 text-sm text-ink-muted">{CONTACTS.address} · {CONTACTS.hours}</p>
+          </nav>
+        )}
+      </header>
     </div>
   )
 }
+
+

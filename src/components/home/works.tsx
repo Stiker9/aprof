@@ -38,7 +38,7 @@ import { WorksGallery, type GalleryWork } from '@/components/home/works-gallery'
  * ничего не утверждают о снимке. Разные намеренно, чтобы двенадцать
  * одинаковых кнопок не читались шаблоном.
  */
-const WORKS: GalleryWork[] = [
+export const WORKS: GalleryWork[] = [
   {
     car: 'Mazda CX-5',
     photo: '/images/gallery/mazda-cx5.webp',

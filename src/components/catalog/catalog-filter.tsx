@@ -88,7 +88,7 @@ export function CatalogFilter() {
 
   if (failed) {
     return (
-      <p className="mt-8 rounded-[var(--radius-card)] border border-line-light bg-white px-7 py-8 text-[15px] leading-[1.6] text-ink-dim">
+      <p className="mt-8 rounded-[var(--radius-card)] border border-line-light bg-white px-7 py-8 text-[15px] leading-[1.6] text-[#444442]">
         Не удалось загрузить каталог. Обновите страницу — или позвоните, подберём по телефону.
       </p>
     )
@@ -96,7 +96,7 @@ export function CatalogFilter() {
 
   if (!products) {
     return (
-      <p className="mt-8 rounded-[var(--radius-card)] border border-line-light bg-paper-3 px-7 py-8 text-[15px] text-ink-dim">
+      <p className="mt-8 rounded-[var(--radius-card)] border border-line-light bg-paper-3 px-7 py-8 text-[15px] text-[#444442]">
         Загружаем каталог…
       </p>
     )

@@ -51,7 +51,7 @@ export default async function CatalogPage() {
       >
         <div className="flex flex-col gap-1.5">
           <h2 className="text-[19px] font-medium">Не нашли свою марку?</h2>
-          <p className="text-sm text-[#6E6E6C]">
+          <p className="text-sm text-[#444442]">
             Подберём под редкие и старые модели — позвоните или оставьте номер.
           </p>
         </div>
@@ -108,12 +108,12 @@ export default async function CatalogPage() {
               {item.question}
               <span
                 aria-hidden
-                className="text-base text-[#8A8A88] transition-transform group-open:rotate-45"
+                className="text-base text-[#555553] transition-transform group-open:rotate-45"
               >
                 +
               </span>
             </summary>
-            <p className="mt-2.5 max-w-[720px] text-sm leading-[1.6] text-[#6E6E6C]">
+            <p className="mt-2.5 max-w-[720px] text-sm leading-[1.6] text-[#444442]">
               {item.answer}
             </p>
           </details>

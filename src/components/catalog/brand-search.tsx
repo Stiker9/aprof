@@ -143,7 +143,7 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
         <div className="relative flex min-w-[260px] flex-1 items-center">
           <span
             aria-hidden
-            className="pointer-events-none absolute left-[18px] text-[15px] text-ink-muted"
+            className="pointer-events-none absolute left-[18px] text-[15px] text-[#444442]"
           >
             ⌕
           </span>
@@ -168,7 +168,7 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
               он рисуется по-своему в каждом браузере и не совпадает ни
               с одной нашей иконкой.
             */
-            className="h-[52px] w-full appearance-none rounded-xl border border-line-light bg-white pl-11 pr-11 text-[15px] text-ink-dark outline-none transition-colors placeholder:text-ink-muted hover:border-ink-dark/25 focus:border-accent focus:ring-2 focus:ring-accent/25 [&::-webkit-search-cancel-button]:hidden"
+            className="h-[52px] w-full appearance-none rounded-xl border border-line-light bg-white pl-11 pr-11 text-[15px] text-ink-dark outline-none transition-colors placeholder:text-[#444442] hover:border-ink-dark/25 focus:border-accent focus:ring-2 focus:ring-accent/25 [&::-webkit-search-cancel-button]:hidden"
           />
 
           {searching ? (
@@ -179,7 +179,7 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
                 inputRef.current?.focus()
               }}
               aria-label="Очистить поиск"
-              className="absolute right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-lg leading-none text-ink-muted transition-colors hover:bg-paper-2 hover:text-ink-dark"
+              className="absolute right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-lg leading-none text-[#444442] transition-colors hover:bg-paper-2 hover:text-ink-dark"
             >
               <span aria-hidden>×</span>
             </button>
@@ -190,7 +190,7 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
           Счётчик найденного объявляется вслух: человек, который не видит
           сетку, иначе не узнает, что список сузился.
         */}
-        <p aria-live="polite" className="text-sm text-ink-muted">
+        <p aria-live="polite" className="text-sm text-[#444442]">
           {searching
             ? shown.length > 0
               ? `Нашлось ${formatCount(shown.length, 'марка', 'марки', 'марок')}`
@@ -262,7 +262,7 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
                 ) : null}
 
                 <span className="text-center text-sm text-[#2E2E30]">{brand.name}</span>
-                <span className="text-[11px] text-ink-muted">
+                <span className="text-[11px] text-[#444442]">
                   {formatCount(brand.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
                 </span>
               </Link>
@@ -279,7 +279,7 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
           <p className="text-[17px] text-ink-dark">
             По запросу «{trimmed}» марок нет.
           </p>
-          <p className="max-w-[52ch] text-sm leading-[1.6] text-ink-dim">
+          <p className="max-w-[52ch] text-sm leading-[1.6] text-[#444442]">
             Проверьте написание или сбросьте поиск. Редкие и старые марки в каталог не выведены,
             но фаркоп под них обычно находится.
           </p>

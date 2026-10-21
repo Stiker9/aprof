@@ -39,7 +39,7 @@ export default function AboutPage() {
             <div className="font-[family-name:var(--font-display)] text-[clamp(30px,4vw,42px)] leading-none tracking-[-0.02em]">
               {item.value}
             </div>
-            <div className="mt-2 text-sm opacity-60">{item.caption}</div>
+            <div className="mt-2 text-sm opacity-75">{item.caption}</div>
           </div>
         ))}
       </div>
@@ -81,9 +81,9 @@ export default function AboutPage() {
           <h2 className="text-[19px] font-medium">Где мы</h2>
           <p className="mt-3 text-[17px]">{CONTACTS.address}</p>
           {CONTACTS.addressNote ? (
-            <p className="mt-1 text-sm opacity-55">{CONTACTS.addressNote}</p>
+            <p className="mt-1 text-sm opacity-75">{CONTACTS.addressNote}</p>
           ) : null}
-          <p className="mt-4 text-sm opacity-55">
+          <p className="mt-4 text-sm opacity-75">
             {CONTACTS.dayOff ? `${CONTACTS.hours} · ${CONTACTS.dayOff}` : CONTACTS.hours}
           </p>
           <Link href="/kontakty" className="mt-5 inline-block text-accent hover:underline">
