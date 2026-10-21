@@ -126,14 +126,21 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
     [shown],
   )
 
-  // Первая марка на каждую букву получает якорь — к ней ведёт указатель
-  const seen = new Set<string>()
-  const anchorOf = (brand: BrandRow) => {
-    const letter = brand.name[0].toUpperCase()
-    if (seen.has(letter)) return undefined
-    seen.add(letter)
-    return `letter-${letter}`
-  }
+  // Найденное, разложенное по первой букве
+  const groups = useMemo(() => {
+    const map = new Map<string, BrandRow[]>()
+    for (const brand of shown) {
+      const letter = brand.name[0].toUpperCase()
+      map.set(letter, [...(map.get(letter) ?? []), brand])
+    }
+    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b, 'ru'))
+  }, [shown])
+
+  // Двенадцать самых наполненных марок
+  const popular = useMemo(
+    () => [...brands].sort((a, b) => b.productCount - a.productCount).slice(0, 12),
+    [brands],
+  )
 
   const searching = trimmed.length > 0
 
@@ -230,45 +237,53 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
         })}
       </nav>
 
+      {/*
+        Популярные марки — крупными карточками сверху, как на главной:
+        к ним приходит большинство, и искать Toyota в алфавите незачем.
+        Во время поиска блок прячется: результаты и так одни, а две
+        выдачи подряд путали бы.
+      */}
+      {!searching ? (
+        <section aria-labelledby="popular-brands" className="flex flex-col gap-4">
+          <h2 id="popular-brands" className="text-[19px] font-medium">
+            Популярные марки
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {popular.map((brand) => (
+              <BrandCard key={brand.slug} brand={brand} size="large" />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {shown.length > 0 ? (
         /*
-          Ячейки склеены в таблицу: зазор в один пиксель на общем фоне
-          даёт сетку разделителей. Отдельными плитками с просветом, как
-          на главной, здесь нельзя — там их две дюжины, а тут 106, и
-          просветы рассыпают список на карточки вместо единого указателя.
+          Все марки — по буквам, как в справочниках: крупная буква слева,
+          марки на неё справа. Из ста с лишним названий так находят своё
+          глазами быстрее, чем в сплошной сетке, а указатель над списком
+          ведёт прямо к нужной букве.
         */
-        <div className="grid grid-cols-2 gap-px border border-ink-dark/8 bg-ink-dark/8 sm:grid-cols-3 lg:grid-cols-6">
-          {shown.map((brand) => {
-            const logo = logoFor(brand.slug)
-            return (
-              <Link
-                key={brand.slug}
-                id={searching ? undefined : anchorOf(brand)}
-                href={urls.brand(brand.slug)}
-                className="flex scroll-mt-40 flex-col items-center justify-center gap-2.5 bg-white px-2.5 py-6 transition-colors hover:bg-paper-2"
+        <section aria-label="Все марки по алфавиту" className="flex flex-col">
+          {groups.map(([letter, items]) => (
+            <div
+              key={letter}
+              id={searching ? undefined : `letter-${letter}`}
+              className="grid scroll-mt-40 grid-cols-[48px_1fr] gap-x-4 border-t border-ink-dark/8 py-6 sm:grid-cols-[72px_1fr] sm:gap-x-6"
+            >
+              <span
+                aria-hidden
+                className="font-[family-name:var(--font-display)] text-[30px] leading-none text-ink-dark/25 sm:text-[40px]"
               >
-                {logo ? (
-                  /*
-                    Логотипы в родном цвете. Раньше они были обесцвечены и
-                    притушены — из опасения, что сетка из ста с лишним
-                    марок превратится в рябь. Логотипов тогда было 25 из
-                    106, и серыми они смотрелись ровно; теперь их 85, и
-                    заказчик попросил цвет: по цвету марку узнают быстрее,
-                    чем по начертанию.
-                  */
-                  <span className="relative block h-12 w-[76px]">
-                    <Image src={logo} alt="" fill sizes="76px" className="object-contain" />
-                  </span>
-                ) : null}
-
-                <span className="text-center text-sm text-[#2E2E30]">{brand.name}</span>
-                <span className="text-[11px] text-[#444442]">
-                  {formatCount(brand.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
-                </span>
-              </Link>
-            )
-          })}
-        </div>
+                {letter}
+              </span>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {items.map((brand) => (
+                  <BrandCard key={brand.slug} brand={brand} size="small" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
       ) : (
         /*
           Пустой результат не тупик: под каталогом уже стоит блок «Не
@@ -301,5 +316,60 @@ export function BrandSearch({ brands }: { brands: BrandRow[] }) {
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * Карточка марки: логотип слева, название и число фаркопов справа.
+ *
+ * Логотипы в родном цвете — так попросил заказчик, по цвету марку
+ * узнают быстрее. У кого логотипа нет, вместо него кружок с первой
+ * буквой: плитка не выглядит сломанной и стоит вровень с соседями.
+ */
+function BrandCard({ brand, size }: { brand: BrandRow; size: 'large' | 'small' }) {
+  const logo = logoFor(brand.slug)
+  const large = size === 'large'
+  return (
+    <Link
+      href={urls.brand(brand.slug)}
+      className={`group flex items-center gap-4 rounded-xl border border-line-light bg-white transition-[border-color,box-shadow] hover:border-ink-dark/20 hover:shadow-[0_8px_24px_rgba(20,20,22,0.06)] ${
+        large ? 'min-h-[88px] px-5 py-4' : 'min-h-[64px] px-4 py-3'
+      }`}
+    >
+      <span
+        className={`relative flex shrink-0 items-center justify-center ${large ? 'h-12 w-16' : 'h-9 w-12'}`}
+      >
+        {logo ? (
+          <Image src={logo} alt="" fill sizes={large ? '64px' : '48px'} className="object-contain" />
+        ) : (
+          <span
+            aria-hidden
+            className={`flex items-center justify-center rounded-full bg-paper-2 font-medium text-ink-dark/60 ${
+              large ? 'h-11 w-11 text-[17px]' : 'h-8 w-8 text-[13px]'
+            }`}
+          >
+            {brand.name[0].toUpperCase()}
+          </span>
+        )}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span
+          className={`truncate font-medium text-ink-dark transition-colors group-hover:text-accent ${
+            large ? 'text-[17px]' : 'text-[15px]'
+          }`}
+        >
+          {brand.name}
+        </span>
+        <span className="text-[12px] text-[#555553]">
+          {formatCount(brand.productCount, 'фаркоп', 'фаркопа', 'фаркопов')}
+        </span>
+      </span>
+      <span
+        aria-hidden
+        className="text-[15px] text-ink-dark/30 transition-[color,transform] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent"
+      >
+        ↗
+      </span>
+    </Link>
   )
 }

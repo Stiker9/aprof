@@ -28,7 +28,8 @@
  * последствия тихие: сайт работает, но сыплет 404 или теряет адреса.
  */
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, renameSync, rmSync } from 'node:fs'
+import { copyFileSync, cpSync, existsSync, renameSync, rmSync } from 'node:fs'
+import path from 'node:path'
 
 /*
   Отдельная папка сборки: на сервере рядом работает админка со своей
@@ -36,7 +37,25 @@ import { copyFileSync, renameSync, rmSync } from 'node:fs'
   работающего приложения прямо во время запроса. См. next.config.ts.
 */
 const EXPORT_DIR = '.next-export'
-const env = { ...process.env, STATIC_EXPORT: '1', NEXT_DIST_DIR: '.next-export' }
+
+/*
+  Сборка читает не .pgdata, а её снимок. PGlite рассчитана на один
+  процесс: пока рядом работает `next dev`, второй экземпляр на той же
+  папке портит базу. Снимок снимает конфликт — разработку можно не
+  останавливать на двадцать минут сборки. Правки владельца берутся из
+  снимка так же, как из оригинала: на момент сборки они одинаковые.
+*/
+const SNAPSHOT = path.resolve('.pgdata-build')
+rmSync(SNAPSHOT, { recursive: true, force: true })
+if (existsSync('.pgdata')) cpSync('.pgdata', SNAPSHOT, { recursive: true })
+process.on('exit', () => rmSync(SNAPSHOT, { recursive: true, force: true }))
+
+const env = {
+  ...process.env,
+  STATIC_EXPORT: '1',
+  NEXT_DIST_DIR: '.next-export',
+  PGLITE_PATH: SNAPSHOT,
+}
 
 function run(command, args) {
   const result = spawnSync(command, args, { stdio: 'inherit', env, shell: true })
@@ -66,7 +85,28 @@ copyFileSync('deploy/.htaccess', `${EXPORT_DIR}/.htaccess`)
 */
 console.log('→ Переношу выгрузку в out/')
 rmSync('out', { recursive: true, force: true })
-renameSync(EXPORT_DIR, 'out')
+moveExport()
+
+/*
+  На Windows переименование папки иногда отказывает с EPERM: свежие
+  файлы ещё держит антивирус или индексатор поиска. Через секунду-две
+  они отпускают, поэтому сначала несколько повторов, а если не вышло —
+  копирование: дольше, но не зависит от чужих блокировок.
+*/
+function moveExport() {
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      renameSync(EXPORT_DIR, 'out')
+      return
+    } catch (error) {
+      if (error.code !== 'EPERM' && error.code !== 'EBUSY') throw error
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1500)
+    }
+  }
+  console.log('   Папку не отпускают — копирую')
+  cpSync(EXPORT_DIR, 'out', { recursive: true })
+  rmSync(EXPORT_DIR, { recursive: true, force: true })
+}
 
 console.log('')
 console.log('Готово. Файлы сайта — в папке out/')

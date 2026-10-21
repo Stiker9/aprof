@@ -109,7 +109,7 @@ export function SiteFooter() {
 
         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-6 text-[13px] text-ink-muted">
           <span>
-            © 2026 VASHFARKOP · ИНН {LEGAL_ENTITY.inn} · ОГРН {LEGAL_ENTITY.ogrn}
+            © 2026 VASHFARKOP · ИНН {LEGAL_ENTITY.inn} · {LEGAL_ENTITY.ogrnLabel} {LEGAL_ENTITY.ogrn}
           </span>
           {LEGAL.map((l) => (
             <Link key={l.href} href={l.href} className="hover:text-ink-muted">

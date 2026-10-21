@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
-import { DraftNotice } from '@/components/draft-notice'
 import { LegalBody, LegalSection } from '@/components/legal-text'
 import { CONTACTS, LEGAL_ENTITY } from '@/content/contacts'
 
@@ -22,8 +21,6 @@ export default function TermsPage() {
       title="Пользовательское соглашение"
       summary="Условия использования сайта"
     >
-      <DraftNotice>Реквизиты не заполнены, текст не проверен юристом.</DraftNotice>
-
       <LegalBody>
         <LegalSection number={1} title="Стороны">
           <p>

@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
-import { DraftNotice } from '@/components/draft-notice'
 import { LegalBody, LegalSection } from '@/components/legal-text'
 import { CONTACTS, LEGAL_ENTITY } from '@/content/contacts'
 
@@ -25,10 +24,6 @@ export default function ConsentPage() {
       title="Согласие на обработку персональных данных"
       summary="Текст, который принимает посетитель при отправке заявки"
     >
-      <DraftNotice>
-        Реквизиты оператора не заполнены, текст не проверен юристом.
-      </DraftNotice>
-
       <LegalBody>
         <LegalSection number={1} title="Кому даётся согласие">
           <p>

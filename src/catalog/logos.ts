@@ -18,18 +18,21 @@
  * - iran-khordo ← iran-khodro: у нас в базе опечатка в названии;
  * - faw ← faw-jiefang: «единица» в овале — групповой знак FAW.
  *
- * GAC логотипа не получил намеренно: в наборе под этим именем лежит
- * знак Trumpchi — отдельной марки внутри GAC, а не самой GAC.
+ * Ещё 12 взяты с Wikimedia Commons и Википедии (официальные знаки марок,
+ * каждый сверен глазами): BAIC, Belgee, Forthing, GAC, Jaecoo, JMC, LDV,
+ * Moskvich, Omoda, Sollers, TagAZ, Vortex. Для GAC теперь знак самой
+ * GAC Motor, а не Trumpchi.
  *
- * Без логотипов остались 21 марка, которых в наборе нет: Sollers,
- * Solaris, Xcite, Omoda, BAIC, Jaecoo, Belgee, Ravon, Oting, KnewStar,
- * Tagaz, Moskvich, Vortex, Forthing, Polar Stone, SWM, GAC, Ambertruck,
- * LDV, Izh, JMC. Плитка без логотипа — обычное состояние, а не поломка.
+ * Без логотипов остались 9 марок — свободного файла их знака не нашлось:
+ * Ambertruck, Izh, KnewStar, Oting, Polar Stone, Ravon, Solaris, SWM,
+ * Xcite. Для них плитка показывает первую букву марки.
  */
 const AVAILABLE = new Set([
   'acura',
   'alfa-romeo',
   'audi',
+  'baic',
+  'belgee',
   'bmw',
   'byd',
   'cadillac',
@@ -51,7 +54,9 @@ const AVAILABLE = new Set([
   'faw',
   'fiat',
   'ford',
+  'forthing',
   'foton',
+  'gac',
   'gaz',
   'geely',
   'genesis',
@@ -66,16 +71,19 @@ const AVAILABLE = new Set([
   'isuzu',
   'iveco',
   'jac',
+  'jaecoo',
   'jaguar',
   'jeep',
   'jetour',
   'jetta',
+  'jmc',
   'kaiyi',
   'kgm',
   'kia',
   'lada',
   'lancia',
   'land-rover',
+  'ldv',
   'lexus',
   'li-auto',
   'lifan',
@@ -88,7 +96,9 @@ const AVAILABLE = new Set([
   'mg',
   'mini',
   'mitsubishi',
+  'moskvich',
   'nissan',
+  'omoda',
   'opel',
   'peugeot',
   'pontiac',
@@ -99,16 +109,19 @@ const AVAILABLE = new Set([
   'saab',
   'seat',
   'skoda',
+  'sollers',
   'soueast',
   'ssang-yong',
   'subaru',
   'suzuki',
+  'tagaz',
   'tank',
   'tesla',
   'toyota',
   'uaz',
   'volkswagen',
   'volvo',
+  'vortex',
   'voyah',
   'wey',
   'zotye',

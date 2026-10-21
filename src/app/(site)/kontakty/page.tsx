@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
+import { MapEmbed } from '@/components/map-embed'
 import { RequestForm } from '@/components/request-form'
 import { CONTACTS, LEGAL_ENTITY } from '@/content/contacts'
 
@@ -70,7 +71,7 @@ export default function ContactsPage() {
             <div className="mt-2 text-sm opacity-75">
               {LEGAL_ENTITY.name}
               <br />
-              ИНН {LEGAL_ENTITY.inn} · ОГРН {LEGAL_ENTITY.ogrn}
+              ИНН {LEGAL_ENTITY.inn} · {LEGAL_ENTITY.ogrnLabel} {LEGAL_ENTITY.ogrn}
             </div>
           </div>
         </div>
@@ -82,15 +83,11 @@ export default function ContactsPage() {
         Заголовок у iframe обязателен, иначе для читалки это безымянная
         рамка, в которую непонятно зачем заходить.
       */}
-      <div className="mt-14 overflow-hidden rounded-[var(--radius-card)] border border-line-light">
-        <iframe
-          src={CONTACTS.mapEmbedUrl}
-          title={`Сервис VASHFARKOP на карте: ${CONTACTS.address}`}
-          loading="lazy"
-          allowFullScreen
-          className="h-[420px] w-full border-0"
-        />
-      </div>
+      <MapEmbed
+        src={CONTACTS.mapEmbedUrl}
+        title={`Сервис VASHFARKOP на карте: ${CONTACTS.address}`}
+        className="h-[420px] mt-14"
+      />
     </CatalogShell>
   )
 }

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { HeroBackground } from './hero-background'
+import { HERO_SLIDES, HeroBackground } from './hero-background'
 import styles from './hero-visual.module.css'
 
-const captions = ['Берите увлечения с собой', 'Открывайте новые маршруты', 'Ближе к отдыху на воде', 'Путешествуйте с домом на колёсах']
+const captions = HERO_SLIDES.map((slide) => slide.caption)
 
 export function HeroVisual() {
   const [scene, setScene] = useState(0)

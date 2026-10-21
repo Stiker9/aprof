@@ -4,12 +4,56 @@ import Image from 'next/image'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import styles from './hero-background.module.css'
 
-const slides = [
-  { src: '/images/redesign/hero-bikes-forest.webp', label: 'Автомобиль с велосипедами в лесу', position: '70% 50%' },
-  { src: '/images/hero-prado-4k.webp', label: 'Prado на набережной', position: '55% 45%' },
-  { src: '/images/redesign/hero-boat-lake.webp', label: 'Автомобиль с лодкой у озера', position: '65% 50%' },
-  { src: '/images/redesign/hero-camper-lake.webp', label: 'Внедорожник с домом на колёсах у озера', position: '70% 50%' },
+/*
+  Порядок кадров — порядок показа; первый виден при открытии сайта.
+  Подпись, своя кадрировка Prado и дополнительное затемнение живут при
+  кадре, а не завязаны на его номер: так порядок меняется перестановкой
+  строк, и подписи не съезжают на чужие фото.
+*/
+/*
+  blur — то же фото, ужатое до 32 пикселей (100–150 байт), прямо в
+  разметке. Без него первый экран, пока грузится настоящее фото в
+  230–300 КБ, стоял пустым и чёрным — и при открытии сайта, и при
+  возврате на главную с других страниц. Теперь размытая копия видна
+  сразу, а резкое фото проявляется поверх.
+
+  Пересчитать после замены фото:
+    node -e "require('sharp')('путь.webp').resize(32).blur(1.2).webp({quality:45}).toBuffer().then(b=>console.log('data:image/webp;base64,'+b.toString('base64')))"
+*/
+export const HERO_SLIDES = [
+  {
+    src: '/images/redesign/hero-camper-lake.webp',
+    label: 'Внедорожник с домом на колёсах у озера',
+    caption: 'Путешествуйте с домом на колёсах',
+    position: '70% 50%',
+    shade: true,
+    blur: 'data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAADQAwCdASogAAoAPt0+s1SooiWjmAEQG4llALsAHozeKsLoPfgKsfgAzibjtffitLYO9CpqRh0C6hfLci3BR/61TUrfJ37iXmBL3yPXRAA=',
+  },
+  {
+    src: '/images/redesign/hero-bikes-forest.webp',
+    label: 'Автомобиль с велосипедами в лесу',
+    caption: 'Берите увлечения с собой',
+    position: '70% 50%',
+    blur: 'data:image/webp;base64,UklGRnoAAABXRUJQVlA4IG4AAAAwBQCdASogABIAPt1iqU2opaQiMBgIARAbiWUAvkgMHDhLYg/39WdTPBnjgwEYK/BXAAD+7z+ELqJxwY/LBzQEsO6z6fnl0WYX8VUTRrlf8AU8zKs5nxDtK/VsYdbYnJ1BBlLDhgF4V17LY7cAAA==',
+  },
+  {
+    src: '/images/hero-prado-4k.webp',
+    label: 'Prado на набережной',
+    caption: 'Открывайте новые маршруты',
+    position: '55% 45%',
+    prado: true,
+    blur: 'data:image/webp;base64,UklGRnwAAABXRUJQVlA4IHAAAAAQBQCdASogABIAPt1gp0yopaOiMAgBEBuJZQC7IVyBmXaYK2QflaWrlwL/ENW+M6gAAP53Fiw4WME60MCx9R24nO74/cGOlOaJsJ1y3aoArkL0SUbE8J4jpi6JPXGNBHsn42WQ09SwG15OdLx6geAA',
+  },
+  {
+    src: '/images/redesign/hero-boat-lake.webp',
+    label: 'Автомобиль с лодкой у озера',
+    caption: 'Ближе к отдыху на воде',
+    position: '65% 50%',
+    shade: true,
+    blur: 'data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAADQBACdASogABIAPtlcokyoJSMiMAwBABsJYwAAXKKJkx9+FlFDuU3C2HLiCS1vQAD7lSawl8MakEHWp+pT7ZCZjLqL5yDGHvRZfXF+OjZMWXwDYXpRMwH3D+onD6sZJ04BX28/4ZDYIF1sFQ3Wu2NtWQCLR6jEYxwiJnc4YgAAAA==',
+  },
 ]
+const slides = HERO_SLIDES
 
 /*
   Тайминги сверены с сайтами, где первый экран тоже меняет кадры
@@ -119,12 +163,13 @@ export function HeroBackground({ onSlideChange }: { onSlideChange?: (index: numb
           style={{ opacity: active === index || previous === index ? 1 : 0, zIndex: active === index ? 2 : previous === index ? 1 : 0 }}>
         {(index === 0 || loadRest) && <Image src={slide.src} alt="" fill sizes="100vw"
           priority={index === 0} loading={index === 0 ? undefined : 'eager'}
+          placeholder="blur" blurDataURL={slide.blur}
           onLoad={() => markReady(slide.src)}
           ref={image => {
             if (image?.complete && image.naturalWidth > 0) markReady(slide.src)
           }}
-          className={`${styles.photo} ${index === 1 ? styles.prado : ''}`}
-          style={index === 1 ? undefined : { objectPosition: slide.position, transformOrigin: slide.position }}
+          className={`${styles.photo} ${'prado' in slide ? styles.prado : ''}`}
+          style={'prado' in slide ? undefined : { objectPosition: slide.position, transformOrigin: slide.position }}
         />}
         </div>
       ))}
@@ -133,7 +178,7 @@ export function HeroBackground({ onSlideChange }: { onSlideChange?: (index: numb
         className="pointer-events-none absolute inset-0 transition-opacity"
         style={{
           transitionDuration: `${FADE_MS}ms`,
-          opacity: active === 2 || active === 3 ? 1 : 0,
+          opacity: 'shade' in slides[active] ? 1 : 0,
           background: 'linear-gradient(90deg, rgba(8,8,9,.45) 0%, rgba(8,8,9,.3) 35%, transparent 65%)',
         }} />
       {/*

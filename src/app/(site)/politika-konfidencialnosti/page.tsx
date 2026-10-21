@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { absolute, urls } from '@/catalog/urls'
 import { CatalogShell } from '@/components/catalog/shell'
-import { DraftNotice } from '@/components/draft-notice'
 import { LegalBody, LegalSection } from '@/components/legal-text'
 import { CONTACTS, LEGAL_ENTITY } from '@/content/contacts'
 
@@ -31,11 +30,6 @@ export default function PrivacyPage() {
       title="Политика конфиденциальности"
       summary="В отношении обработки персональных данных"
     >
-      <DraftNotice>
-        Реквизиты оператора не заполнены, текст не проверен юристом. До этого форму заявки нельзя
-        запускать: приём персональных данных без действующей политики нарушает 152-ФЗ.
-      </DraftNotice>
-
       <LegalBody>
         <LegalSection number={1} title="Общие положения">
           <p>
@@ -43,7 +37,7 @@ export default function PrivacyPage() {
             обеспечению их безопасности в {LEGAL_ENTITY.name} (далее — Оператор).
           </p>
           <p>
-            ИНН {LEGAL_ENTITY.inn}, ОГРН {LEGAL_ENTITY.ogrn}, адрес: {CONTACTS.address}.
+            ИНН {LEGAL_ENTITY.inn}, {LEGAL_ENTITY.ogrnLabel} {LEGAL_ENTITY.ogrn}, адрес: {CONTACTS.address}.
           </p>
           <p>
             Оператор ставит своей важнейшей целью соблюдение прав и свобод человека при обработке

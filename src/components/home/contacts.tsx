@@ -1,4 +1,5 @@
 import { RequestForm } from '@/components/request-form'
+import { MapEmbed } from '@/components/map-embed'
 import { Eyebrow, Section, SectionLead, SectionTitle } from '@/components/ui/section'
 import { CONTACTS } from '@/content/contacts'
 
@@ -85,15 +86,11 @@ export function Contacts() {
         Заголовок у iframe обязателен, иначе для читалки это безымянная
         рамка, в которую непонятно зачем заходить.
       */}
-      <div className="mt-12 overflow-hidden rounded-[var(--radius-card)] border border-line-light">
-        <iframe
-          src={CONTACTS.mapEmbedUrl}
-          title={`Сервис VASHFARKOP на карте: ${CONTACTS.address}`}
-          loading="lazy"
-          allowFullScreen
-          className="h-[380px] w-full border-0"
-        />
-      </div>
+      <MapEmbed
+        src={CONTACTS.mapEmbedUrl}
+        title={`Сервис VASHFARKOP на карте: ${CONTACTS.address}`}
+        className="h-[380px] mt-12"
+      />
     </Section>
   )
 }
