@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
    * Received an instance of URL». Пакет должен грузиться как обычный внешний
    * модуль на стороне сервера.
    */
-  serverExternalPackages: ['@electric-sql/pglite'],
+  serverExternalPackages: ['@electric-sql/pglite', 'heic-decode', 'libheif-js'],
 
   experimental: {
     /**

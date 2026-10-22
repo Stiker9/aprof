@@ -61,7 +61,50 @@ const MAX_BYTES = 25 * 1024 * 1024
 const MAX_WIDTH = 1600
 const QUALITY = 80
 
-const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/heic'])
+const ALLOWED = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'image/heic',
+  'image/heif',
+  'image/heic-sequence',
+  'image/heif-sequence',
+])
+
+/**
+ * HEIC — формат, в котором айфон сохраняет снимки по умолчанию.
+ *
+ * sharp из готовой сборки его не читает: кодек HEVC под патентами, и в
+ * бинарники он не входит (в `sharp.format.heif` среди расширений только
+ * .avif). Владелец загружал фото с айфона и получал «Не получилось
+ * прочитать файл как изображение», хотя подсказка под кнопкой обещала
+ * HEIC.
+ *
+ * Поэтому HEIC раскладывается в пиксели отдельным декодером (libheif,
+ * собранный в WebAssembly — без системных библиотек), а дальше идёт
+ * тем же путём через sharp, что и остальные форматы. Разворот по
+ * ориентации libheif делает сам.
+ *
+ * Узнаём формат по содержимому, а не по типу из браузера: Windows не
+ * знает MIME для .heic и присылает пустой тип.
+ */
+const HEIC_BRANDS = new Set(['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'hevm', 'hevs', 'mif1', 'msf1'])
+
+function isHeic(source: Buffer): boolean {
+  if (source.length < 12 || source.subarray(4, 8).toString('latin1') !== 'ftyp') return false
+  // mif1 бывает и у AVIF, но AVIF sharp читает сам — его не трогаем.
+  const brand = source.subarray(8, 12).toString('latin1')
+  return HEIC_BRANDS.has(brand) && !source.subarray(8, 64).toString('latin1').includes('avif')
+}
+
+async function decodeHeic(source: Buffer): Promise<Sharp> {
+  const { default: decode } = await import('heic-decode')
+  const { width, height, data } = await decode({ buffer: source })
+  return sharp(Buffer.from(data.buffer, data.byteOffset, data.byteLength), {
+    raw: { width, height, channels: 4 },
+  })
+}
 
 export interface UploadResult {
   /** Адрес файла для вставки в разметку. */
@@ -99,7 +142,7 @@ export async function savePhoto(file: File, hint: string): Promise<UploadResult>
     // саму метку. Без него вертикальные фотографии с телефона лежат
     // на боку: браузер на метку смотрит, а пересохранённый файл её уже
     // не несёт.
-    image = sharp(source).rotate()
+    image = isHeic(source) ? await decodeHeic(source) : sharp(source).rotate()
     meta = await image.metadata()
   } catch {
     throw new UploadError('Не получилось прочитать файл как изображение')
