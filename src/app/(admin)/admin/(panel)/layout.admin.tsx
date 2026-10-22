@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { requireAdmin } from '@/admin/auth'
+import { settlePublish } from '@/admin/publish'
 import { countNewRequests, pendingCount } from '@/admin/store'
 import { AdminShell } from '@/components/admin/shell'
 import { getDb } from '@/db/client'
@@ -23,6 +24,10 @@ import { getDb } from '@/db/client'
 export default async function PanelLayout({ children }: { children: ReactNode }) {
   const session = await requireAdmin()
   const db = await getDb()
+
+  // Закончилась публикация — отмечаем правки до подсчёта, иначе плашка
+  // «правки не на сайте» висела бы ещё одну страницу.
+  await settlePublish()
 
   const [newRequests, pending] = await Promise.all([countNewRequests(db), pendingCount(db)])
 

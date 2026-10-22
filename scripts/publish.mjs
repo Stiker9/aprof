@@ -202,8 +202,18 @@ function main() {
     uploadOverSsh(changed, removed)
   }
 
-  console.log('\n→ Отмечаю правки опубликованными')
-  run('npx', ['tsx', 'scripts/mark-published.ts'])
+  /*
+    Из админки отметку ставит она сама (src/admin/publish.ts,
+    settlePublish): отсюда пришлось бы открыть её базу второй копией
+    PGlite, а это портит базу. Отдельным процессом отмечаем только при
+    запуске руками, когда админка базу не держит.
+  */
+  if (process.env.PUBLISH_MARK_IN_ADMIN === '1') {
+    console.log('\nПравки отметит админка при следующем открытии.')
+  } else {
+    console.log('\n→ Отмечаю правки опубликованными')
+    run('npx', ['tsx', 'scripts/mark-published.ts'])
+  }
 
   mkdirSync('.cache', { recursive: true })
   writeFileSync(MANIFEST, `${JSON.stringify(now, null, 0)}\n`, 'utf8')

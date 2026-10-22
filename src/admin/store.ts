@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from 'drizzle-orm'
+import { and, count, desc, eq, lte } from 'drizzle-orm'
 import type { DrizzleDb } from '../db/client'
 import { overrides, requests } from '../db/schema'
 
@@ -195,9 +195,19 @@ export async function pendingList(db: DrizzleDb, limit = 200): Promise<PendingIt
  * Служебные метки при публикации удаляются: они нужны были только
  * чтобы сборка узнала, что страницу надо переделать.
  */
-export async function markPublished(db: DrizzleDb): Promise<void> {
-  await db.delete(overrides).where(eq(overrides.field, '__dirty'))
-  await db.update(overrides).set({ published: true }).where(eq(overrides.published, false))
+export async function markPublished(db: DrizzleDb, upTo?: string): Promise<void> {
+  /*
+    upTo — момент, когда снималась база для сборки. Правки, сделанные
+    позже, пока сайт полчаса собирался, в выгрузку не попали, и помечать
+    их опубликованными нельзя: владелец решил бы, что они на сайте.
+    Время хранится в ISO, поэтому строки сравниваются как даты.
+  */
+  const before = upTo ? lte(overrides.updatedAt, upTo) : undefined
+  await db.delete(overrides).where(and(eq(overrides.field, '__dirty'), before))
+  await db
+    .update(overrides)
+    .set({ published: true })
+    .where(and(eq(overrides.published, false), before))
 }
 
 /* ── Заявки ──────────────────────────────────────────────────────── */

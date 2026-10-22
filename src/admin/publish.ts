@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process'
-import { existsSync, readFileSync, writeFileSync, mkdirSync, openSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync, mkdirSync, openSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import { getDb } from '@/db/client'
+import { markPublished } from './store'
 
 /**
  * Запуск публикации из админки.
@@ -34,6 +35,10 @@ const DIR = path.join(ROOT, '.publish')
 const LOCK = path.join(DIR, 'lock')
 const LOG = path.join(DIR, 'publish.log')
 const SNAPSHOT = path.join(DIR, 'pgdata.tar.gz')
+/** Когда снималась база для сборки — граница для отметки «опубликовано». */
+const STARTED = path.join(DIR, 'started')
+/** Отметка уже поставлена для этой публикации. */
+const MARKED = path.join(DIR, 'marked')
 
 /**
  * Выгрузка базы для сборки.
@@ -84,6 +89,30 @@ function tail(lines = 40): string[] {
   return readFileSync(LOG, 'utf8').split('\n').filter(Boolean).slice(-lines)
 }
 
+/**
+ * Отмечает правки опубликованными, когда публикация дошла до конца.
+ *
+ * Раньше отметку ставил скрипт публикации своим процессом. Но база
+ * PGlite держит один процесс: скрипт писал в файлы мимо работающей
+ * админки, та его запись не видела (плашка «правки не на сайте» не
+ * уходила), а два писателя в одной базе — ровно то, что утром
+ * 22.10.2026 её повредило.
+ *
+ * Теперь отметку ставит админка своей связью с базой — при первом
+ * открытии любой страницы панели после успешной публикации. Помечаются
+ * только правки до момента снимка базы: сделанные во время сборки на
+ * сайт не попали.
+ */
+export async function settlePublish(): Promise<void> {
+  const state = publishState()
+  if (state.kind !== 'done' || !state.ok) return
+  if (existsSync(MARKED) || !existsSync(STARTED)) return
+
+  const startedAt = readFileSync(STARTED, 'utf8').trim()
+  await markPublished(await getDb(), startedAt)
+  writeFileSync(MARKED, new Date().toISOString(), 'utf8')
+}
+
 export function publishState(): PublishState {
   const log = tail()
   if (runningPid() !== null) return { kind: 'running', log }
@@ -105,14 +134,23 @@ export async function startPublish(): Promise<{ started: boolean; reason?: strin
   if (runningPid() !== null) return { started: false, reason: 'Публикация уже идёт' }
 
   mkdirSync(DIR, { recursive: true })
+  const startedAt = new Date().toISOString()
   const dumped = await dumpDatabase()
+  writeFileSync(STARTED, startedAt, 'utf8')
+  rmSync(MARKED, { force: true })
   const out = openSync(LOG, 'w')
 
   const child = spawn('npm', ['run', 'publish'], {
     cwd: ROOT,
     detached: true,
     stdio: ['ignore', out, out],
-    env: dumped ? { ...process.env, PGLITE_SNAPSHOT_TGZ: SNAPSHOT } : process.env,
+    env: {
+      ...process.env,
+      ...(dumped ? { PGLITE_SNAPSHOT_TGZ: SNAPSHOT } : {}),
+      // Отметку «опубликовано» ставит сама админка (settlePublish), а не
+      // скрипт: он открыл бы её базу второй копией PGlite.
+      PUBLISH_MARK_IN_ADMIN: '1',
+    },
     shell: true,
   })
 
