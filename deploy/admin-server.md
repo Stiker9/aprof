@@ -27,6 +27,13 @@ VPS RuVDS, `193.42.113.207`, Ubuntu. Админка: https://193-42-113-207.ssli
 `/etc/systemd/system/vashfarkop-admin.service` — `npm start`,
 `HOSTNAME=127.0.0.1`, `PORT=3000`, окружение из `/opt/vashfarkop/.env.local`.
 
+`/etc/systemd/system/vashfarkop-admin.service.d/dist.conf` —
+`Environment=NEXT_DIST_DIR=.next-admin`. Админка работает из своей папки
+сборки, не из `.next`: статическая выгрузка сайта (кнопка «Опубликовать»)
+в Next 16 при `output: 'export'` всегда пишет служебные файлы в `.next`,
+куда бы ни указывал `distDir`, — 22.10.2026 так затёрла админку, и после
+перезагрузки та отдавала 404. Скрипт обновления подменяет `.next-admin`.
+
 `/etc/systemd/system/vashfarkop-admin.service.d/db.conf` —
 `Environment=PGLITE_RUNTIME_PATH=/opt/vashfarkop/.pgdata`. Без этой строки
 запущенная админка открыла бы снимок базы, в который смотрела сборка, —
@@ -78,3 +85,12 @@ server {
 Правки владельца (цены, фото, тексты) живут в базе этого сервера. Сайт,
 собранный на другом компьютере, их не содержит — публиковать нужно отсюда,
 иначе правки владельца с сайта пропадут до следующей публикации из админки.
+
+## Подкачка
+
+`/etc/sysctl.d/99-vashfarkop-swap.conf` — `vm.swappiness = 60`. В
+`/etc/sysctl.conf` стоит `vm.swappiness = 0`: ядро не трогает подкачку,
+пока память не кончится, и сборка (Next держит около 1,3 ГБ) падала с
+OOM при пустых 5 ГБ swap. Файл в `sysctl.d` читается позже и перекрывает.
+Память сервера — 2 ГБ (увеличена с 1 ГБ 22.10.2026 в кабинете RuVDS;
+1270 ₽/мес).

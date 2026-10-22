@@ -36,6 +36,13 @@ import path from 'node:path'
   сборкой в .next, и класть выгрузку туда же значит затереть файлы
   работающего приложения прямо во время запроса. См. next.config.ts.
 */
+/*
+  Сюда Next кладёт готовый сайт. Служебные файлы сборки он при
+  output: 'export' всё равно пишет в .next — в Next 16 это жёстко
+  (build/index.js: config.distDir = '.next'). Поэтому на сервере админка
+  работает не из .next, а из .next-admin (deploy/admin-server.md), иначе
+  каждая публикация затирала бы её.
+*/
 const EXPORT_DIR = '.next-export'
 
 /*
