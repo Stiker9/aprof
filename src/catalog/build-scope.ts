@@ -12,7 +12,20 @@
  */
 const LIMIT = 3
 
-export const designMode = process.env.DESIGN_MODE === '1'
+/*
+  ADMIN_SERVER_BUILD — сборка для сервера админки. Сайт оттуда не
+  раздаётся (он на хостинге), а восемь тысяч страниц каталога на сервере
+  с 846 МБ памяти раздували сборку до подкачки: 22.10.2026 она шла
+  больше двух часов вместо получаса. Остальные страницы, если их кто-то
+  откроет, Next соберёт при первом обращении.
+
+  В статической выгрузке флаг не действует никогда: там каждая
+  несобранная страница — дыра на сайте.
+*/
+const adminServerBuild =
+  process.env.ADMIN_SERVER_BUILD === '1' && process.env.STATIC_EXPORT !== '1'
+
+export const designMode = process.env.DESIGN_MODE === '1' || adminServerBuild
 
 /** Оставляет первые несколько параметров маршрута, если режим включён. */
 export function limitParams<T>(params: T[], route: string): T[] {

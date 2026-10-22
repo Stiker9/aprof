@@ -61,17 +61,6 @@ const MAX_BYTES = 25 * 1024 * 1024
 const MAX_WIDTH = 1600
 const QUALITY = 80
 
-const ALLOWED = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/avif',
-  'image/heic',
-  'image/heif',
-  'image/heic-sequence',
-  'image/heif-sequence',
-])
-
 /**
  * HEIC — формат, в котором айфон сохраняет снимки по умолчанию.
  *
@@ -129,7 +118,15 @@ export async function savePhoto(file: File, hint: string): Promise<UploadResult>
   if (file.size > MAX_BYTES) {
     throw new UploadError(`Файл больше ${Math.round(MAX_BYTES / 1024 / 1024)} МБ`)
   }
-  if (file.type && !ALLOWED.has(file.type)) {
+  /*
+    Тип от браузера — только чтобы сразу отсечь явно не картинку
+    (видео, документ). Список «разрешённых» типов здесь был и мешал:
+    Windows для .heic присылает что придётся — пустоту,
+    application/octet-stream, — и владелец с айфоновскими снимками
+    получал «Нужна фотография», хотя это и была фотография. Настоящая
+    проверка — ниже: файл либо открывается как изображение, либо нет.
+  */
+  if (file.type && !file.type.startsWith('image/') && file.type !== 'application/octet-stream') {
     throw new UploadError('Нужна фотография: JPEG, PNG, WebP или HEIC')
   }
 
