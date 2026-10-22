@@ -437,6 +437,6 @@ export async function savePromoShape(formData: FormData): Promise<void> {
  */
 export async function publishSite(): Promise<void> {
   await requireAdmin()
-  startPublish()
+  await startPublish()
   revalidatePath('/admin', 'layout')
 }

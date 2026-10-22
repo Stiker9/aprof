@@ -47,8 +47,29 @@ const EXPORT_DIR = '.next-export'
 */
 const SNAPSHOT = path.resolve('.pgdata-build')
 rmSync(SNAPSHOT, { recursive: true, force: true })
-if (existsSync('.pgdata')) cpSync('.pgdata', SNAPSHOT, { recursive: true })
 process.on('exit', () => rmSync(SNAPSHOT, { recursive: true, force: true }))
+
+/*
+  Откуда снимок. Публикацию из админки предваряет выгрузка базы
+  (PGLITE_SNAPSHOT_TGZ, см. src/admin/publish.ts) — это согласованная
+  копия с правками владельца, её и разворачиваем. Просто скопировать
+  папку работающей базы нельзя: снятая на ходу, она не открывается.
+
+  Без выгрузки (запуск руками на машине разработчика) копируем папку:
+  dev-сервер почти всё время только читает, и копия обычно цела.
+*/
+const ARCHIVE = process.env.PGLITE_SNAPSHOT_TGZ
+if (ARCHIVE && existsSync(ARCHIVE)) {
+  console.log('→ Разворачиваю выгрузку базы из админки')
+  const loaded = spawnSync('node', ['scripts/load-snapshot.mjs', ARCHIVE, SNAPSHOT], {
+    stdio: 'inherit',
+    shell: true,
+  })
+  if (loaded.status !== 0) process.exit(loaded.status ?? 1)
+} else if (existsSync('.pgdata')) {
+  cpSync('.pgdata', SNAPSHOT, { recursive: true })
+  rmSync(path.join(SNAPSHOT, 'postmaster.pid'), { force: true })
+}
 
 const env = {
   ...process.env,

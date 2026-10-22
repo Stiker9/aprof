@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync, mkdirSync, openSync } from 'node:fs'
 import path from 'node:path'
+import { getDb } from '@/db/client'
 
 /**
  * Запуск публикации из админки.
@@ -32,6 +33,27 @@ const ROOT = process.cwd()
 const DIR = path.join(ROOT, '.publish')
 const LOCK = path.join(DIR, 'lock')
 const LOG = path.join(DIR, 'publish.log')
+const SNAPSHOT = path.join(DIR, 'pgdata.tar.gz')
+
+/**
+ * Выгрузка базы для сборки.
+ *
+ * Сборке нужны правки владельца, а они в базе работающей админки.
+ * Открыть ту же папку второй копией PGlite нельзя — она держит один
+ * процесс. Скопировать файлы тоже: снятая на ходу копия не согласована
+ * и не открывается («Aborted()»). Поэтому базу выгружает сама админка
+ * встроенным dumpDataDir — это согласованный снимок, — а сборка
+ * разворачивает его в свою папку (scripts/build-static.mjs).
+ */
+async function dumpDatabase(): Promise<boolean> {
+  const db = await getDb()
+  const client = (db as unknown as { $client?: { dumpDataDir?: (c: 'gzip') => Promise<Blob> } })
+    .$client
+  if (typeof client?.dumpDataDir !== 'function') return false
+  const blob = await client.dumpDataDir('gzip')
+  writeFileSync(SNAPSHOT, Buffer.from(await blob.arrayBuffer()))
+  return true
+}
 
 export type PublishState =
   | { kind: 'idle'; log: string[] }
@@ -79,17 +101,18 @@ export function publishState(): PublishState {
  * Процесс отвязывается от родителя: перезапуск админки не должен
  * убивать идущую сборку на середине.
  */
-export function startPublish(): { started: boolean; reason?: string } {
+export async function startPublish(): Promise<{ started: boolean; reason?: string }> {
   if (runningPid() !== null) return { started: false, reason: 'Публикация уже идёт' }
 
   mkdirSync(DIR, { recursive: true })
+  const dumped = await dumpDatabase()
   const out = openSync(LOG, 'w')
 
   const child = spawn('npm', ['run', 'publish'], {
     cwd: ROOT,
     detached: true,
     stdio: ['ignore', out, out],
-    env: process.env,
+    env: dumped ? { ...process.env, PGLITE_SNAPSHOT_TGZ: SNAPSHOT } : process.env,
     shell: true,
   })
 
