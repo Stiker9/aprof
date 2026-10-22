@@ -18,10 +18,19 @@ VPS RuVDS, `193.42.113.207`, Ubuntu. Админка: https://193-42-113-207.ssli
 `.next/types/validator.ts`), если из проекта удалили страницы. Лечится так:
 `rm -rf /opt/vashfarkop/.next/types /opt/vashfarkop/.next-build/types`.
 
+Сборка идёт по копии базы (`.pgdata-build`), а не по `.pgdata`: PGlite
+держит один процесс, и сборка рядом с работающей админкой падала с
+`Aborted()`. Копию скрипт снимает сам и удаляет после сборки.
+
 ## Служба
 
 `/etc/systemd/system/vashfarkop-admin.service` — `npm start`,
 `HOSTNAME=127.0.0.1`, `PORT=3000`, окружение из `/opt/vashfarkop/.env.local`.
+
+`/etc/systemd/system/vashfarkop-admin.service.d/db.conf` —
+`Environment=PGLITE_RUNTIME_PATH=/opt/vashfarkop/.pgdata`. Без этой строки
+запущенная админка открыла бы снимок базы, в который смотрела сборка, —
+скрипт обновления проверяет её и без неё не подменяет версию.
 
 ## nginx — `/etc/nginx/sites-available/vashfarkop-admin`
 

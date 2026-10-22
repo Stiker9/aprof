@@ -76,7 +76,22 @@ async function connect(): Promise<DrizzleDb> {
     PGLITE_PATH теперь приходит уже абсолютным из next.config.ts (env),
     но explicit path.resolve() — на случай прямого запуска без Next.js.
   */
-  const dataDir = process.env.PGLITE_PATH || path.resolve(process.cwd(), '.pgdata')
+  /*
+    PGLITE_RUNTIME_PATH — путь для работающего сервера, в отличие от
+    PGLITE_PATH он не вшивается в код при сборке (его нет в env у
+    next.config.ts) и читается при каждом запуске.
+
+    Нужен серверу админки. Сборка там идёт рядом с работающей админкой,
+    и открывать её базу второй копией PGlite нельзя — сборка падала с
+    «Aborted()», а могла бы и испортить правки владельца. Поэтому
+    сборка смотрит в снимок базы (PGLITE_PATH), а запущенная админка —
+    в настоящую базу (PGLITE_RUNTIME_PATH из настроек службы systemd).
+    Локально переменная не задана, и всё как раньше.
+  */
+  const dataDir =
+    process.env.PGLITE_RUNTIME_PATH ||
+    process.env.PGLITE_PATH ||
+    path.resolve(process.cwd(), '.pgdata')
 
   // Строка сборки, не рантайма сайта — безопасно логировать всегда.
   console.log(`[db] cwd=${process.cwd()} dataDir=${dataDir} существует=${existsSync(dataDir)}`)

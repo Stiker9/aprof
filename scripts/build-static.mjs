@@ -55,6 +55,9 @@ const env = {
   STATIC_EXPORT: '1',
   NEXT_DIST_DIR: '.next-export',
   PGLITE_PATH: SNAPSHOT,
+  // Публикацию запускает админка, у которой эта переменная указывает на
+  // настоящую базу (см. src/db/client.ts). Сборке нужен снимок.
+  PGLITE_RUNTIME_PATH: '',
 }
 
 function run(command, args) {
