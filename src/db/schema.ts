@@ -370,6 +370,36 @@ export const works = pgTable(
   (t) => [index('works_visible_idx').on(t.visible)],
 )
 
+/**
+ * Фото товара, загруженные владельцем.
+ *
+ * Фото два вида, и разница в том, кому их показывать:
+ *
+ * - общие (model_key = '') — сам фаркоп: шар, крепёж, коробка. Один
+ *   артикул подходит к нескольким машинам, и эти фото видны на всех;
+ * - на машине (model_key = 'audi/q7') — фаркоп, поставленный на эту
+ *   модель. Их видит только тот, кто смотрит эту машину: покупателю
+ *   Cayenne снимок с Q7 вместо своей машины только мешает.
+ *
+ * Привязка к модели, а не к кузову: поколения одной модели снаружи
+ * обычно отличаются мало, а владельцу выбрать «Audi Q7» проще, чем
+ * «Q7 4M 2015–2020».
+ */
+export const productPhotos = pgTable(
+  'product_photos',
+  {
+    id: serial('id').primaryKey(),
+    productSlug: text('product_slug').notNull(),
+    /** '' — общие фото; иначе «марка/модель» слагами, как в адресах каталога. */
+    modelKey: text('model_key').notNull().default(''),
+    /** Адрес файла в public: /images/own/… */
+    url: text('url').notNull(),
+    position: integer('position').notNull().default(0),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [index('product_photos_slug_idx').on(t.productSlug, t.modelKey, t.position)],
+)
+
 export type Review = typeof reviews.$inferSelect
 export type Promo = typeof promos.$inferSelect
 export type Work = typeof works.$inferSelect

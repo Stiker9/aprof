@@ -4,6 +4,8 @@ import { eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { forgetProductOverrides } from '@/catalog/overrides'
+import { forgetOwnPhotos } from '@/catalog/own-photos'
+import { addPhoto, deletePhoto, movePhoto } from './product-photos'
 import { getDb } from '@/db/client'
 import { adminUsers, promos } from '@/db/schema'
 import { requireAdmin } from './auth'
@@ -376,33 +378,58 @@ export async function uploadWorkPhoto(
 }
 
 /**
- * Своя фотография товара.
+ * Фото товара — по одному файлу за вызов.
  *
- * Ложится правкой поля `photo`, а не в таблицу товаров: выгрузка
- * поставщика перезаписывает товары целиком, и снимок владельца
- * исчезал бы при каждом обновлении прайса.
+ * Владелец выбирает пачку, а браузер отправляет файлы по очереди. Одним
+ * запросом шесть снимков с телефона по 5 МБ упёрлись бы в предел тела
+ * запроса (26 МБ, см. next.config.ts), и пропала бы вся пачка разом.
+ *
+ * modelKey — «audi/q7», если это фото фаркопа на машине, или пусто для
+ * общих фото самого фаркопа (см. src/catalog/own-photos.ts).
+ *
+ * Фото лежат своей таблицей, а не в таблице товаров: выгрузка
+ * поставщика перезаписывает товары целиком, и снимки владельца
+ * исчезали бы при каждом обновлении прайса.
  */
-export async function uploadProductPhoto(
-  _state: UploadState,
-  formData: FormData,
-): Promise<UploadState> {
+export async function uploadProductPhoto(formData: FormData): Promise<UploadState> {
   const session = await requireAdmin()
 
   const slug = String(formData.get('slug') ?? '')
+  const modelKey = String(formData.get('modelKey') ?? '')
   const file = formData.get('file')
   if (!slug) return { error: 'Не понятно, к какому товару' }
+  if (modelKey && !/^[a-z0-9-]+\/[a-z0-9-]+$/.test(modelKey)) return { error: 'Не понятно, какая машина' }
   if (!(file instanceof File)) return { error: 'Файл не пришёл' }
 
   try {
-    const saved = await savePhoto(file, slug)
+    const saved = await savePhoto(file, modelKey ? `${slug}-${modelKey.replace('/', '-')}` : slug)
     const db = await getDb()
-    await setOverride(db, 'product', slug, 'photo', saved.url, session.login)
-    forgetProductOverrides()
+    await addPhoto(db, slug, modelKey, saved.url)
+    await markDirty(db, 'product', slug, session.login)
+    forgetOwnPhotos()
     refresh()
     return { url: saved.url }
   } catch (error) {
     return { error: error instanceof UploadError ? error.message : 'Не получилось сохранить файл' }
   }
+}
+
+export async function deleteProductPhoto(id: number): Promise<void> {
+  const session = await requireAdmin()
+  const db = await getDb()
+  const slug = await deletePhoto(db, id)
+  if (slug) await markDirty(db, 'product', slug, session.login)
+  forgetOwnPhotos()
+  refresh()
+}
+
+export async function moveProductPhoto(id: number, delta: -1 | 1): Promise<void> {
+  const session = await requireAdmin()
+  const db = await getDb()
+  const slug = await movePhoto(db, id, delta === -1 ? -1 : 1)
+  if (slug) await markDirty(db, 'product', slug, session.login)
+  forgetOwnPhotos()
+  refresh()
 }
 
 /**

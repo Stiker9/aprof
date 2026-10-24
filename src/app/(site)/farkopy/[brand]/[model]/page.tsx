@@ -97,7 +97,7 @@ export default async function ModelPage({ params }: Params) {
         товары появятся страницей глубже.
       */}
       {single ? (
-        <ProductFilter products={products} />
+        <ProductFilter products={products} carKey={`${brand}/${model}`} />
       ) : (
         <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {variants.map((variant) => (

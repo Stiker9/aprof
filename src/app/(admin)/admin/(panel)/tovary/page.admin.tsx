@@ -12,7 +12,8 @@ import { urls } from '@/catalog/urls'
 import { CarFilter } from '@/components/admin/car-filter'
 import { Editable } from '@/components/admin/editable'
 import { Empty, PageBody, PageHead } from '@/components/admin/page-head'
-import { ProductPhotoUpload } from '@/components/admin/photo-upload'
+import { ProductPhotos, type AdminPhotoGroup } from '@/components/admin/product-photos'
+import { photoGroupsFor } from '@/admin/product-photos'
 import { Toggle } from '@/components/admin/toggle'
 import { getDb } from '@/db/client'
 
@@ -70,6 +71,7 @@ export default async function ProductsPage({
   ])
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const photos = await photoGroupsFor(db, rows.map((row) => row.slug))
 
   /*
     Подпись выбранной машины словами. Нужна в двух местах: под
@@ -142,7 +144,7 @@ export default async function ProductsPage({
 
               <div className="divide-y divide-line-light">
                 {rows.map((row) => (
-                  <Row key={row.slug} product={row} />
+                  <Row key={row.slug} product={row} photos={photos[row.slug] ?? []} />
                 ))}
               </div>
             </div>
@@ -164,16 +166,12 @@ export default async function ProductsPage({
  */
 const GRID = 'grid gap-x-3 gap-y-2 lg:grid-cols-[minmax(0,1fr)_7rem_8rem_11rem_7rem]'
 
-function Row({ product }: { product: AdminProduct }) {
+function Row({ product, photos }: { product: AdminProduct; photos: AdminPhotoGroup[] }) {
   const hidden = product.own.hidden === '1'
-
-  // Что показывает карточка сейчас: своя фотография владельца, иначе
-  // собранная парсером, иначе ничего — и тогда на сайте стоит
-  // обобщённое изображение по типу шара.
-  const own = product.own.photo ?? product.parsedPhoto ?? ''
+  const ownCount = photos.reduce((sum, group) => sum + group.photos.length, 0)
 
   const changed = [
-    product.own.photo ? 'фотография' : '',
+    ownCount > 0 ? `фото (${ownCount})` : '',
     product.own.description ? 'описание' : '',
   ].filter(Boolean)
 
@@ -198,15 +196,15 @@ function Row({ product }: { product: AdminProduct }) {
         */}
         <details className="mt-1">
           <summary className="w-fit cursor-pointer text-[12px] text-ink-dim hover:text-accent">
-            {changed.length > 0 ? `Изменено: ${changed.join(' и ')}` : 'Фотография и описание'}
+            {changed.length > 0 ? `Своё: ${changed.join(' и ')}` : 'Фотографии и описание'}
           </summary>
 
           <div className="mt-2 flex max-w-xl flex-col gap-3">
             <div>
               <span className="mb-1 block text-[11px] tracking-wide text-ink-dim uppercase">
-                Фотография
+                Фотографии
               </span>
-              <ProductPhotoUpload slug={product.slug} photo={own} />
+              <ProductPhotos slug={product.slug} groups={photos} />
               {/*
                 Страница товара на этом же сервере — предпросмотр: правка
                 видна сразу, а на vashfarkop.ru появится после публикации.
@@ -224,12 +222,12 @@ function Row({ product }: { product: AdminProduct }) {
               <span className="ml-2 text-[11px] text-ink-dim">
                 на vashfarkop.ru — после публикации
               </span>
-              {!product.own.photo && product.parsedPhoto && (
+              {ownCount === 0 && product.parsedPhoto && (
                 <p className="mt-1 text-[11px] text-ink-dim">
                   Сейчас показывается изображение с сайта завода. Своя заменит его.
                 </p>
               )}
-              {!product.own.photo && !product.parsedPhoto && (
+              {ownCount === 0 && !product.parsedPhoto && (
                 <p className="mt-1 text-[11px] text-ink-dim">
                   Своего изображения нет — на сайте стоит обобщённое фото по типу шара.
                 </p>

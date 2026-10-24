@@ -36,7 +36,8 @@ function toRow(p: CompactProduct): ProductRow {
     slug,
     // Адрес предсказуем: файл всегда /images/products/<слаг>.webp.
     // Поэтому в подгружаемом файле лежит бит, а не строка.
-    photo: hasPhoto ? `/images/products/${slug}.webp` : null,
+    // Строка — своё фото владельца, 1 — изображение от завода по обычному адресу.
+    photo: typeof hasPhoto === 'string' ? hasPhoto : hasPhoto ? `/images/products/${slug}.webp` : null,
     article,
     manufacturer,
     country: null,

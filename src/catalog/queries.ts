@@ -4,6 +4,7 @@ import { brands, fitments, manufacturers, models, products, variants } from '../
 import { formatVariantShort } from './format'
 import { applyToList, applyProductOverride, getProductOverrides, isHidden } from './overrides'
 import { productPhotoSrc } from './product-photos'
+import { getOwnPhotos, mainOwnPhoto, modelKey, withOwnPhoto } from './own-photos'
 
 export interface BrandRow {
   slug: string
@@ -199,9 +200,14 @@ export async function listProductsForVariant(
     )
     .orderBy(asc(products.sourcePrice))
 
-  return applyToList(
-    rows.map((r) => ({ ...r, photo: productPhotoSrc(r.slug) })),
-    await getProductOverrides(db),
+  // Фото на этой машине, если владелец его загрузил, — см. own-photos.ts.
+  return withOwnPhoto(
+    applyToList(
+      rows.map((r) => ({ ...r, photo: productPhotoSrc(r.slug) })),
+      await getProductOverrides(db),
+    ),
+    await getOwnPhotos(db),
+    modelKey(brandSlug, modelSlug),
   )
 }
 
@@ -237,7 +243,9 @@ export async function getProduct(db: DrizzleDb, articleSlug: string): Promise<Pr
   const override = (await getProductOverrides(db))[row.slug]
   if (isHidden(override)) return null
 
-  return applyProductOverride({ ...row, photo: productPhotoSrc(row.slug) }, override)
+  const product = applyProductOverride({ ...row, photo: productPhotoSrc(row.slug) }, override)
+  const own = mainOwnPhoto((await getOwnPhotos(db))[row.slug])
+  return own ? { ...product, photo: own } : product
 }
 
 /** Машины, к которым подходит товар. Ключевой узел перелинковки. */
@@ -481,7 +489,10 @@ export async function listSimilarProducts(
     documents: [],
   }))
 
-  return applyToList(similar, await getProductOverrides(db)).slice(0, limit)
+  return withOwnPhoto(
+    applyToList(similar, await getProductOverrides(db)).slice(0, limit),
+    await getOwnPhotos(db),
+  )
 }
 
 /**
@@ -562,7 +573,11 @@ export type CompactProduct = [
   towLoadKg: number | null,
   verticalLoadKg: number | null,
   bumperCut: 0 | 1 | 2,
-  hasPhoto: 0 | 1,
+  /**
+   * 1 — есть изображение от завода по обычному адресу; строка — адрес
+   * своего фото владельца (их единицы, и адрес не угадать по слагу).
+   */
+  hasPhoto: 0 | 1 | string,
 ]
 
 export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProduct[]> {
@@ -598,6 +613,8 @@ export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProd
     await getProductOverrides(db),
   )
 
+  const own = await getOwnPhotos(db)
+
   return visible.map((r) => {
     return [
       r.slug,
@@ -610,7 +627,7 @@ export async function listAllProductsCompact(db: DrizzleDb): Promise<CompactProd
       r.towLoadKg,
       r.verticalLoadKg,
       r.bumperCut === 'not_required' ? 0 : r.bumperCut === 'required' ? 1 : 2,
-      r.photo ? 1 : 0,
+      mainOwnPhoto(own[r.slug]) ?? (r.photo ? 1 : 0),
     ]
   })
 }

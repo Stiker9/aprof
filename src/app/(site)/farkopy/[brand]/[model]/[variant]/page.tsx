@@ -110,7 +110,7 @@ export default async function VariantPage({ params }: Params) {
         подряд, не имея возможности отсечь лишнее, — самое слабое место
         каталога.
       */}
-      <ProductFilter products={data.products} />
+      <ProductFilter products={data.products} carKey={`${brand}/${model}`} />
 
       <section className="mt-12 grid gap-4 md:grid-cols-2">
         <div className="rounded-[var(--radius-block)] border border-line-light bg-white p-7">

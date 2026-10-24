@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useRef } from 'react'
-import { uploadProductPhoto, uploadWorkPhoto, type UploadState } from '@/admin/actions'
+import { uploadWorkPhoto, type UploadState } from '@/admin/actions'
 
 /**
  * Загрузка фотографии.
@@ -49,21 +49,6 @@ export function WorkPhotoUpload({
         ['hint', hint],
       ]}
       empty="Нет фотографии"
-    />
-  )
-}
-
-export function ProductPhotoUpload({ slug, photo }: { slug: string; photo: string }) {
-  const [state, action, pending] = useActionState<UploadState, FormData>(uploadProductPhoto, {})
-
-  return (
-    <Frame
-      action={action}
-      pending={pending}
-      state={state}
-      photo={photo}
-      hidden={[['slug', slug]]}
-      empty="Своей фотографии нет"
     />
   )
 }

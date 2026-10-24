@@ -92,8 +92,11 @@ export function ProductFilter({
   products,
   cars,
   fits,
+  carKey,
 }: {
   products: ProductRow[]
+  /** Машина страницы — «audi/q7»; уходит в ссылки карточек. */
+  carKey?: string
   /*
     Справочник машин и связки «кузов → товары». Есть только на странице
     подбора: там машину выбирают прямо в фильтре. На странице кузова
@@ -391,7 +394,7 @@ export function ProductFilter({
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {shown.slice(0, limit).map((product) => (
-              <ProductCard key={product.slug} product={product} />
+              <ProductCard key={product.slug} product={product} car={carKey} />
             ))}
           </div>
 

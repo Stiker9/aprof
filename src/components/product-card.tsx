@@ -32,7 +32,17 @@ const BUMPER_LABEL: Record<ProductRow['bumperCut'], string | null> = {
  * отгрузкой сегодня и под заказ на 1–6 месяцев. Если человек не увидит
  * разницу при заказе, он узнает о ней через полгода ожидания.
  */
-export function ProductCard({ product }: { product: ProductRow }) {
+export function ProductCard({
+  product,
+  car,
+}: {
+  product: ProductRow
+  /**
+   * С какой машины пришли — «audi/q7». Страница товара по нему первыми
+   * показывает фото фаркопа на этой машине (см. own-photos.ts).
+   */
+  car?: string
+}) {
   const bumper = BUMPER_LABEL[product.bumperCut]
   const display = productDisplayImage(product)
 
@@ -86,7 +96,7 @@ export function ProductCard({ product }: { product: ProductRow }) {
 
       <div className="flex flex-1 flex-col p-4">
         <Link
-          href={urls.product(product.slug)}
+          href={car ? `${urls.product(product.slug)}?car=${car}` : urls.product(product.slug)}
           className="text-[15px] font-medium leading-[1.3] after:absolute after:inset-0 hover:text-accent"
         >
           {product.manufacturer} {product.article}

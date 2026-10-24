@@ -44,7 +44,7 @@ export async function listInStockShowcase(db: DrizzleDb, limit = 4): Promise<Sho
     const inStock = row[4]
     const hasPhoto = row[10]
 
-    if (inStock !== 1 || hasPhoto !== 1) continue
+    if (inStock !== 1 || !hasPhoto) continue
     if (manufacturers.has(manufacturer)) continue
 
     manufacturers.add(manufacturer)
@@ -79,7 +79,7 @@ export async function listInStockShowcase(db: DrizzleDb, limit = 4): Promise<Sho
         article,
         manufacturer,
         price: formatPrice(price),
-        photo: productPhotoSrc(slug) ?? '',
+        photo: typeof row[10] === 'string' ? row[10] : (productPhotoSrc(slug) ?? ''),
         note: parts.join(' · '),
       }
     }),

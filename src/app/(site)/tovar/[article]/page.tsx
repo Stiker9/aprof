@@ -22,6 +22,7 @@ import { JsonLd } from '@/seo/json-ld'
 import { fitTitle, productDescription } from '@/seo/meta'
 import { productSchema } from '@/seo/schema'
 import { limitParams } from '@/catalog/build-scope'
+import { getOwnPhotos, photoGroups } from '@/catalog/own-photos'
 
 interface Params {
   params: Promise<{ article: string }>
@@ -43,11 +44,12 @@ async function load(articleSlug: string) {
   const db = await getDb()
   const product = await getProduct(db, articleSlug)
   if (!product) return null
-  const [fits, similar] = await Promise.all([
+  const [fits, similar, own] = await Promise.all([
     listVariantsForProduct(db, articleSlug),
     listSimilarProducts(db, articleSlug),
+    getOwnPhotos(db),
   ])
-  return { product, fits, similar }
+  return { product, fits, similar, photos: photoGroups(own[product.slug], fits) }
 }
 
 /**
@@ -107,7 +109,7 @@ export default async function ProductPage({ params }: Params) {
   const data = await load(article)
   if (!data) notFound()
 
-  const { product, fits, similar } = data
+  const { product, fits, similar, photos } = data
   const title = buildTitle(product.article, product.manufacturer, fits)
   const first = fits[0]
   const display = productDisplayImage(product)
@@ -194,7 +196,12 @@ export default async function ProductPage({ params }: Params) {
       />
       <div className="flex flex-col items-start gap-8 lg:flex-row">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <ProductGallery src={display.src} article={product.article} caption={galleryCaption} />
+          <ProductGallery
+            src={display.src}
+            article={product.article}
+            caption={galleryCaption}
+            groups={photos}
+          />
         </div>
 
         <OrderPanel
