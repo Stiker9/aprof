@@ -23,6 +23,24 @@ import {
 import { lockedFor, noteFailure, noteSuccess } from './throttle'
 
 /**
+ * Сбросить запомненные страницы после правки.
+ *
+ * Кроме админки, сервер отдаёт и страницы сайта — по адресу админки,
+ * например /tovar/451312. Они запоминаются при первом открытии и сами
+ * не обновляются. Владелец загрузил фото, открыл товар там — и увидел
+ * старую картинку, а у Touareg, открытого впервые, уже новую
+ * (23.10.2026). Сброс после каждой правки превращает эту копию в
+ * честный предпросмотр: правки товаров видны сразу, ещё до публикации.
+ *
+ * Тексты, контакты, отзывы и вопросы сайт берёт из файлов, которые
+ * пересобираются только при публикации, — в предпросмотре их не видно.
+ */
+function refresh(): void {
+  revalidatePath('/admin', 'layout')
+  revalidatePath('/', 'layout')
+}
+
+/**
  * Серверные действия админки.
  *
  * ── Правило файла ──
@@ -166,7 +184,7 @@ export async function saveField(formData: FormData): Promise<void> {
     цену до перезапуска сервера.
   */
   forgetProductOverrides()
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 /** Снимает правку — поле возвращается к значению из выгрузки. */
@@ -181,7 +199,7 @@ export async function resetField(formData: FormData): Promise<void> {
   const db = await getDb()
   await clearOverride(db, entity, targetKey, field)
   forgetProductOverrides()
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 /** Переключатель: скрыт товар или нет, спрятан он или нет. */
@@ -201,7 +219,7 @@ export async function toggleField(formData: FormData): Promise<void> {
     await clearOverride(db, entity, targetKey, field)
   }
   forgetProductOverrides()
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 /* ── Заявки ──────────────────────────────────────────────────────── */
@@ -215,7 +233,7 @@ export async function updateRequest(formData: FormData): Promise<void> {
 
   const db = await getDb()
   await setRequestStatus(db, id, status)
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 /* ── Списки: отзывы, акции, снимки работ ─────────────────────────── */
@@ -258,7 +276,7 @@ export async function addListRow(formData: FormData): Promise<void> {
   const db = await getDb()
   const id = await addRow(db, list, scope)
   await noteListChange(list, id, session.login)
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 export async function saveListField(formData: FormData): Promise<void> {
@@ -271,7 +289,7 @@ export async function saveListField(formData: FormData): Promise<void> {
   const db = await getDb()
   await setRowField(db, list, id, field, String(formData.get('value') ?? ''))
   await noteListChange(list, id, session.login)
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 export async function toggleListVisible(formData: FormData): Promise<void> {
@@ -283,7 +301,7 @@ export async function toggleListVisible(formData: FormData): Promise<void> {
   const db = await getDb()
   await setRowVisible(db, list, id, formData.get('on') === '1')
   await noteListChange(list, id, session.login)
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 export async function deleteListRow(formData: FormData): Promise<void> {
@@ -302,7 +320,7 @@ export async function deleteListRow(formData: FormData): Promise<void> {
     но это мегабайты, а не риск.
   */
   await noteListChange(list, id, session.login)
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 export async function moveListRow(formData: FormData): Promise<void> {
@@ -315,7 +333,7 @@ export async function moveListRow(formData: FormData): Promise<void> {
   const db = await getDb()
   await moveRow(db, list, id, direction)
   await noteListChange(list, id, session.login)
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 /* ── Загрузка картинок ───────────────────────────────────────────── */
@@ -350,7 +368,7 @@ export async function uploadWorkPhoto(
     const db = await getDb()
     await setRowField(db, 'work', id, 'photo', saved.url)
     await noteListChange('work', id, session.login)
-    revalidatePath('/admin', 'layout')
+    refresh()
     return { url: saved.url }
   } catch (error) {
     return { error: error instanceof UploadError ? error.message : 'Не получилось сохранить файл' }
@@ -380,7 +398,7 @@ export async function uploadProductPhoto(
     const db = await getDb()
     await setOverride(db, 'product', slug, 'photo', saved.url, session.login)
     forgetProductOverrides()
-    revalidatePath('/admin', 'layout')
+    refresh()
     return { url: saved.url }
   } catch (error) {
     return { error: error instanceof UploadError ? error.message : 'Не получилось сохранить файл' }
@@ -424,7 +442,7 @@ export async function savePromoShape(formData: FormData): Promise<void> {
   const db = await getDb()
   await db.update(promos).set({ kind, items }).where(eq(promos.id, id))
   await noteListChange('promo', id, session.login)
-  revalidatePath('/admin', 'layout')
+  refresh()
 }
 
 /* ── Публикация ──────────────────────────────────────────────────── */
@@ -438,5 +456,5 @@ export async function savePromoShape(formData: FormData): Promise<void> {
 export async function publishSite(): Promise<void> {
   await requireAdmin()
   await startPublish()
-  revalidatePath('/admin', 'layout')
+  refresh()
 }

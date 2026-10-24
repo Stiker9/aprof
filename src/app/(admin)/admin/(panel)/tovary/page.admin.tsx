@@ -8,6 +8,7 @@ import {
 } from '@/admin/products'
 import { formatNumber, formatPrice, formatVariantShort, plural } from '@/catalog/format'
 import { listBrands, listModels, listVariants } from '@/catalog/queries'
+import { urls } from '@/catalog/urls'
 import { CarFilter } from '@/components/admin/car-filter'
 import { Editable } from '@/components/admin/editable'
 import { Empty, PageBody, PageHead } from '@/components/admin/page-head'
@@ -206,6 +207,23 @@ function Row({ product }: { product: AdminProduct }) {
                 Фотография
               </span>
               <ProductPhotoUpload slug={product.slug} photo={own} />
+              {/*
+                Страница товара на этом же сервере — предпросмотр: правка
+                видна сразу, а на vashfarkop.ru появится после публикации.
+                Подпись говорит об этом прямо — иначе владелец ищет
+                загруженное фото на сайте и не находит.
+              */}
+              <a
+                href={urls.product(product.slug)}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-block text-[12px] text-accent hover:underline"
+              >
+                Посмотреть, как будет на сайте ↗
+              </a>
+              <span className="ml-2 text-[11px] text-ink-dim">
+                на vashfarkop.ru — после публикации
+              </span>
               {!product.own.photo && product.parsedPhoto && (
                 <p className="mt-1 text-[11px] text-ink-dim">
                   Сейчас показывается изображение с сайта завода. Своя заменит его.
