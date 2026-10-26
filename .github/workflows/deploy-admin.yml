@@ -1,0 +1,71 @@
+# Обновление админки: GitHub собирает, сервер только подменяет.
+#
+# На самом сервере (одно ядро, 2 ГБ, жёсткий диск) сборка шла 20–40
+# минут и уходила в подкачку. Здесь — несколько минут, а на сервер
+# приезжает готовая папка, и скрипт vashfarkop-deploy-ci подменяет её
+# с копией базы, миграциями и проверкой (deploy/server/).
+#
+# Ключ к серверу — секрет DEPLOY_SSH_KEY. Он привязан к одному скрипту:
+# войти им на сервер или выполнить что-то другое нельзя.
+name: Обновление админки
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Два обновления подряд идут по очереди, а не наперегонки.
+concurrency:
+  group: deploy-admin
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      # Сборка — в той же папке, что на сервере. Next записывает в неё
+      # абсолютные пути, и собранное в другом месте на сервере не нашло
+      # бы своих файлов.
+      - name: Папка как на сервере
+        run: |
+          sudo mkdir -p /opt/vashfarkop
+          sudo chown "$USER" /opt/vashfarkop
+          cp -a "$GITHUB_WORKSPACE/." /opt/vashfarkop/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Зависимости
+        working-directory: /opt/vashfarkop
+        run: npm install --no-audit --no-fund
+
+      # Те же переменные, что в vashfarkop-update: облегчённая сборка без
+      # восьми тысяч страниц каталога и отдельная база из дампа.
+      - name: Сборка
+        working-directory: /opt/vashfarkop
+        env:
+          ADMIN_SERVER_BUILD: '1'
+          NEXT_DIST_DIR: .next-build
+          PGLITE_PATH: /opt/vashfarkop/.pgdata-build
+        run: npm run build
+
+      - name: Упаковка
+        run: tar -czf /tmp/admin.tar.gz -C /opt/vashfarkop/.next-build .
+
+      - name: Отправка на сервер
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "Нет секрета DEPLOY_SSH_KEY — сборка готова, но на сервер не отправлена."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          echo "193.42.113.207 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF1H2oj7qJe/OFR5f7ceK0NB+WMKXKdyQntmO1FI2gmW" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy -o ServerAliveInterval=30 root@193.42.113.207 "$GITHUB_SHA" < /tmp/admin.tar.gz
