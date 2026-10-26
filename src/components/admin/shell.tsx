@@ -93,7 +93,7 @@ export function AdminShell({
         </div>
       </MobileNav>
 
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="admin-work flex-1 overflow-y-auto">{children}</main>
     </div>
   )
 }
