@@ -63,12 +63,21 @@ export function Blog() {
           </p>
         </div>
 
-        <Link
-          href="/blog"
-          className="group inline-flex items-center gap-2 text-[15px] font-medium text-accent"
-        >
-          Все статьи
-          <span className="transition-transform group-hover:translate-x-1">→</span>
+        {/*
+          Минимально: тёмный текст и стрелка в тонком кружке. При
+          наведении кружок заливается красным, а текст подчёркивается
+          тонкой линией — заметно, но без лишнего цвета в покое.
+        */}
+        <Link href="/blog" className="group inline-flex items-center gap-3.5 text-[15px] font-medium text-ink-dark">
+          <span className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-left-bottom bg-no-repeat pb-0.5 transition-[background-size] duration-300 group-hover:bg-[length:100%_1px]">
+            Все статьи
+          </span>
+          <span
+            aria-hidden
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-ink-dark/20 transition-colors duration-300 group-hover:border-accent group-hover:bg-accent group-hover:text-white"
+          >
+            <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
+          </span>
         </Link>
       </div>
 

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { SiteFooter } from '@/components/site-footer'
+import { Metrika } from '@/components/metrika'
 import { SiteHeader } from '@/components/site-header'
 import { SmoothScroll } from '@/components/smooth-scroll'
 import { fontVariables } from '@/lib/fonts'
@@ -69,6 +70,8 @@ export default function SiteLayout({ children }: LayoutProps<'/'>) {
           {children}
           <SiteFooter />
         </div>
+        <Metrika />
+
       </body>
     </html>
   )

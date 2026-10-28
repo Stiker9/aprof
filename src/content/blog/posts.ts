@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { BlokSoglasovaniya, BLOK_SOGLASOVANIYA_FAQ } from './blok-soglasovaniya'
 import { MassaPricepa, MASSA_PRICEPA_FAQ } from './massa-pricepa'
 import { TipySharov, TIPY_SHAROV_FAQ } from './tipy-sharov'
 
@@ -36,6 +37,22 @@ export interface BlogPost {
  * Новые — в начало списка: порядок здесь и есть порядок в блоге.
  */
 export const POSTS: BlogPost[] = [
+  {
+    slug: 'blok-soglasovaniya',
+    title: 'Блок согласования: зачем он нужен и что будет без него',
+    seoTitle: 'Блок согласования фаркопа: зачем нужен и что будет без него',
+    description:
+      'Как работает блок согласования фаркопа, на каких машинах он нужен, что будет без него и чем универсальный блок отличается от штатной электрики.',
+    category: 'Электрика',
+    excerpt:
+      'Почему на современной машине розетку фаркопа нельзя подключить напрямую, как понять, нужен ли блок вашей машине, и когда стоит брать штатную электрику.',
+    // Временная обложка — до картинки по промту из docs/seo/stati/03-blok-soglasovaniya.md
+    image: '/images/odin-vizit.webp',
+    imageAlt: 'Фаркоп с шаром под задним бампером автомобиля',
+    published: '2026-10-26',
+    Body: BlokSoglasovaniya,
+    faq: BLOK_SOGLASOVANIYA_FAQ,
+  },
   {
     slug: 'tipy-sharov-farkopa',
     title: 'Чем отличаются шары A, C и F и какой нужен вам',
