@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { deleteProductPhoto, moveProductPhoto, uploadProductPhoto } from '@/admin/actions'
+import { movePhotoToAction } from '@/admin/catalog-actions'
 
 export interface AdminPhotoGroup {
   /** '' — общие фото фаркопа; иначе «audi/q7». */
@@ -63,11 +64,16 @@ export function ProductPhotos({ slug, groups }: { slug: string; groups: AdminPho
     router.refresh()
   }
 
-  function act(run: () => Promise<void>) {
+  function act(run: () => Promise<unknown>) {
     startTransition(async () => {
       await run()
       router.refresh()
     })
+  }
+
+  async function moveTo(id: number, modelKey: string) {
+    const result = await movePhotoToAction(id, modelKey)
+    if (result.error) setErrors([result.error])
   }
 
   return (
@@ -89,10 +95,8 @@ export function ProductPhotos({ slug, groups }: { slug: string; groups: AdminPho
 
             <div className="flex flex-wrap items-start gap-2">
               {group.photos.map((photo, i) => (
-                <div
-                  key={photo.id}
-                  className="relative h-[72px] w-[96px] overflow-hidden rounded-md border border-line-light bg-white"
-                >
+                <div key={photo.id} className="flex w-[96px] flex-col gap-1">
+                <div className="relative h-[72px] w-[96px] overflow-hidden rounded-md border border-line-light bg-white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={photo.url} alt="" className="h-full w-full object-cover" />
                   {i === 0 && (
@@ -131,6 +135,33 @@ export function ProductPhotos({ slug, groups }: { slug: string; groups: AdminPho
                       →
                     </button>
                   </div>
+                </div>
+                {/*
+                  Перенос в другую строку. Нужен, когда снимок с машиной
+                  попал в «Общие»: тогда его видят покупатели всех машин,
+                  а он про одну.
+                */}
+                {groups.length > 1 && (
+                  <select
+                    value=""
+                    disabled={pending}
+                    onChange={(event) => {
+                      const target = event.target.value
+                      if (target !== '__') act(() => moveTo(photo.id, target === '_general' ? '' : target))
+                    }}
+                    aria-label="Перенести фото в другую строку"
+                    className="w-full rounded border border-line-light bg-white px-1 py-0.5 text-[10px] text-ink-muted"
+                  >
+                    <option value="">перенести…</option>
+                    {groups
+                      .filter((other) => other.key !== group.key)
+                      .map((other) => (
+                        <option key={other.key || '_general'} value={other.key || '_general'}>
+                          {other.label ? `на ${other.label}` : 'в общие'}
+                        </option>
+                      ))}
+                  </select>
+                )}
                 </div>
               ))}
 

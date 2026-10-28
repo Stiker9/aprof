@@ -3,7 +3,8 @@
  *
  *   npm run publish -- --dry           посмотреть план, ничего не делая
  *   npm run publish -- --to ../proba   залить в локальную папку (проверка)
- *   npm run publish                    залить на хостинг
+ *   npm run publish                    залить на хостинг — только из админки,
+ *                                      см. refuseLocalUpload
  *
  * Один раз, на сайте, выложенном руками:
  *   npm run publish -- --skip-build --assume-published
@@ -115,7 +116,33 @@ function human(bytes) {
   return `${Math.round(bytes / 1024)} КБ`
 }
 
+/**
+ * Заливать на хостинг можно только из админки.
+ *
+ * Правки владельца — цены, фото, новые машины и фаркопы — живут в базе
+ * сервера админки. Сайт, собранный на другом компьютере, их не содержит:
+ * залей его — и всё, что Егор добавил, пропадёт с сайта до следующей
+ * публикации из админки. Ошибки при этом нет, заметят по жалобе.
+ *
+ * Админка запускает этот скрипт с PUBLISH_MARK_IN_ADMIN=1. Без неё
+ * заливка на хостинг отказывает; проверка (--dry, --to) работает как
+ * прежде. Обойти — --from-local, только если точно известно, что база
+ * здесь свежее серверной.
+ */
+function refuseLocalUpload() {
+  if (DRY || LOCAL_TARGET || ASSUME) return
+  if (process.env.PUBLISH_MARK_IN_ADMIN === '1') return
+  if (process.argv.includes('--from-local')) return
+  console.error(
+    '\nЗаливать на хостинг можно только из админки — кнопкой «Опубликовать».\n' +
+      'Здесь нет правок владельца (цены, фото, новые машины и фаркопы), и сайт\n' +
+      'отсюда их бы потерял. Проверить сборку: npm run publish -- --to ../proba\n',
+  )
+  process.exit(1)
+}
+
 function main() {
+  refuseLocalUpload()
   if (!SKIP_BUILD) {
     console.log('→ Собираю сайт (это долго, около двадцати минут)\n')
     run('node', ['scripts/build-static.mjs'])

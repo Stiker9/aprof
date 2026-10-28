@@ -111,12 +111,23 @@ export default async function ProductPage({ params }: Params) {
 
   const { product, fits, similar, photos } = data
   const title = buildTitle(product.article, product.manufacturer, fits)
-  const first = fits[0]
+  /*
+    Машина в шапке и строке подбора — только если модель одна. Иначе
+    раньше сюда вставала первая по алфавиту: покупатель Cayenne
+    открывал фаркоп и видел «Audi → Q8», как будто сайт сменил ему
+    машину. Теперь при нескольких моделях шапка без машины, а строка
+    подбора берёт машину из ссылки (?car=), по которой он пришёл.
+  */
+  const oneModel = new Set(fits.map((fit) => `${fit.brandSlug}/${fit.modelSlug}`)).size === 1
+  const first = oneModel ? fits[0] : undefined
   const display = productDisplayImage(product)
   const documents = publishableDocuments(product.documents)
   const CAPTION = {
     photo: `Изображение этого артикула от завода-изготовителя (${product.manufacturer}).`,
-    icon: `Обобщённое изображение по типу шара${product.ballType ? ` (${product.ballType})` : ''} — точный снимок этой позиции пока не публикуем: карточки поставщика помечены знаком его конкурента.`,
+    // У своего фаркопа владельца карточек поставщика нет — и объяснение про них было бы неправдой.
+    icon: product.addedByOwner
+      ? `Обобщённое изображение по типу шара${product.ballType ? ` (${product.ballType})` : ''} — не снимок этого фаркопа.`
+      : `Обобщённое изображение по типу шара${product.ballType ? ` (${product.ballType})` : ''} — точный снимок этой позиции пока не публикуем: карточки поставщика помечены знаком его конкурента.`,
   }
   const galleryCaption = CAPTION[display.kind]
 
@@ -162,7 +173,7 @@ export default async function ProductPage({ params }: Params) {
                 first.variant.yearTo,
               ),
             }
-          : undefined
+          : { fromQuery: true }
       }
       crumbs={[
         { label: 'Главная', href: urls.home() },

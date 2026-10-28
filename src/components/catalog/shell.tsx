@@ -37,7 +37,7 @@ export function CatalogShell({
    * строки нет совсем. На странице услуги подбирать нечего, и пустые
    * списки там только сбивали бы с толку.
    */
-  picker?: { brand?: string; model?: string; variant?: string } | false
+  picker?: { brand?: string; model?: string; variant?: string; fromQuery?: boolean } | false
   /**
    * Каким шрифтом набрать заголовок.
    *

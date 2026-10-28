@@ -32,6 +32,8 @@ export interface VariantRow {
 
 export interface ProductRow {
   slug: string
+  /** Заведён владельцем в админке — не из выгрузки поставщика. */
+  addedByOwner?: boolean
   /**
    * Адрес своей картинки этого артикула или null.
    *
@@ -230,6 +232,7 @@ export async function getProduct(db: DrizzleDb, articleSlug: string): Promise<Pr
       description: products.description,
       images: products.images,
       documents: products.documents,
+      addedByOwner: products.addedByOwner,
     })
     .from(products)
     .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))

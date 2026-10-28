@@ -94,3 +94,27 @@ server {
 OOM при пустых 5 ГБ swap. Файл в `sysctl.d` читается позже и перекрывает.
 Память сервера — 2 ГБ (увеличена с 1 ГБ 22.10.2026 в кабинете RuVDS;
 1270 ₽/мес).
+
+## Ночная копия
+
+`/usr/local/bin/vashfarkop-backup` (из `deploy/server/vashfarkop-backup.sh`),
+таймер `vashfarkop-backup.timer` — каждую ночь в 04:30.
+
+- База — согласованный снимок от самой админки через `POST /api/kopiya`
+  (без остановки, заявки не теряются). Адрес отвечает только запросу
+  изнутри сервера (без `X-Forwarded-For` от nginx) с ключом
+  `BACKUP_TOKEN` из `.env.local`; нет ключа — адрес выключен.
+- Фото владельца — зеркало `public/images/own` (без удаления).
+- Лежит в `/var/backups/vashfarkop`, 14 последних ночей, и копией на
+  хостинге reg.ru в `~/backup-admin` (вне папки сайта).
+
+Восстановить базу:
+
+```bash
+systemctl stop vashfarkop-admin
+mv /opt/vashfarkop/.pgdata /opt/vashfarkop/.pgdata.old
+cd /opt/vashfarkop && node scripts/load-snapshot.mjs /var/backups/vashfarkop/pgdata-ГГГГ-ММ-ДД.tar.gz .pgdata
+systemctl start vashfarkop-admin
+```
+
+Проверить вручную: `systemctl start vashfarkop-backup; journalctl -u vashfarkop-backup -n 20`.

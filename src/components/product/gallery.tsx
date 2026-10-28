@@ -40,21 +40,43 @@ export function ProductGallery({
   caption?: string
   groups?: PhotoGroup[]
 }) {
-  const [groupKey, setGroupKey] = useState(groups[0]?.key ?? '')
+  /*
+    Пришёл покупатель со своей машины (?car=) — показываем только её фото
+    и общие, чужие машины не показываем вовсе. Раньше рядом висела
+    вкладка «на Audi Q8», и покупатель Cayenne видел чужую машину —
+    Егор назвал это «перепрыгиванием»: машины одной платформы снаружи
+    сильно разные, и фото с другой только сбивает с толку.
+
+    Без ?car (пришли из поиска) — все группы вкладками, у каждой подпись,
+    на какой она машине.
+
+    До того как скрипт прочитал адрес, видны только общие фото. Страница
+    статическая, и начни она со всех групп — покупатель Cayenne на
+    медленном телефоне секунду-другую смотрел бы на Audi, пока не
+    сработает фильтр. То же перепрыгивание, только короче.
+  */
+  const general = groups.filter((group) => group.key === '')
+  const [shown, setShown] = useState(general)
+  const [groupKey, setGroupKey] = useState('')
   const [index, setIndex] = useState(0)
   const [zoomed, setZoomed] = useState(false)
 
   useEffect(() => {
     const car = new URLSearchParams(window.location.search).get('car')
-    if (car && groups.some((group) => group.key === car)) {
-      setGroupKey(car)
-      setIndex(0)
+    if (!car) {
+      setShown(groups)
+      setGroupKey(groups[0]?.key ?? '')
+      return
     }
+    const own = groups.filter((group) => group.key === '' || group.key === car)
+    setShown(own)
+    setGroupKey(own.some((group) => group.key === car) ? car : '')
+    setIndex(0)
     // Только при открытии: дальше группу выбирает сам человек.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const group = groups.find((g) => g.key === groupKey) ?? groups[0]
+  const group = shown.find((g) => g.key === groupKey) ?? shown[0]
   const photos = group ? group.photos : [src]
   const current = photos[Math.min(index, photos.length - 1)]
   const alt = group?.label ? `Фаркоп ${article} на ${group.label}` : `Фаркоп ${article}`
@@ -105,9 +127,9 @@ export function ProductGallery({
   return (
     <>
       <div className="flex flex-col gap-3">
-        {groups.length > 1 && (
+        {shown.length > 1 && (
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Фото по машинам">
-            {groups.map((g) => (
+            {shown.map((g) => (
               <button
                 key={g.key}
                 type="button"

@@ -117,6 +117,30 @@ export async function addPhoto(
   })
 }
 
+/**
+ * Перекладывает фото в другую строку — например, из «Общих» в «На Audi
+ * Q7». Встаёт в конец той строки. Нужно, когда снимок с машиной попал в
+ * общие: тогда его видят покупатели всех машин, а не только этой.
+ */
+export async function movePhotoTo(db: DrizzleDb, id: number, modelKey: string): Promise<string | null> {
+  const [photo] = await db
+    .select({ slug: productPhotos.productSlug })
+    .from(productPhotos)
+    .where(eq(productPhotos.id, id))
+  if (!photo) return null
+
+  const [last] = await db
+    .select({ position: max(productPhotos.position) })
+    .from(productPhotos)
+    .where(and(eq(productPhotos.productSlug, photo.slug), eq(productPhotos.modelKey, modelKey)))
+
+  await db
+    .update(productPhotos)
+    .set({ modelKey, position: (last?.position ?? -1) + 1 })
+    .where(eq(productPhotos.id, id))
+  return photo.slug
+}
+
 /** Удаляет фото и возвращает слаг товара — его надо пометить к публикации. */
 export async function deletePhoto(db: DrizzleDb, id: number): Promise<string | null> {
   const [row] = await db

@@ -1,0 +1,9 @@
+[Unit]
+Description=Ночная копия базы и фото админки VASHFARKOP
+After=vashfarkop-admin.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vashfarkop-backup
+Nice=10
+IOSchedulingClass=idle

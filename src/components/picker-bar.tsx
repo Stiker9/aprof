@@ -28,7 +28,14 @@ export function PickerBar({
   variant,
   transparent = false,
   bare = false,
+  fromQuery = false,
 }: {
+  /**
+   * Взять машину из адреса (?car=audi/q8). Нужно странице товара,
+   * который подходит к нескольким моделям: она одна на все машины и
+   * сама не знает, с какой пришёл покупатель.
+   */
+  fromQuery?: boolean
   /** Выбранные значения, если страница уже сузила подбор. */
   brand?: string
   model?: string
@@ -88,6 +95,15 @@ export function PickerBar({
     const foundVariant = foundModel.v.find((v) => v.n === variant)
     if (foundVariant) setVariantSlug(foundVariant.s)
   }, [state, index, brand, model, variant])
+
+  useEffect(() => {
+    if (state !== 'ready' || !fromQuery) return
+    const [carBrand, carModel] = (new URLSearchParams(window.location.search).get('car') ?? '').split('/')
+    const found = index.find((b) => b.s === carBrand)
+    if (!found) return
+    setBrandSlug(found.s)
+    if (found.m.some((m) => m.s === carModel)) setModelSlug(carModel)
+  }, [state, index, fromQuery])
 
   const currentBrand = index.find((b) => b.s === brandSlug)
   const currentModel = currentBrand?.m.find((m) => m.s === modelSlug)

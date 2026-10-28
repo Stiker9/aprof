@@ -33,6 +33,8 @@ export const brands = pgTable(
     productCount: integer('product_count').notNull().default(0),
     modelCount: integer('model_count').notNull().default(0),
     isPublished: boolean('is_published').notNull().default(false),
+    /** Добавлено владельцем в админке, а не пришло из выгрузки. */
+    addedByOwner: boolean('added_by_owner').notNull().default(false),
   },
   (t) => [index('brands_published_idx').on(t.isPublished)],
 )
@@ -51,6 +53,8 @@ export const models = pgTable(
     productCount: integer('product_count').notNull().default(0),
     variantCount: integer('variant_count').notNull().default(0),
     isPublished: boolean('is_published').notNull().default(false),
+    /** Добавлено владельцем в админке, а не пришло из выгрузки. */
+    addedByOwner: boolean('added_by_owner').notNull().default(false),
   },
   (t) => [uniqueIndex('models_brand_slug_idx').on(t.brandId, t.slug)],
 )
@@ -92,6 +96,8 @@ export const variants = pgTable(
     productCount: integer('product_count').notNull().default(0),
     isPublished: boolean('is_published').notNull().default(false),
     hasOwnPage: boolean('has_own_page').notNull().default(false),
+    /** Добавлено владельцем в админке, а не пришло из выгрузки. */
+    addedByOwner: boolean('added_by_owner').notNull().default(false),
   },
   (t) => [uniqueIndex('variants_model_slug_idx').on(t.modelId, t.slug)],
 )
@@ -121,6 +127,8 @@ export const products = pgTable(
     sourceUrl: text('source_url'),
     images: jsonb('images').$type<string[]>().notNull().default([]),
     documents: jsonb('documents').$type<{ url: string; label: string }[]>().notNull().default([]),
+    /** Добавлено владельцем в админке, а не пришло из выгрузки. */
+    addedByOwner: boolean('added_by_owner').notNull().default(false),
   },
   (t) => [index('products_manufacturer_idx').on(t.manufacturerId)],
 )
@@ -138,6 +146,8 @@ export const fitments = pgTable(
       .references(() => variants.id),
     price: integer('price'),
     deliveryText: text('delivery_text'),
+    /** Добавлено владельцем в админке, а не пришло из выгрузки. */
+    addedByOwner: boolean('added_by_owner').notNull().default(false),
   },
   (t) => [
     uniqueIndex('fitments_product_variant_idx').on(t.productId, t.variantId),

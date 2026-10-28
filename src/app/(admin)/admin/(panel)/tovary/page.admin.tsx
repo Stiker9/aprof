@@ -14,6 +14,9 @@ import { Editable } from '@/components/admin/editable'
 import { Empty, PageBody, PageHead } from '@/components/admin/page-head'
 import { ProductPhotos, type AdminPhotoGroup } from '@/components/admin/product-photos'
 import { photoGroupsFor } from '@/admin/product-photos'
+import { ballTypes, fitsFor, manufacturerNames, variantLabel } from '@/admin/catalog-edit'
+import { ProductFits, type FitItem } from '@/components/admin/product-fits'
+import { OwnProductSpecs } from '@/components/admin/spec-fields'
 import { Toggle } from '@/components/admin/toggle'
 import { getDb } from '@/db/client'
 
@@ -22,10 +25,11 @@ import { getDb } from '@/db/client'
  *
  * ── Что здесь правится и что нет ──
  *
- * Правятся цена, артикул, описание и видимость. Не правятся остатки,
- * связки с машинами и характеристики: первое меняется у поставщика
- * ежедневно (3 454 позиции — вручную такое не ведут), второе и третье
- * приходит из выгрузки и описывает изделие, а не наше предложение.
+ * Правятся цена, артикул, описание, видимость и машины («Подходит к»).
+ * Остатки и характеристики товаров из выгрузки не правятся: они
+ * описывают изделие завода, а не наше предложение. Исключение — свои
+ * фаркопы, заведённые в «Новом фаркопе»: их характеристики задал сам
+ * владелец, и править их больше негде.
  *
  * ── Почему рядом стоят две цены ──
  *
@@ -71,7 +75,15 @@ export default async function ProductsPage({
   ])
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const photos = await photoGroupsFor(db, rows.map((row) => row.slug))
+  const slugs = rows.map((row) => row.slug)
+  const anyOwn = rows.some((row) => row.addedByOwner)
+  const [photos, fits, makers, balls] = await Promise.all([
+    photoGroupsFor(db, slugs),
+    fitsFor(db, slugs),
+    // Подсказки для правки своих фаркопов — только если такие есть на странице.
+    anyOwn ? manufacturerNames(db) : Promise.resolve([]),
+    anyOwn ? ballTypes(db) : Promise.resolve([]),
+  ])
 
   /*
     Подпись выбранной машины словами. Нужна в двух местах: под
@@ -99,6 +111,12 @@ export default async function ProductsPage({
             : `${formatNumber(total)} ${plural(total, 'товар', 'товара', 'товаров')} в каталоге`
         }
       >
+        <Link
+          href="/admin/tovary/novyj"
+          className="shrink-0 rounded-lg bg-accent px-3.5 py-2 text-[13px] font-medium text-white hover:bg-accent-hover"
+        >
+          + Новый фаркоп
+        </Link>
         <CarFilter
           query={query}
           brand={brand}
@@ -144,7 +162,18 @@ export default async function ProductsPage({
 
               <div className="divide-y divide-line-light">
                 {rows.map((row) => (
-                  <Row key={row.slug} product={row} photos={photos[row.slug] ?? []} />
+                  <Row
+                    key={row.slug}
+                    product={row}
+                    makers={makers}
+                    balls={balls}
+                    photos={photos[row.slug] ?? []}
+                    fits={(fits[row.slug] ?? []).map((fit) => ({
+                      fitmentId: fit.fitmentId,
+                      label: `${fit.brand} ${fit.model} ${variantLabel(fit.generation, fit.yearFrom, fit.yearTo)}`,
+                      addedByOwner: fit.addedByOwner,
+                    }))}
+                  />
                 ))}
               </div>
             </div>
@@ -166,9 +195,22 @@ export default async function ProductsPage({
  */
 const GRID = 'grid gap-x-3 gap-y-2 lg:grid-cols-[minmax(0,1fr)_7rem_8rem_11rem_7rem]'
 
-function Row({ product, photos }: { product: AdminProduct; photos: AdminPhotoGroup[] }) {
+function Row({
+  product,
+  makers,
+  balls,
+  photos,
+  fits,
+}: {
+  product: AdminProduct
+  makers: string[]
+  balls: string[]
+  photos: AdminPhotoGroup[]
+  fits: FitItem[]
+}) {
   const hidden = product.own.hidden === '1'
   const ownCount = photos.reduce((sum, group) => sum + group.photos.length, 0)
+  const generalCount = photos.find((group) => group.key === '')?.photos.length ?? 0
 
   const changed = [
     ownCount > 0 ? `фото (${ownCount})` : '',
@@ -196,10 +238,21 @@ function Row({ product, photos }: { product: AdminProduct; photos: AdminPhotoGro
         */}
         <details className="mt-1">
           <summary className="w-fit cursor-pointer text-[12px] text-ink-dim hover:text-accent">
-            {changed.length > 0 ? `Своё: ${changed.join(' и ')}` : 'Фотографии и описание'}
+            {changed.length > 0
+              ? `Своё: ${changed.join(' и ')}`
+              : product.addedByOwner
+                ? 'Машины, фото, характеристики'
+                : 'Машины, фото и описание'}
           </summary>
 
           <div className="mt-2 flex max-w-xl flex-col gap-3">
+            <div>
+              <span className="mb-1 block text-[11px] tracking-wide text-ink-dim uppercase">
+                Подходит к
+              </span>
+              <ProductFits slug={product.slug} fits={fits} />
+            </div>
+
             <div>
               <span className="mb-1 block text-[11px] tracking-wide text-ink-dim uppercase">
                 Фотографии
@@ -227,12 +280,39 @@ function Row({ product, photos }: { product: AdminProduct; photos: AdminPhotoGro
                   Сейчас показывается изображение с сайта завода. Своя заменит его.
                 </p>
               )}
+              {/*
+                Фото есть, но все — на конкретных машинах. Покупатель с
+                другой машины их не увидит (см. ProductGallery) и получит
+                рисунок шара. Владелец этого не заметит, пока не откроет
+                товар с чужой машины, — поэтому говорим здесь.
+              */}
+              {ownCount > 0 && generalCount === 0 && (
+                <p className="mt-1 text-[11px] text-ink-dim">
+                  Общих фото нет — покупатели остальных машин видят рисунок шара. Добавьте в «Общие» снимок
+                  самого фаркопа.
+                </p>
+              )}
               {ownCount === 0 && !product.parsedPhoto && (
                 <p className="mt-1 text-[11px] text-ink-dim">
                   Своего изображения нет — на сайте стоит обобщённое фото по типу шара.
                 </p>
               )}
             </div>
+
+            {product.addedByOwner && (
+              <div>
+                <span className="mb-1 block text-[11px] tracking-wide text-ink-dim uppercase">
+                  Характеристики — фаркоп заведён вами
+                </span>
+                <OwnProductSpecs
+                  slug={product.slug}
+                  manufacturer={product.manufacturer}
+                  manufacturers={makers}
+                  balls={balls}
+                  specs={{ ...product.specs, inStock: product.inStock }}
+                />
+              </div>
+            )}
 
             <div>
               <span className="mb-1 block text-[11px] tracking-wide text-ink-dim uppercase">

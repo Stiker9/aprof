@@ -45,6 +45,23 @@ export interface AdminProduct {
   parsedPhoto: string | null
   /** Правки владельца по этому товару: поле → значение. */
   own: Record<string, string>
+  /**
+   * Заведён владельцем, а не пришёл из выгрузки. Только у таких
+   * характеристики правятся в админке — см. OwnProductSpecs.
+   */
+  addedByOwner: boolean
+  specs: ProductSpecs
+}
+
+/** Характеристики, которые владелец задаёт своему фаркопу. */
+export interface ProductSpecs {
+  ballType: string | null
+  towLoadKg: number | null
+  verticalLoadKg: number | null
+  weightKg: number | null
+  bumperCut: 'not_required' | 'required' | 'unknown'
+  electricsIncluded: boolean | null
+  deliveryText: string | null
 }
 
 /**
@@ -147,6 +164,14 @@ export async function listAdminProducts(
       description: products.description,
       sourcePrice: products.sourcePrice,
       inStock: products.inStock,
+      addedByOwner: products.addedByOwner,
+      ballType: products.ballType,
+      towLoadKg: products.towLoadKg,
+      verticalLoadKg: products.verticalLoadKg,
+      weightKg: products.weightKg,
+      bumperCut: products.bumperCut,
+      electricsIncluded: products.electricsIncluded,
+      deliveryText: products.deliveryText,
     })
     .from(products)
     .innerJoin(manufacturers, eq(manufacturers.id, products.manufacturerId))
@@ -182,11 +207,14 @@ export async function listAdminProducts(
     byProduct.set(edit.targetKey, bucket)
   }
 
-  return rows.map((row) => ({
-    ...row,
-    parsedPhoto: productPhotoSrc(row.slug),
-    own: byProduct.get(row.slug) ?? {},
-  }))
+  return rows.map(
+    ({ ballType, towLoadKg, verticalLoadKg, weightKg, bumperCut, electricsIncluded, deliveryText, ...row }) => ({
+      ...row,
+      specs: { ballType, towLoadKg, verticalLoadKg, weightKg, bumperCut, electricsIncluded, deliveryText },
+      parsedPhoto: productPhotoSrc(row.slug),
+      own: byProduct.get(row.slug) ?? {},
+    }),
+  )
 }
 
 /** Сколько товаров владелец уже правил — для сводки. */

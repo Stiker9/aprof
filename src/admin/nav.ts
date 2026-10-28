@@ -35,7 +35,8 @@ export const NAV: NavGroup[] = [
     items: [
       { href: '/admin', label: 'Сводка' },
       { href: '/admin/zayavki', label: 'Заявки', badge: 'requests' },
-      { href: '/admin/tovary', label: 'Товары', hint: 'цены, описания, скрытие' },
+      { href: '/admin/tovary', label: 'Товары', hint: 'цены, фото, совместимость' },
+      { href: '/admin/mashiny', label: 'Машины', hint: 'новые марки и модели' },
     ],
   },
   {
